@@ -1,0 +1,151 @@
+.services-section {
+    /* background-image: url('../assets/services-section-background.svg');
+    background-size: 85%;
+    background-position: 130% -120px;
+    background-repeat: no-repeat; */
+    background-color: #155D67;
+    color: white;
+    padding: 100px 20px;
+    text-align: center;
+}
+
+  .services-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .services-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  
+  .services-description {
+    width: 60%;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    margin-bottom: 50px;
+    line-height: 1.5;
+    text-align: left;
+  }
+  
+  .services-grid {
+    width: 60%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  @media (max-width: 1248px) {
+    .services-grid {
+        gap: 46px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .services-title {
+        text-align: center;
+    }
+    .services-description {
+        width: 100%;
+        text-align: center;
+    }
+      
+    .services-grid {
+        width: 100%;
+        gap: 46px;
+        justify-items: center;
+    }
+  }
+
+  .services-card {
+    width: 307px;
+    background: #6C6C6C53;
+    border: 3px solid #34BFD1;
+    border-radius: 19px;
+    padding: 20px;
+    text-align: left;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .services-card-main-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .services-card-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .services-card-stat {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: #00d4ff;
+    margin-bottom: 20px;
+  }
+  
+  .services-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .services-list li {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    margin-bottom: 10px;
+    vertical-align: middle;
+  }
+
+  .check-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  .services-card-stat-container {
+    display: flex;
+    margin-top: 32px;
+    margin-bottom: 32px;
+    align-items: center;
+    color: #FFFFFF;
+    vertical-align: middle;
+  }
+
+  .services-card-stat {
+    font-size: 36px; /* Larger font size for emphasis */
+    font-weight: 800;
+    margin-right: 8px; /* Space between the number and text */
+    margin-top: 0px;
+    margin-bottom: 0px;
+    text-align: center;
+    /*垂直置中*/
+    vertical-align: middle;
+  }
+
+  .services-card-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .services-card-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .services-card-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #CCCCCC; /* Lighter color for subtitle */
+    margin: 0;
+  }

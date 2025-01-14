@@ -1,0 +1,220 @@
+.hero-section {
+    background-image: url('../assets/hero-section-backgroudn.svg');
+    background-size: 1374px 619px;
+    background-position: -45px -41px;
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-color: #000;
+    color: white;
+    padding: 100px 0px;
+    text-align: center;
+    height: 416px;
+}
+
+.hero-section-floating-background {
+    position: absolute;
+    background-image: url('../assets/services-section-background.svg');
+    background-size: 85%;
+    opacity: 0.7; 
+    height: 155%;
+    top: 0;
+    left: 0;
+    background-position: 170% 522px;
+    background-repeat: no-repeat;
+    color: white;
+    padding: 0px;
+    text-align: center;
+    z-index: 0;
+    width: 100%;
+}
+
+/* @media (max-width: 1460px) {
+    .hero-section-floating-background {
+        background-position: 50% 548px;
+        height: 2181px;
+    }
+} */
+@media (max-width: 768px) {
+    .hero-section-floating-background {
+        background-size: 139%;
+        background-position: 50% 548px;
+        height: 2181px;
+    }
+}
+.hero-container {
+    max-width: 796px;
+    margin: 0 auto;
+    text-align: left;
+    margin: 75px 75px 0 75px;
+
+}
+  
+.hero-title {
+    /*文字會自動換行*/
+    word-wrap: break-word;
+    font-family: 'Sora', sans-serif;
+    font-size: 64px;
+    font-weight: bold;
+    text-align: left;
+    text-shadow: 2px 0px 20.6px rgba(255, 255, 255, 0.55); /* X, Y, Blur, Color with 35% opacity */
+}
+  
+.hero-subtitle {
+    font-family: 'Sora', sans-serif;
+    font-size: 40px;
+    line-height: 1.1;
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
+.hero-subtitle-container{
+    min-height: 51px;
+    margin-top: 10px;
+    margin-bottom: 0px;  
+}
+.hero-description {
+    font-family: 'Sora', sans-serif;
+    font-size: 16px;
+    line-height: 1;
+    text-align: left;
+    color: #DCDCDC;
+  }
+  
+  .hero-button-container{
+    margin-top: 10px;
+  }
+  .hero-button {
+    font-family: 'Sora', sans-serif;
+    font-size: 16px; 
+    background-color: #00bcd4;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: left;
+  }
+  
+  .hero-button:hover {
+    background-color: #008ba3;
+  }
+  
+  .hero-footer {
+    font-size: 16px;
+    color: #FFFFFF;
+    margin-top: 7px;
+    margin-bottom: 0px;
+  }
+  
+  .hero-title-container div {
+    margin-bottom: 0px;
+  }
+  
+  .hero-title-container div:last-child {
+    margin-bottom: 0;
+  }
+  
+  .hero-slogan-container{
+    min-height: 157px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  .hero-slogan-container div{
+    min-height: 83px;
+  }
+
+@media (min-width: 1278px) {
+    .hero-section {
+        background-image: url('../assets/hero-section-backgroudn.svg');
+        background-size: cover;
+        background-position: center top;
+        background-repeat: no-repeat;
+    }
+    
+    .hero-container {
+        width: 1278px;
+        position: relative;
+        left: 50%; /* Move to the center */
+        transform: translateX(-50%) translateX(-180px); /* Center and offset left by 200px */
+        justify-content: center;
+        align-items: center;
+        margin: 75px 0; /* Adjust vertical margin as needed */
+    }
+
+}
+/* Mobile Styles */
+@media (max-width: 768px) {
+    .hero-slogan-container div {
+        min-height: 42px;
+    }
+    .hero-container {
+        max-width: 796px;
+        margin: 0 auto;
+        text-align: left;
+        margin: 75px 10px 0 10px;
+    
+    }
+
+    .hero-title {
+        font-family: 'Sora', sans-serif;
+        font-size: 46px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .hero-subtitle {
+        font-family: 'Sora', sans-serif;
+        font-size: 20px;
+        line-height: 1.1;
+        margin-bottom: 0px;
+        margin-top: 0px;
+        text-align: center;
+    }
+    .hero-subtitle-container{
+        min-height: 51px;
+        margin-top: 10px;
+        margin-bottom: 0px;  
+    }
+    .hero-description {
+        font-family: 'Sora', sans-serif;
+        font-size: 12px;
+        line-height: 1;
+        text-align: center;
+        color: #DCDCDC;
+    }
+      
+    .hero-button-container{
+        margin-top: 8px;
+        text-align: center;
+    }
+
+    .hero-button {
+        font-family: 'Sora', sans-serif;
+        font-size: 14px; 
+        background-color: #00bcd4;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        text-align: center;
+    }
+      
+}
+
+/* 177px 以下 */
+@media (max-width: 177px) {
+    .hero-section {
+        background-image: url('../assets/hero-section-backgroudn.svg');
+        /*高度填滿*/
+        background-size: cover;
+        background-position: center top;
+        background-color: #000;
+        color: white;
+        padding: 100px 0px;
+        text-align: center;
+        /*高度跟著內容*/
+        height: auto;
+      }
+}
