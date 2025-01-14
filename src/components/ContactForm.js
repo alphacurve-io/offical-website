@@ -33,10 +33,18 @@ const [formData, setFormData] = useState({
     Object.keys(formData).forEach((key) => {
       data.append(key, formData[key]);
     });
-
+    /* print env */
+    var REACT_APP_API_BASE_URL_PRODUCTION='https://alphacurve.io/website/api';
+    var REACT_APP_API_BASE_URL_DEVELOPMENT='http://localhost:8080';
+    console.log('Environment:', process.env.REACT_APP_ENV);
+    const baseUrl = process.env.REACT_APP_ENV != 'dev'
+      ? REACT_APP_API_BASE_URL_PRODUCTION
+      : REACT_APP_API_BASE_URL_DEVELOPMENT;
+    const apiUrl = `${baseUrl}/submit`;
+    console.log('API URL:', apiUrl);
     try {
       console.log('Form Data:', formData);
-      const response = await fetch('http://localhost:8080/submit', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         body: data,
       });
@@ -88,7 +96,7 @@ const [formData, setFormData] = useState({
                 <EmailIcon className="contact-icon" />
                 <div className="contact-item-text">
                     <strong>E-MAIL</strong>
-                    <p>info@alphacurve.io</p>
+                    <p>james@alphacurve.io</p>
                 </div>
                 </div>
             </div>

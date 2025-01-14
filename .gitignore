@@ -22,6 +22,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+.env
+
 # api
 api/web_api/target
 api/web_api/Cargo.lock

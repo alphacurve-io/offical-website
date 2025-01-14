@@ -149,7 +149,8 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .service(submit_form)
     })
-    .bind("127.0.0.1:8080")?
+    // bind to all interfaces
+    .bind("0.0.0.0:8080")?
     .run()
     .await
 }
