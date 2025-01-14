@@ -29,7 +29,7 @@ struct ContactForm {
     file_content: Option<Vec<u8>>,
 }
 
-#[post("/submit")]
+#[post("/website/api/submit")]
 async fn submit_form(mut payload: Multipart) -> Result<impl Responder, Error> {
     // 建立一個結構，用來收集所有欄位
     let mut form_data = ContactForm {

@@ -16,7 +16,7 @@ git clone https://Jamesshieh0510:${GITHUB_TOKEN}@github.com/alphacurve-io/offica
 # 安裝必要的系統套件
 sudo apt-get update
 sudo apt-get install -y build-essential pkg-config
-
+     sudo apt-get install libssl-dev
 # install rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
@@ -32,4 +32,14 @@ cargo build --release
 cargo run --release &
 
 # 關閉背景執行
-kill $!
+kill -9 $(lsof -t -i :8080)
+
+curl --location 'http://10.140.0.2:8080/submit' --header 'Content-Type: application/json' --data-raw '{
+    "name": "name",
+    "street": "street",
+    "city": "city",
+    "postcode": "110",
+    "phone": "0921",
+    "email": "james@alpha",
+    "message": "hello\nworld"
+}'
