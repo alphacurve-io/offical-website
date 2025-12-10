@@ -1,24 +1,22 @@
 import React from 'react';
 import './Timeline.css';
-
+// import { ReactComponent as CircleBlue } from '../assets/circle-blue.svg';
+// import { ReactComponent as CircleWhite } from '../assets/circle-white.svg';
+// import { ReactComponent as CircleBlueGlow } from '../assets/circle-blue-glow.svg';
+// import { ReactComponent as CircleWhiteGlow } from '../assets/circle-white-glow.svg';
+// import { ReactComponent as TriangleWithStroke } from '../assets/triangle-with-stroke.svg';
+// import { ReactComponent as Triangle } from '../assets/triangle.svg';
+// import { ReactComponent as TimelineSolution } from '../assets/timeline-solution.svg';
 const Timeline = () => {
   return (
-      <div class="timeline">
-        <div class="timeline-item">
-          <div class="circle"></div>
-          <div class="label">business</div>
-        </div>
-        <div class="arrow"></div>
-        <div class="timeline-item">
-          <div class="circle active"></div>
-          <div class="label active">solution</div>
-        </div>
-        <div class="arrow"></div>
-        <div class="timeline-item">
-          <div class="circle"></div>
-          <div class="label">team</div>
-        </div>
-      </div>
+      <section className="timeline-section">
+        {/* <div className='timeline-business'></div> */}
+        {/* <div className='timeline-business-arrow'></div> */}
+        {/* <div className='timeline-solution'></div> */}
+        {/* <TimelineSolution className='timeline-solution' /> */}
+        {/* <div className='timeline-solution-arrow'></div> */}
+        {/* <div className='timeline-tech'></div> */}
+      </section>
   );
 };
 

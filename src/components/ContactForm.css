@@ -1,4 +1,6 @@
 .contact-section {
+    position: relative;
+    z-index: 2;
     /* background-image: url('../assets/contact-us-background.svg');
     background-size: cover;
     background-position: center;
@@ -19,6 +21,8 @@
   }
   
   .contact-container {
+    position: relative;
+    z-index: 2;
     background: linear-gradient(
         to bottom,
         rgba(255, 255, 255, 0.7) 6%,
@@ -35,7 +39,6 @@
     gap: 8px;
     flex-direction: row;
     justify-content: center;
-      
   }
   @media (max-width: 768px) {
     .contact-container {
@@ -71,7 +74,8 @@
   
   .contact-form input,
   .contact-form textarea {
-
+    position: relative;
+    z-index: 2;
     width: 90%;
     padding: 10px;
     margin-bottom: 20px;
@@ -102,6 +106,12 @@
     border-radius: 10px;
 
   }
+
+  .contact-item a {
+    margin: 0;
+    font-size: 14px;
+    color: #00a8cc;
+}
 
   .file-upload {
     border: 2px dashed #ccc;
@@ -149,17 +159,21 @@
   }
   
   .contact-map-container {
+    position: relative;
     width: 608px;
     height: 746px;
     border-radius: 50px;
     /* flex: 1; */
     position: relative;
+    z-index: 2;
     display: flex;
     justify-content: center;
     align-items: center;
   }
   
   .map {
+    position: relative;
+    z-index: 2;
     border-radius: 50px;
     border: 5px solid #FFFFFFB4;
     box-shadow: 0 3px 36px rgba(0, 0, 0, 0.2);
@@ -171,8 +185,16 @@
     margin-top: 77px;
 
   }
+  .map:hover {
+    border: 4px solid #34BFD1;
+    /* 增加陰影 */
+    box-shadow: 0 3px 36px rgba(0, 0, 0, 0.2);
+    transition: border 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
   
   .map-info {
+    position: relative;
+    z-index: 2;
     width: 339px;
     height: 84px;
     position: absolute;
@@ -183,12 +205,21 @@
     border-radius: 21px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+
+.map-info:hover {
+    background: #FFFFFFFF;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s ease-in-out, border 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+
+    transition: transform 0.3s ease-in-out;
+}
   @media (max-width: 768px) {
     .map-info {
+        display: none;
         width: 272px;
         position: absolute;
         left: 50%;
-        top: 89px;
+        top: 189px;
         transform: translateX(-50%);
       }
   }
@@ -262,6 +293,11 @@
     transform: translate(-50%, -50%);
   }
 
+  .map-pin-icon:hover {
+    /* 置中放大 */
+    transform: translate(-50%, -50%) scale(1.1);
+    transition: transform 0.3s ease-in-out;
+  }
   .contact-item-text {
     display: flex;
     flex-direction: column;
@@ -284,6 +320,7 @@
         rgba(52, 191, 209, 0) 100%
       );
     position: absolute;
+    z-index: 1;
     display: flex;
     width: 97%;
     max-width: 1230px;
@@ -313,3 +350,41 @@
       align-items: center;
     }
   }
+
+
+  .map-background-video-container {
+    position: absolute;
+    width: 100%;
+    height: 121%;
+    overflow: hidden;
+    z-index: -1;
+    left: 0;
+    filter: blur(2px);
+    /* filter: invert(50%) brightness(0.5) contrast(1.5); */
+    bottom: 0px;
+}
+  
+
+.map-background-video {
+    position: absolute;
+    bottom: -30%;
+    left: 50%;
+    min-width: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -269px);
+    object-fit: cover;
+    z-index: 0;
+    opacity: 0.5;
+}
+
+@media (max-width: 1116px) {
+    /* .map-background-video {
+        top: 130%;
+        left: 14%;
+
+    }
+    .map-background-video {
+        height: 775px;
+    } */
+}

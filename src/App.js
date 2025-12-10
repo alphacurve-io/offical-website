@@ -6,7 +6,6 @@ import Services from './components/Services';
 import Team from './components/Team';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
-import Timeline from './components/Timeline';
 const App = () => {
   return (
     <div className="App">
@@ -16,7 +15,6 @@ const App = () => {
       <Team />
       <ContactForm />
       <Footer />
-      {/* <Timeline /> */}
     </div>
   );
 };

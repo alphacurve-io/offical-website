@@ -3,21 +3,34 @@ import React, { useState } from 'react';
 import './ContactForm.css';
 
 import { ReactComponent as UploadIcon } from '../assets/upload-icon.svg';
-import { ReactComponent as PhoneIcon } from '../assets/phone-icon.svg';
+// import { ReactComponent as PhoneIcon } from '../assets/phone-icon.svg';
+import { ReactComponent as LineIcon } from '../assets/line-icon.svg';
 import { ReactComponent as EmailIcon } from '../assets/email-icon.svg';
 import { ReactComponent as MapPinIcon } from '../assets/map-pin.svg';
+import videoSrc from '../assets/map-background-video.mp4';
 
 const ContactForm = () => {
-const [formData, setFormData] = useState({
-    name: '',
-    street: '',
-    city: '',
-    postcode: '',
-    phone: '',
-    email: '',
-    message: '',
-    file: null,
-    });
+    const contact_info = {
+        phone: '+886 921833117',
+        email: 'service@alphacurve.io',
+        address: '302059 新竹市竹北市莊敬三路207號10樓',
+        address_en: '10F., No.207, Zhuangjing 3rd Rd., Zhubei City, Hsinchu County 302059, Taiwan (R.O.C.)',
+        company_name: '艾菲肯有限公司',
+        company_name_en: 'AlphaCurve Co., Ltd.',
+        line_id: '@alphacurve',
+        line_link: 'https://page.line.me/alphacurve',
+
+    }
+    const [formData, setFormData] = useState({
+        name: '',
+        street: '',
+        city: '',
+        postcode: '',
+        phone: '',
+        email: '',
+        message: '',
+        file: null,
+        });
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === 'file') {
@@ -37,7 +50,7 @@ const [formData, setFormData] = useState({
     var REACT_APP_API_BASE_URL_PRODUCTION='https://alphacurve.io/website/api';
     var REACT_APP_API_BASE_URL_DEVELOPMENT='http://localhost:8080';
     console.log('Environment:', process.env.REACT_APP_ENV);
-    const baseUrl = process.env.REACT_APP_ENV != 'dev'
+    const baseUrl = process.env.REACT_APP_ENV !== 'dev'
       ? REACT_APP_API_BASE_URL_PRODUCTION
       : REACT_APP_API_BASE_URL_DEVELOPMENT;
     const apiUrl = `${baseUrl}/submit`;
@@ -58,6 +71,29 @@ const [formData, setFormData] = useState({
       alert('An error occurred.');
     }
   };
+
+  /* 如果在手機上，點擊 .map-pin-icon 時，顯示 .map-info */
+  const handleMapPinClick = () => {
+    const mapInfo = document.querySelector('.map-info');
+    if (window.innerWidth < 768) {
+      mapInfo.style.display = 'block';
+    }
+
+  }
+  const handleMapPinHover = () => {
+    const mapInfo = document.querySelector('.map-info');
+    if (window.innerWidth < 768) {
+      mapInfo.style.display = 'block';
+      mapInfo.style.opacity = '1';
+        /*過3秒後，隱藏 .map-info 漸變消失*/
+        setTimeout(() => {
+            mapInfo.style.opacity = '0';
+            mapInfo.style.transition = 'opacity 0.3s ease-in-out';
+            // mapInfo.style.display = 'none';
+        }, 3000);
+    }
+
+  }
 
   return (
     <section className="contact-section" id="contact">
@@ -86,17 +122,17 @@ const [formData, setFormData] = useState({
             <button type="submit" className="submit-button">提交/SUBMIT</button>
             <div className="contact-info">
                 <div className="contact-item">
-                <PhoneIcon className="contact-icon" />
+                <LineIcon className="contact-icon" />
                 <div className="contact-item-text">
-                    <strong>Phone</strong>
-                    <p>+886 921833117</p>
+                    <strong>Line</strong>
+                    <p><a href={contact_info.line_link} target="_blank" rel="noopener noreferrer">{contact_info.line_id}</a></p>
                 </div>
                 </div>
                 <div className="contact-item">
                 <EmailIcon className="contact-icon" />
                 <div className="contact-item-text">
                     <strong>E-MAIL</strong>
-                    <p>james@alphacurve.io</p>
+                    <p>{contact_info.email}</p>
                 </div>
                 </div>
             </div>
@@ -104,14 +140,28 @@ const [formData, setFormData] = useState({
         </div>
         
         <div className="contact-map-container">
-          <div className="map"><MapPinIcon className="map-pin-icon" /></div>
+          <div className="map"><MapPinIcon className="map-pin-icon" onClick={handleMapPinClick} onMouseOver={handleMapPinHover} /></div>
           <div className="map-info">
-            <p>alphacurve.io</p>
-            <h3>艾菲肯有限公司</h3>
-            <p>10F., No.207, Zhuangjing 3rd Rd., Zhubei City, Hsinchu County 302059, Taiwan (R.O.C.)</p>
+            <p>{contact_info.company_name_en}</p>
+            <h3>{contact_info.company_name}</h3>
+            <p>{contact_info.address}</p>
           </div>
         </div>
       </div>
+      {/* video section start */}
+      <div className="map-background-video-container">
+        <video
+          className="map-background-video"
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+        <source src={videoSrc} type="video/mp4" />
+        </video>
+      </div>
+      <script src="./MapSectionVideo.js"></script>
+      {/* video section end */}
     </section>
   );
 };

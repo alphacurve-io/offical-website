@@ -1,0 +1,23 @@
+[Unit]
+Description=AlphaCurve Web API Service
+After=network.target
+
+[Service]
+# 使用何種使用者/群組來執行
+User=jamesshieh0510
+Group=jamesshieh0510
+
+# 程式啟動指令
+ExecStart=source .env; /usr/local/bin/web_api
+
+# 如果你的服務需要某些環境變數，可在此加入
+# Environment="RUST_LOG=info"
+# 讀取.env
+EnvironmentFile=/usr/local/bin/.env
+
+# 當服務失敗（例如 panic 崩潰）時，自動重啟
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -18,6 +18,21 @@
     
 }
 
+
+
+@keyframes fadeInOutIcon {
+    0% {
+        opacity: 0.05;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.logo-icon {
+    animation: fadeInOutIcon 2s;
+}
+
 .header.scrolled {
     background: linear-gradient(to right, rgba(0, 47, 75, 0.5), rgba(0, 97, 138, 0.5)); /* Semi-transparent gradient */
 }
@@ -166,7 +181,7 @@ text-decoration: underline;
     nav.header-nav.open ul li a{
         display: flex;
         align-items: center;
-        background: rgba(251, 251, 251, 0.9);
+        background: rgba(251, 251, 251, 0.95);
         padding: 1px;
         margin-bottom: 1px;
         margin-top: 1px;
@@ -188,7 +203,8 @@ text-decoration: underline;
       flex-direction: column;
       position: absolute;
       top: 61px;
-      left: 0px;
+      /* left: 0px;
+      right: 0px; */
       padding: 10px;
       border-radius: 8px;
       width: 97%;
@@ -197,17 +213,25 @@ text-decoration: underline;
     }
   
     .header-nav.open {
-      margin-top: 0px;
-      display: flex;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 1px;
+        justify-content: center;
+        margin: 0;
+        display: flex;
+        /* background: rgba(0, 0, 0, 0.8); */
+        padding: 0px;
+        border-radius: 47px;
+        width: 98%;
+        align-items: center;
+        left: 2px;
     }
-  
+    /* .header-nav.open ul.nav-links li{
+        height: 41px;
+      } */
     .nav-links {
       flex-direction: column;
       margin: 0px;
       gap: 0px;
       padding: 0px;
+      width: 100%;
     }
   
     .nav-links a {
@@ -228,6 +252,24 @@ text-decoration: underline;
     .nav-subtitle {
         font-size: 12px;
         color: #74768F;
+    }
+    .nav-link-container {
+        height: 41px;
+        /*項目水平排列*/
+        display: flex;
+        flex-direction: row;
+        background-color: rgba(251, 251, 251, 0.9);
+        margin-bottom: 1px;
+        margin-right: 20px;
+        padding-left: 15px;
+        /*垂直置中*/
+        align-items: center;
+        font-size: 15px;
+        font-weight: bold;
+        font-family: 'Helvetica', sans-serif;
+    }
+    li:last-child .nav-link-container{
+        border-radius: 0px 0px 17px 17px;
     }
   }
   

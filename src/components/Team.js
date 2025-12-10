@@ -13,28 +13,32 @@ const Team = () => {
       role: 'CEO & Founder',
       education: '國立成功大學 製造資訊與系統所 碩士',
       degree: "Master's of Science, National Cheng Kung University",
-      picture: JamesIcon
+      picture: JamesIcon,
+      link: 'https://app.wavecnct.com/app/profile/james.shieh.8uqu',
     },
     {
       name: 'Peter',
       role: 'Chief Designer',
       education: '波士頓大學 工業設計 學士',
       degree: "Bachelor's degree, Boston University",
-      picture: PeterIcon
+      picture: PeterIcon,
+      link: '#',
     },
     {
       name: 'Angela',
       role: 'Business Development',
       education: '國立台灣大學 企業管理 碩士',
       degree: "Master's degree in National Taiwan University",
-      picture: AngelaIcon
+      picture: AngelaIcon,
+      link: '#',
     },
     {
       name: 'Aaron',
       role: 'Business Development',
       education: '國立清大大學 工業工程 碩士',
       degree: "Master's degree in National Tsinghua University",
-      picture: AaronIcon
+      picture: AaronIcon,
+      link: '#',
     },
   ];
 
@@ -58,10 +62,12 @@ const Team = () => {
                 )}
               </div>
               <div className="team-details">
-                <h3 className="team-name">{member.name}</h3>
-                <p className="team-role">{member.role}</p>
-                <p className="team-education">{member.education}</p>
-                <p className="team-degree">{member.degree}</p>
+                <a href={member.link} target="_blank" rel="noopener noreferrer">
+                  <h3 className="team-name">{member.name}</h3>
+                  <p className="team-role">{member.role}</p>
+                  <p className="team-education">{member.education}</p>
+                  <p className="team-degree">{member.degree}</p>
+                </a>
               </div>
             </div>
           ))}

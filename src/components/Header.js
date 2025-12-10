@@ -1,23 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import './Header.css';
 import { ReactComponent as HeaderIcon } from '../assets/header-icon.svg';
+import { ReactComponent as HeaderIconWhite } from '../assets/header-icon-white.svg';
 import { ReactComponent as MenuOpenIcon } from '../assets/menu-open-icon.svg';
 import { ReactComponent as MenuCloseIcon } from '../assets/menu-close-icon.svg';
 
 const Header = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   useEffect(() => {
+    
     const handleScroll = () => {
       const header = document.querySelector('.header');
+      const headerIcon = document.querySelector('.header-icon');
       if (window.scrollY > 10) {
         header.classList.add('scrolled');
+        // headerIcon.classList.add('header-icon-active');
+        setIsScrolled(true);
       } else {
         header.classList.remove('scrolled');
+        // headerIcon.classList.remove('header-icon-active');
+        setIsScrolled(false);
+
       }
     };
 
@@ -45,8 +53,8 @@ const Header = () => {
     <header className="header">
       <div className="header-container">
         <div className="header-logo" onClick={handleLogoClick}>
-          <HeaderIcon className="logo-icon" />
-          <div className="logo-text">
+        {isScrolled ? <HeaderIconWhite className="logo-icon" /> : <HeaderIcon className="logo-icon" />}
+        <div className="logo-text">
             <div className="logo-text-title">
               <h1>LPHACURVE</h1>
             </div>

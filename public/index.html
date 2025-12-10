@@ -16,7 +16,7 @@
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!-- <link rel="manifest" href="%PUBLIC_URL%/manifest.json" /> -->
     <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
@@ -43,6 +43,15 @@
     <meta name="twitter:description" content="Integrate technology and business strategy with Alphacurve.io to break through tech bottlenecks and unleash your business potential." />
     <!-- <meta name="twitter:image" content="https://alphacurve.io/twitter-image.png" /> -->
     <meta data-rh="true" name="twitter:image:src" content="https://alphacurve.io/twitter-image.png"/>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QK3V12N7GB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-QK3V12N7GB');
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

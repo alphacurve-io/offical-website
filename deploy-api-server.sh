@@ -28,12 +28,16 @@ rustup update
 cd ~/offical-website/api/web_api
 cargo build --release
 
-# 背景執行
-cargo run --release &
-
+cp ./target/release/web_api ~/web_api
 # 關閉背景執行
 kill -9 $(lsof -t -i :8080)
-
+# 背景執行
+# cargo run --release &
+# 背景執行binary
+./target/release/web_api &
+#背景執行，並儲存log
+~/web_api > ~/web_api.log 2>&1 &
+./offical-website/api/web_api/target/release/web_api 2>&1 &
 curl --location 'http://10.140.0.2:8080/submit' --header 'Content-Type: application/json' --data-raw '{
     "name": "name",
     "street": "street",
@@ -43,3 +47,20 @@ curl --location 'http://10.140.0.2:8080/submit' --header 'Content-Type: applicat
     "email": "james@alpha",
     "message": "hello\nworld"
 }'
+
+curl --location 'http://localhost:8080/website/api/submit' --header 'Content-Type: application/json' --data-raw '{
+    "name": "name",
+    "street": "street",
+    "city": "city",
+    "postcode": "110",
+    "phone": "0921",
+    "email": "james@alpha",
+    "message": "hello\nworld"
+}'
+
+cp ./offical-website/api/web_api/target/release/web_api /usr/local/bin/web_api
+sudo vim /etc/systemd/system/web_api.service
+sudo systemctl daemon-reload
+sudo systemctl enable web_api.service
+sudo systemctl start web_api.service
+sudo systemctl status web_api.service
