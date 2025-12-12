@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import './ContactForm.css';
+import contactContent from '../content/contact-content';
 
 import { ReactComponent as UploadIcon } from '../assets/upload-icon.svg';
 // import { ReactComponent as PhoneIcon } from '../assets/phone-icon.svg';
@@ -10,17 +11,8 @@ import { ReactComponent as MapPinIcon } from '../assets/map-pin.svg';
 import videoSrc from '../assets/map-background-video.mp4';
 
 const ContactForm = () => {
-    const contact_info = {
-        phone: '+886 921833117',
-        email: 'service@alphacurve.io',
-        address: '302059 新竹市竹北市莊敬三路207號10樓',
-        address_en: '10F., No.207, Zhuangjing 3rd Rd., Zhubei City, Hsinchu County 302059, Taiwan (R.O.C.)',
-        company_name: '艾菲肯有限公司',
-        company_name_en: 'AlphaCurve Co., Ltd.',
-        line_id: '@alphacurve',
-        line_link: 'https://page.line.me/alphacurve',
+    const { contactInfo, form } = contactContent;
 
-    }
     const [formData, setFormData] = useState({
         name: '',
         street: '',
@@ -101,38 +93,38 @@ const ContactForm = () => {
       <div className="contact-container">
         <div className="contact-form-container">
         
-          <h2 className="contact-title">聯絡我們/Get in <span className="highlight">touch</span></h2>
-          <p className="contact-subtitle">我們會盡快聯繫您！</p>
+          <h2 className="contact-title">{form.title} <span className="highlight">{form.titleHighlight}</span></h2>
+          <p className="contact-subtitle">{form.subtitle}</p>
           <form className="contact-form" onSubmit={handleSubmit}>
-            <input type="text" placeholder="姓名/Contact name" name="name" onChange={handleChange} />
-            <input type="text" placeholder="地址/Street" name="street" onChange={handleChange} />
-            <input type="text" placeholder="城市/City" name="city" onChange={handleChange} />
-            <input type="text" placeholder="郵遞區號/Postcode" name="postcode" onChange={handleChange} />
-            <input type="text" placeholder="聯絡電話/Contact Phone" name="phone" onChange={handleChange} />
-            <input type="email" placeholder="E-mail" name="email" onChange={handleChange} />
-            <textarea placeholder="說說你的想法/Let's talk about your idea" name="message" onChange={handleChange}></textarea>
+            <input type="text" placeholder={form.placeholders.name} name="name" onChange={handleChange} />
+            <input type="text" placeholder={form.placeholders.street} name="street" onChange={handleChange} />
+            <input type="text" placeholder={form.placeholders.city} name="city" onChange={handleChange} />
+            <input type="text" placeholder={form.placeholders.postcode} name="postcode" onChange={handleChange} />
+            <input type="text" placeholder={form.placeholders.phone} name="phone" onChange={handleChange} />
+            <input type="email" placeholder={form.placeholders.email} name="email" onChange={handleChange} />
+            <textarea placeholder={form.placeholders.message} name="message" onChange={handleChange}></textarea>
             <div className="file-upload">
                 <label htmlFor="file-upload" className="file-label">
                     <UploadIcon className="upload-icon" />
-                    Upload Additional file
+                    {form.upload.label}
                 </label>
                 <input type="file" id="file-upload" name="file" onChange={handleChange} />
-                <small>Attach file. File size of your documents should not exceed 10MB</small>
+                <small>{form.upload.note}</small>
             </div>
-            <button type="submit" className="submit-button">提交/SUBMIT</button>
+            <button type="submit" className="submit-button">{form.submitButton}</button>
             <div className="contact-info">
                 <div className="contact-item">
                 <LineIcon className="contact-icon" />
                 <div className="contact-item-text">
                     <strong>Line</strong>
-                    <p><a href={contact_info.line_link} target="_blank" rel="noopener noreferrer">{contact_info.line_id}</a></p>
+                    <p><a href={contactInfo.line_link} target="_blank" rel="noopener noreferrer">{contactInfo.line_id}</a></p>
                 </div>
                 </div>
                 <div className="contact-item">
                 <EmailIcon className="contact-icon" />
                 <div className="contact-item-text">
                     <strong>E-MAIL</strong>
-                    <p>{contact_info.email}</p>
+                    <p>{contactInfo.email}</p>
                 </div>
                 </div>
             </div>
@@ -142,9 +134,9 @@ const ContactForm = () => {
         <div className="contact-map-container">
           <div className="map"><MapPinIcon className="map-pin-icon" onClick={handleMapPinClick} onMouseOver={handleMapPinHover} /></div>
           <div className="map-info">
-            <p>{contact_info.company_name_en}</p>
-            <h3>{contact_info.company_name}</h3>
-            <p>{contact_info.address}</p>
+            <p>{contactInfo.company_name_en}</p>
+            <h3>{contactInfo.company_name}</h3>
+            <p>{contactInfo.address}</p>
           </div>
         </div>
       </div>

@@ -94,7 +94,7 @@
     /*文字會自動換行*/
     word-wrap: break-word;
     font-family: 'Sora', sans-serif;
-    font-size: 64px;
+    font-size: 53px;
     font-weight: bold;
     text-align: left;
     text-shadow: 2px 0px 20.6px rgba(255, 255, 255, 0.55); /* X, Y, Blur, Color with 35% opacity */

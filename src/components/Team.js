@@ -2,63 +2,28 @@
 import React from 'react';
 import './Team.css';
 import { ReactComponent as BackgroundIcon } from '../assets/team/team-background.svg';
-import { ReactComponent as JamesIcon } from '../assets/team/james.svg';
-import { ReactComponent as PeterIcon } from '../assets/team/peter.svg';
-import { ReactComponent as AngelaIcon } from '../assets/team/angela.svg';
-import { ReactComponent as AaronIcon } from '../assets/team/aaron.svg';
+import teamContent from '../content/team-content';
+
 const Team = () => {
-  const teamMembers = [
-    {
-      name: 'James',
-      role: 'CEO & Founder',
-      education: '國立成功大學 製造資訊與系統所 碩士',
-      degree: "Master's of Science, National Cheng Kung University",
-      picture: JamesIcon,
-      link: 'https://app.wavecnct.com/app/profile/james.shieh.8uqu',
-    },
-    {
-      name: 'Peter',
-      role: 'Chief Designer',
-      education: '波士頓大學 工業設計 學士',
-      degree: "Bachelor's degree, Boston University",
-      picture: PeterIcon,
-      link: '#',
-    },
-    {
-      name: 'Angela',
-      role: 'Business Development',
-      education: '國立台灣大學 企業管理 碩士',
-      degree: "Master's degree in National Taiwan University",
-      picture: AngelaIcon,
-      link: '#',
-    },
-    {
-      name: 'Aaron',
-      role: 'Business Development',
-      education: '國立清大大學 工業工程 碩士',
-      degree: "Master's degree in National Tsinghua University",
-      picture: AaronIcon,
-      link: '#',
-    },
-  ];
+  const { title, description, members } = teamContent;
 
   return (
     <section className="team-section" id="team">
       <div className="team-container">
-        <h2 className="services-title">Who We Are</h2>
-        <p className="services-description">關於我們</p>
+        <h2 className="services-title">{title}</h2>
+        <p className="services-description">{description}</p>
         <div className="team-grid">
-          {teamMembers.map((member, index) => (
-            <div key={index} className="team-card">
+          {members.map((member) => (
+            <div key={member.id} className="team-card">
               <div className="team-image">
                 <BackgroundIcon className="background-icon" />
                 {member.picture ? (
-                    <member.picture
+                  <member.picture
                     alt={member.name}
                     className="person-icon"
-                    />
+                  />
                 ) : (
-                    <div className="person-icon-placeholder">No Image</div>
+                  <div className="person-icon-placeholder">No Image</div>
                 )}
               </div>
               <div className="team-details">
