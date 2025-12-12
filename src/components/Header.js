@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import './Header.css';
-import headerContent from '../content/header-content';
+import { useLanguage } from '../contexts/LanguageContext';
 import { ReactComponent as HeaderIcon } from '../assets/header-icon.svg';
 import { ReactComponent as HeaderIconWhite } from '../assets/header-icon-white.svg';
 import { ReactComponent as MenuOpenIcon } from '../assets/menu-open-icon.svg';
 import { ReactComponent as MenuCloseIcon } from '../assets/menu-close-icon.svg';
 
 const Header = () => {
-  const { logo, nav } = headerContent;
+  const { content, language, toggleLanguage } = useLanguage();
+  const { logo, nav } = content.header;
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const toggleMenu = () => {
@@ -65,9 +66,6 @@ const Header = () => {
             </div>
           </div>
         </div>
-        <button className="menu-toggle" onClick={toggleMenu}>
-          {isMenuOpen ? <MenuCloseIcon /> : <MenuOpenIcon />}
-        </button>
         <nav className={`header-nav ${isMenuOpen ? 'open' : ''}`}>
           <ul className="nav-links">
             {nav.map((item, index) => (
@@ -80,6 +78,14 @@ const Header = () => {
             ))}
           </ul>
         </nav>
+        <div className="header-actions">
+            <button className="lang-toggle" onClick={toggleLanguage}>
+                {language === 'zh' ? 'EN' : '中'}
+            </button>
+            <button className="menu-toggle" onClick={toggleMenu}>
+            {isMenuOpen ? <MenuCloseIcon /> : <MenuOpenIcon />}
+            </button>
+        </div>
       </div>
     </header>
   );

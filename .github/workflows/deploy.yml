@@ -1,0 +1,62 @@
+name: Deploy to GCP VM
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18' # Adjust version as needed, defaulting to 18
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build
+      run: npm run build
+
+    - name: Zip build folder
+      run: zip -r build.zip build
+
+    - name: Copy files to VM
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.GCP_VM_IP }}
+        username: ${{ secrets.GCP_VM_USER }}
+        key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+        source: "build.zip"
+        target: "~/"
+
+    - name: Deploy on VM
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.GCP_VM_IP }}
+        username: ${{ secrets.GCP_VM_USER }}
+        key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+        script: |
+          # Remove old build.zip if exists (though scp overwrites, good to be clean)
+          # Unzip new build
+          unzip -o ~/build.zip -d ~/
+          
+          # Remove zip after unzip
+          rm ~/build.zip
+          
+          # Clean old html files
+          # Using sudo if necessary, but script used user permissions for /var/www/alphacurve.io/html
+          # Assuming user has permissions as per original script
+          rm -rf /var/www/alphacurve.io/html/*
+          
+          # Move new build files
+          mv ~/build/* /var/www/alphacurve.io/html/
+          
+          # Cleanup extracted build folder
+          rm -rf ~/build

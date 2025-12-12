@@ -10,6 +10,7 @@
     text-align: center;
     height: 416px;
     z-index: 0;
+    position: relative; /* Ensure background stays within section */
 }
 
 
@@ -30,7 +31,7 @@
     background-repeat: no-repeat;
     background-size: 85%;
     color: #fff;
-    height: 155%;
+    height: 205%;
     left: 0;
     opacity: .7;
     padding: 0;
@@ -39,6 +40,7 @@
     top: 0;
     width: 100%;
     z-index: 1;
+    pointer-events: none; /* Prevent blocking clicks */
 }
 
 @media (max-width: 1648px) {
@@ -50,7 +52,7 @@
         position: absolute;
         background-size: 900px;
         opacity: 0.7;
-        height: 155%;
+        height: 205%;
         top: 0;
         left: 0;
         background-position: 120% 235px;
@@ -117,6 +119,29 @@
     margin-bottom: 0px;
     margin-top: 0px;
 }
+
+/* English Mode Styles */
+.hero-section.lang-en .hero-title {
+    font-size: 42px;
+}
+
+.hero-section.lang-en .hero-subtitle {
+    font-size: 32px;
+}
+
+.hero-section.lang-en .hero-slogan-container {
+    margin-bottom: 0px;
+    min-height: auto;
+}
+
+.hero-section.lang-en .hero-slogan-container div {
+    min-height: auto;
+}
+
+.hero-section.lang-en .hero-button-container {
+    margin-top: 5px;
+}
+/* End English Mode Styles */
 .hero-subtitle-container{
     min-height: 51px;
     margin-top: 10px;

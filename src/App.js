@@ -7,17 +7,21 @@ import Team from './components/Team';
 import ServiceModel from './components/ServiceModel';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
+import { LanguageProvider } from './contexts/LanguageContext';
+
 const App = () => {
   return (
-    <div className="App">
-      <Header />
-      <HeroSection />
-      <Services />
-      <Team />
-      <ServiceModel />
-      <ContactForm />
-      <Footer />
-    </div>
+    <LanguageProvider>
+      <div className="App">
+        <Header />
+        <HeroSection />
+        <Services />
+        <Team />
+        <ServiceModel />
+        <ContactForm />
+        <Footer />
+      </div>
+    </LanguageProvider>
   );
 };
 

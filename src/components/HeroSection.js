@@ -1,50 +1,56 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import './HeroSection.css';
+import { useLanguage } from '../contexts/LanguageContext';
 import videoSrc from '../assets/hero-section-background-video.mp4';
-import heroContent from '../content/hero-content';
 
 const HeroSection = () => {
-  const { title, subtitle, description, button, footer } = heroContent;
+  const { content, language } = useLanguage();
+  const heroContent = content.hero;
+  const videoRef = useRef(null);
 
-  const handleButtonClick = () => {
-    const targetSection = document.getElementById(button.targetSection);
-    if (targetSection) {
-      targetSection.scrollIntoView({ behavior: 'smooth' });
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 0.7;
+    }
+  }, []);
+
+  const handleScrollToWhyConsulting = () => {
+    const element = document.getElementById('why-consulting');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
   return (
-    <section className="hero-section" id="hero">
-      {/* <div className="hero-section-floating-wave "></div> */}
-
+    <section className={`hero-section ${language === 'en' ? 'lang-en' : ''}`} id="hero">
       <div className="hero-container">
         <div className="hero-title-container">
-          <h1 className="hero-title">{title}</h1>
+          <h1 className="hero-title">{heroContent.title}</h1>
         </div>
         <div className="hero-slogan-container">
           <div className="hero-subtitle-container">
-            <p className="hero-subtitle">
-              {subtitle.line1}<br/>
-              {subtitle.line2}<span>{subtitle.line2Highlight}</span>
-            </p>
+            <h3 className="hero-subtitle">
+              {heroContent.subtitle.line1}<br />
+              {heroContent.subtitle.line2} <span className="highlight">{heroContent.subtitle.line2Highlight}</span>
+            </h3>
           </div>
           <div className="hero-description-container">
             <p className="hero-description">
-              {description.line1}<br/>
-              {description.line2}
+              {heroContent.description.line1}<br />
+              {heroContent.description.line2}
             </p>
           </div>
         </div>
         <div className="hero-button-container">
-          <button className="hero-button" onClick={handleButtonClick}>
-            {button.text}
+          <button className="hero-button" onClick={handleScrollToWhyConsulting}>
+            {heroContent.button.text}
           </button>
-          <p className="hero-footer">{footer}</p>
+          <p className="hero-footer">{heroContent.footer}</p>
         </div>
       </div>
-      {/* video secion start */}
       <div className="hero-section-video-container">
         <video
+          ref={videoRef}
           className="hero-section-video"
           autoPlay
           loop
@@ -54,8 +60,8 @@ const HeroSection = () => {
           <source src={videoSrc} type="video/mp4" />
         </video>
       </div>
-      <script src="./HeroSectionVideo.js"></script>
-      {/* video secion end */}
+      {/* The script tag was likely intended to be removed or handled differently in a React context. */}
+      {/* <script src="./HeroSectionVideo.js"></script> */}
       <div className="hero-section-floating-background" />
     </section>
   );

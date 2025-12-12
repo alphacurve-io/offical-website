@@ -1,30 +1,23 @@
-// src/components/Team.js
 import React from 'react';
 import './Team.css';
+import { useLanguage } from '../contexts/LanguageContext';
 import { ReactComponent as BackgroundIcon } from '../assets/team/team-background.svg';
-import teamContent from '../content/team-content';
 
 const Team = () => {
-  const { title, description, members } = teamContent;
+  const { content } = useLanguage();
+  const teamContent = content.team;
 
   return (
     <section className="team-section" id="team">
       <div className="team-container">
-        <h2 className="services-title">{title}</h2>
-        <p className="services-description">{description}</p>
+        <h2 className="team-title">{teamContent.title}</h2>
+        <p className="team-description">{teamContent.description}</p>
         <div className="team-grid">
-          {members.map((member) => (
+          {teamContent.members.map((member) => (
             <div key={member.id} className="team-card">
               <div className="team-image">
                 <BackgroundIcon className="background-icon" />
-                {member.picture ? (
-                  <member.picture
-                    alt={member.name}
-                    className="person-icon"
-                  />
-                ) : (
-                  <div className="person-icon-placeholder">No Image</div>
-                )}
+                <member.picture className="person-icon" />
               </div>
               <div className="team-details">
                 <a href={member.link} target="_blank" rel="noopener noreferrer">

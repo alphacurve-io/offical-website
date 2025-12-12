@@ -1,12 +1,13 @@
 import React from 'react';
 import './Footer.css';
-import footerContent from '../content/footer-content';
+import { useLanguage } from '../contexts/LanguageContext';
 // import { ReactComponent as FooterIcon } from '../assets/footer-icon.svg';
 import { ReactComponent as FooterIconWithText } from '../assets/footer-icon-with-text.svg';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const { contactInfo, columns, copyright } = footerContent;
+  const { content } = useLanguage();
+  const { contactInfo, columns, copyright } = content.footer;
 
   return (
     <footer className="footer-section">

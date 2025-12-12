@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import './ContactForm.css';
-import contactContent from '../content/contact-content';
+import { useLanguage } from '../contexts/LanguageContext';
 
 import { ReactComponent as UploadIcon } from '../assets/upload-icon.svg';
 // import { ReactComponent as PhoneIcon } from '../assets/phone-icon.svg';
@@ -11,7 +11,8 @@ import { ReactComponent as MapPinIcon } from '../assets/map-pin.svg';
 import videoSrc from '../assets/map-background-video.mp4';
 
 const ContactForm = () => {
-    const { contactInfo, form } = contactContent;
+    const { content } = useLanguage();
+    const { contactInfo, form } = content.contact;
 
     const [formData, setFormData] = useState({
         name: '',
