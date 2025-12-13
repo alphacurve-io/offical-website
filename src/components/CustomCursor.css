@@ -1,0 +1,152 @@
+.custom-cursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s ease;
+  will-change: transform;
+}
+
+.cursor-icon-container {
+  position: relative;
+  width: 40px;
+  height: 37px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: rotateCursor 3s linear infinite;
+  transform-origin: center center;
+}
+
+@keyframes rotateCursor {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cursor-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 37px;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.cursor-icon-default {
+  opacity: 1;
+  animation: fadeIconDefault 2s ease-in-out infinite;
+}
+
+.cursor-icon-white {
+  opacity: 0;
+  animation: fadeIconWhite 2s ease-in-out infinite;
+}
+
+@keyframes fadeIconDefault {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIconWhite {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.custom-cursor.hovering .cursor-icon-default {
+  opacity: 0;
+  animation: none;
+  transition: opacity 0.2s ease;
+}
+
+.custom-cursor.hovering .cursor-icon-white {
+  opacity: 1;
+  animation: none;
+  transition: opacity 0.2s ease;
+}
+
+.custom-cursor.hovering .cursor-icon-container {
+  animation: none;
+  transition: opacity 0.2s ease 0.2s;
+  opacity: 0.05;
+}
+
+.custom-cursor:not(.hovering) .cursor-icon-container {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.cursor-animation-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+@keyframes cursor-outer-dashoffset {
+  0% {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 94.25px 94.25px;
+  }
+  50% {
+    stroke-dasharray: 62.83px 125.66px;
+  }
+  100% {
+    stroke-dashoffset: 188.5px;
+    stroke-dasharray: 94.25px 94.25px;
+  }
+}
+
+.cursor-circle-outer {
+  stroke-dasharray: 94.25px 94.25px;
+  stroke-dashoffset: 0;
+  animation: cursor-outer-dashoffset infinite linear 6s;
+}
+
+@keyframes cursor-inner-dashoffset {
+  0% {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 94.25px 94.25px;
+  }
+  50% {
+    stroke-dasharray: 62.83px 125.66px;
+  }
+  100% {
+    stroke-dashoffset: -188.5px;
+    stroke-dasharray: 94.25px 94.25px;
+  }
+}
+
+.cursor-circle-inner {
+  stroke-dashoffset: 0;
+  stroke-dasharray: 94.25px 94.25px;
+  animation: cursor-inner-dashoffset infinite 5s;
+}
+
+.custom-cursor.hovering .cursor-animation-circle {
+  animation: cursor-pulse 0.3s ease;
+}
+
+@keyframes cursor-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
