@@ -125,7 +125,7 @@ export const serviceModelContent = {
         },
         {
           icon: "🎯",
-          title: "怕我選錯團隊？",
+          title: "怕選錯團隊？",
           subtitle: "協助企業做出最適合的技術選擇，不是比較價格，而是比較風險、擴充性與可維護性。",
           filters: [
             "⭐ 避免被低價方案誤導",
