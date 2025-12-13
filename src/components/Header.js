@@ -19,7 +19,7 @@ const Header = () => {
     
     const handleScroll = () => {
       const header = document.querySelector('.header');
-      const headerIcon = document.querySelector('.header-icon');
+      // const headerIcon = document.querySelector('.header-icon');
       if (window.scrollY > 10) {
         header.classList.add('scrolled');
         // headerIcon.classList.add('header-icon-active');

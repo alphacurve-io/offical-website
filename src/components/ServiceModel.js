@@ -14,13 +14,6 @@ const ServiceModel = () => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
 
-  const handleContactClick = () => {
-    const contactSection = document.getElementById('contact');
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
 
 
   return (
