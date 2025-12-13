@@ -1,0 +1,105 @@
+.parallax-words-section {
+  position: relative;
+  width: 100%;
+  min-height: 300vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 1;
+  transition: background 0.3s ease-out;
+  will-change: background;
+  isolation: isolate;
+  contain: layout style paint;
+}
+
+.parallax-words-container {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  max-width: 1400px;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  gap: 20px;
+  align-items: center;
+  justify-items: center;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  padding: 100px 20px;
+  z-index: 1;
+}
+
+.parallax-word {
+  font-family: 'Sora', sans-serif;
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 
+    0 0 20px rgba(0, 188, 212, 0.6),
+    0 0 40px rgba(0, 188, 212, 0.4),
+    2px 2px 10px rgba(0, 0, 0, 0.4);
+  cursor: default;
+  user-select: none;
+  transition: none;
+  will-change: transform, opacity, filter;
+  position: relative;
+  z-index: 1;
+  transform-style: preserve-3d;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backface-visibility: hidden;
+}
+
+.parallax-word:hover {
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 
+    0 0 30px rgba(0, 188, 212, 0.8),
+    0 0 60px rgba(0, 188, 212, 0.5),
+    2px 2px 15px rgba(0, 0, 0, 0.5);
+  transform: scale(1.1) !important;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .parallax-words-section {
+    min-height: 250vh;
+  }
+
+  .parallax-words-container {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(11, 1fr);
+    gap: 15px;
+    padding: 60px 20px;
+  }
+
+  .parallax-word {
+    font-size: clamp(1.5rem, 4vw, 3rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .parallax-words-container {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(16, 1fr);
+    gap: 10px;
+  }
+
+  .parallax-word {
+    font-size: clamp(1.2rem, 3vw, 2rem);
+  }
+}
+
+.parallax-word:hover {
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 
+    0 0 30px rgba(0, 188, 212, 0.9),
+    0 0 60px rgba(0, 188, 212, 0.6),
+    2px 2px 15px rgba(0, 0, 0, 0.5);
+}

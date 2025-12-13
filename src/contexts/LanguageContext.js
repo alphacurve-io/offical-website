@@ -3,6 +3,7 @@ import { headerContent } from '../content/header-content';
 import { heroContent } from '../content/hero-content';
 import { servicesContent } from '../content/services-content';
 import { teamContent } from '../content/team-content';
+import { parallaxWordsContent } from '../content/parallax-words-content';
 import { serviceModelContent } from '../content/service-model-content';
 import { contactContent } from '../content/contact-content';
 import { footerContent } from '../content/footer-content';
@@ -23,6 +24,7 @@ export const LanguageProvider = ({ children }) => {
     hero: heroContent[language],
     services: servicesContent[language],
     team: teamContent[language],
+    parallaxWords: parallaxWordsContent[language],
     serviceModel: serviceModelContent[language],
     contact: contactContent[language],
     footer: footerContent[language],
