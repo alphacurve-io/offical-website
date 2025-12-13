@@ -115,8 +115,8 @@ color: #DCDCDC;
 }
 
 .header.scrolled .lang-toggle {
-    color: #333;
-    border-color: rgba(0, 0, 0, 0.2);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .lang-toggle:hover {

@@ -89,11 +89,11 @@ export const serviceModelContent = {
           title: "做出來不能用？",
           subtitle: "要降低開發風險，避免做錯方向，多數專案失敗不是因為技術問題，而是方向問題。",
           problems: [
-            "需求未被明確定義",
-            "做一半才發現功能不可行",
-            "預算與期望落差巨大",
-            "沒有完整規格書就開始開發",
-            "反覆返工"
+            "❌ 需求未被明確定義",
+            "❌ 做一半才發現功能不可行",
+            "❌ 預算與期望落差巨大",
+            "❌ 沒有完整規格書就開始開發",
+            "❌ 反覆返工"
           ],
           conclusion: "顧問階段能提前發現問題，大幅降低開發風險。"
         },
@@ -102,11 +102,11 @@ export const serviceModelContent = {
           title: "溝通不順利？",
           subtitle: "減少溝通成本與認知落差，透明流程與清晰輸出＝溝通效率全面提升。",
           problems: [
-            "需求越做越多、版本不斷變更",
-            "開發與企業理解不同步",
-            "開發限制與技術瓶頸後期爆發",
-            "專案拖延",
-            "預算失控"
+            "🔥 需求越做越多、版本不斷變更",
+            "🔥 開發與企業理解不同步",
+            "🔥 開發限制與技術瓶頸後期爆發",
+            "🔥 專案拖延",
+            "🔥 預算失控"
           ],
           conclusion: "顧問流程讓雙方認知一致，確保專案穩定推進。"
         },
@@ -115,11 +115,11 @@ export const serviceModelContent = {
           title: "預算超支？",
           subtitle: "讓預算與時程更可控，需要充足的資訊（需客製?第三方限制?需額外開發?）",
           benefits: [
-            "有共識的預算區間",
-            "客觀的成本估算",
-            "合理的工期推估",
-            "資源安排建議",
-            "技術風險標註"
+            "💡 有共識的預算區間",
+            "💡 客觀的成本估算",
+            "💡 合理的工期推估",
+            "💡 資源安排建議",
+            "💡 技術風險標註"
           ],
           conclusion: "讓決策者能在資訊充分的狀況下制定預算。"
         },
@@ -128,11 +128,11 @@ export const serviceModelContent = {
           title: "怕我選錯團隊？",
           subtitle: "協助企業做出最適合的技術選擇，不是比較價格，而是比較風險、擴充性與可維護性。",
           filters: [
-            "避免被低價方案誤導",
-            "提升決策品質",
-            "減少後續維護成本",
-            "保留企業資源給最重要的項目",
-            "確保技術選型的長期可維護性"
+            "⭐ 避免被低價方案誤導",
+            "⭐ 提升決策品質",
+            "⭐ 減少後續維護成本",
+            "⭐ 保留企業資源給最重要的項目",
+            "⭐ 確保技術選型的長期可維護性"
           ],
           conclusion: "讓企業做出更務實且可長期維護的決策。"
         }
@@ -223,171 +223,184 @@ export const serviceModelContent = {
   en: {
     header: {
       title: "Service Model",
-      subtitle: "We focus on consultative cooperation to help enterprises clarify problems, reduce development risks, and provide complete system planning, development, and maintenance services, ensuring your business strategy is truly implemented."
+      subtitle:
+        "We take a consultative approach—clarifying problems, reducing development risk, and delivering end-to-end system planning, development, and long-term maintenance to ensure your business strategy becomes reality."
     },
     services: {
       title: "Four-Stage Collaboration Process",
-      subtitle: "Four-Stage Collaboration Process",
+      subtitle: "Our structured, risk-reduced workflow",
       items: [
-        {
-          id: "consulting",
-          number: "01",
-          title: "Consulting",
-          subtitle: "Consulting",
-          slogan: "Get the direction right before development",
-          description: "Clarify requirements, verify feasibility, and provide complete technical and business analysis.",
-          benefits: [
-            "Requirement breakdown & goal alignment",
-            "System feasibility analysis",
-            "Architecture draft & tech stack selection",
-            "Budget & timeline estimation",
-            "Risk list (avoiding late-stage scope creep)"
-          ],
-          note: "Consulting fees are deductible from subsequent project costs, allowing you to verify direction with minimal cost."
-        },
-        {
-          id: "planning",
-          number: "02",
-          title: "System Planning",
-          subtitle: "Architecture & Planning",
-          slogan: "Build a maintainable technical blueprint",
-          description: "After direction is clear, we help you formulate a complete system plan.",
-          benefits: [
-            "System & user flow charts",
-            "Data flow & structure design",
-            "Role & permission model design",
-            "API & third-party integration planning",
-            "Roadmap (MVP → Phase 1 → Phase 2)"
-          ],
-          note: "Planning documents serve as specifications for subsequent development, executable by any engineering team."
-        },
-        {
-          id: "development",
-          number: "03",
-          title: "Development & Integration",
-          subtitle: "Development & Integration",
-          slogan: "Make systems more complete, secure, and stable",
-          description: "Develop based on specifications, ensuring quality, security, and scalability.",
-          benefits: [
-            "Enterprise application custom development",
-            "Admin Panel / CRM / Membership Systems",
-            "AI / Automation System Implementation",
-            "Cross-platform data integration",
-            "API Integration (Line, Payment, Logistics, etc.)",
-          ],
-          note: "All development follows the architecture and risk control established in the consulting phase."
-        },
-        {
-          id: "maintenance",
-          number: "04",
-          title: "Long-term Maintenance",
-          subtitle: "Maintenance & Optimization",
-          slogan: "No more tech worries, focus on core business",
-          description: "Assist enterprises in maintaining stable system operations and continuously optimizing based on business needs.",
-          benefits: [
-            "Optimization suggestions & technical listening",
-            "Function inspection & security checks",
-            "Version updates, debugging & system optimization",
-            "Performance tuning & technical debt management",
-            "Iterate closely with business needs, reducing risk of stagnation",
-          ],
-          note: "Let enterprises stop worrying about technical debt and lack of maintenance, ensuring long-term stable operation."
-        }
-      ]
-    },
+          {
+            id: "consulting",
+            number: "01",
+            title: "Consulting",
+            subtitle: "Early Direction Alignment",
+            slogan: "Get the direction right before development",
+            description:
+              "Clarify requirements, verify feasibility, and conduct both technical and business analysis.",
+            benefits: [
+              "Requirement breakdown & goal alignment",
+              "System feasibility analysis",
+              "Architecture draft & tech stack suggestions",
+              "Budget & timeline estimation",
+              "Risk list to prevent late-stage surprises"
+            ],
+            note: "Consulting fees are deductible from subsequent project costs."
+          },
+          {
+            id: "planning",
+            number: "02",
+            title: "System Planning",
+            subtitle: "Architecture & Blueprint",
+            slogan: "Build a maintainable technical foundation",
+            description:
+              "Once direction is validated, we create a complete and executable system plan.",
+            benefits: [
+              "System & user flow diagrams",
+              "Data flow & structure design",
+              "Role & permission models",
+              "API & third-party integration planning",
+              "Roadmap (MVP → Phase 1 → Phase 2)"
+            ],
+            note:
+              "Planning documents act as formal specifications usable by any engineering team."
+          },
+          {
+            id: "development",
+            number: "03",
+            title: "Development & Integration",
+            subtitle: "High-Quality Execution",
+            slogan: "Build systems that are complete, secure, and scalable",
+            description:
+              "We develop according to specifications, ensuring quality, security, and long-term maintainability.",
+            benefits: [
+              "Custom enterprise application development",
+              "Admin panels, CRM, membership systems",
+              "AI & automation implementation",
+              "Cross-platform and cross-system integration",
+              "API integration (LINE, payment, logistics, etc.)"
+            ],
+            note:
+              "All development follows the architecture and risk controls established during consulting."
+          },
+          {
+            id: "maintenance",
+            number: "04",
+            title: "Long-term Maintenance",
+            subtitle: "Maintenance & Optimization",
+            slogan: "Reduce technical burden—focus on your core business",
+            description:
+              "We ensure long-term system stability and continuously optimize based on business needs.",
+            benefits: [
+              "Optimization suggestions & technical advisory",
+              "Feature inspection & security reviews",
+              "Version updates, debugging & performance tuning",
+              "Technical debt management",
+              "Continuous improvement aligned with business growth"
+            ],
+            note:
+              "Eliminate worries about technical debt and lack of maintenance support."
+          }
+        ]
+      },
     whyConsulting: {
-      title: "Why Enterprise Consulting?",
-      subtitle: "You may have encountered these problems",
+      title: "Why Consulting First?",
+      subtitle: "Common challenges enterprises face",
       reasons: [
         {
           icon: "❗",
-          title: "Built but unusable?",
-          subtitle: "To reduce development risk and avoid wrong direction. Most project failures are not due to tech, but direction.",
+          title: "Built but\nunusable?",
+          subtitle: "Most failures come from unclear direction—not technology.",
           problems: [
-            "Requirements not clearly defined",
-            "Discovered infeasibility halfway through",
-            "Huge gap between budget and expectation",
-            "Started development without complete specs",
-            "Repeated rework"
+            "❌ Unclear or shifting requirements",
+            "❌ Feasibility issues discovered mid-project",
+            "❌ Budget expectations misaligned with reality",
+            "❌ Development started without complete specs",
+            "❌ Repeated rework and wasted effort"
           ],
-          conclusion: "Consulting phase detects problems early, significantly reducing development risk."
+          conclusion: "Consulting identifies issues early and greatly reduces development risk."
         },
         {
           icon: "💬",
           title: "Communication issues?",
-          subtitle: "Reduce communication costs and cognitive gaps. Transparent process & clear output = comprehensive efficiency improvement.",
+          subtitle: "Reduce misalignment and communication overhead with clear outputs.",
           problems: [
-            "Requirements keep growing, versions keep changing",
-            "Development and business understanding out of sync",
-            "Third-party limitations & bottlenecks explode later",
-            "Project delays",
-            "Budget out of control"
+            "🔥 Scope keeps growing, versions keep changing",
+            "🔥 Misaligned expectations between business and development",
+            "🔥 Third-party limitations discovered too late",
+            "🔥 Project delays and unexpected blockers",
+            "🔥 Budget instability"
           ],
-          conclusion: "Consulting process aligns understanding, ensuring stable project progress."
+          conclusion: "Consulting aligns all stakeholders and keeps projects on track."
         },
         {
           icon: "💰",
-          title: "Budget overrun?",
-          subtitle: "Make budget and timeline controllable. Need sufficient info (Custom? 3rd party limits? Extra dev?)",
+          title: "Budget\noverruns?",
+          subtitle: "Predictable budgets require clear information and risk visibility.",
           benefits: [
-            "Consensus on budget range",
-            "Objective cost estimation",
-            "Reasonable timeline estimation",
-            "Resource allocation suggestions",
-            "Technical risk labeling"
+            "💡 Shared understanding of budget range",
+            "💡 Objective cost estimates",
+            "💡 Realistic timeline projection",
+            "💡 Resource allocation suggestions (e.g., 10% of budget for maintenance)",
+            "💡 Technical risk identification (e.g., API changes, third-party updates)"
           ],
-          conclusion: "Allow decision makers to budget with sufficient information."
+          conclusion: "Decision-makers can plan budgets confidently and accurately."
         },
         {
           icon: "🎯",
-          title: "Afraid of wrong team?",
-          subtitle: "Help enterprises make the most suitable tech choice. Not comparing price, but risk, scalability, and maintainability.",
+          title: "Choosing the right team?",
+          subtitle: "Choose based on risk, scalability, maintainability—not price alone.",
           filters: [
-            "Avoid being misled by low-price solutions",
-            "Improve decision quality",
-            "Reduce subsequent maintenance costs",
-            "Reserve resources for most important items",
-            "Ensure long-term maintainability of tech selection"
+            "⭐ Avoid being misled by low-cost proposals",
+            "⭐ Improve the quality of technical decisions",
+            "⭐ Reduce long-term maintenance costs",
+            "⭐ Prioritize resources for what truly matters",
+            "⭐ Ensure long-term maintainability of the system"
           ],
-          conclusion: "Let enterprises make more pragmatic and long-term maintainable decisions."
+          conclusion: "Consulting enables pragmatic, long-term and sustainable tech decisions."
         }
       ]
     },
     process: {
       title: "Clear Input/Output Process",
-      subtitle: "Clear output at every step, making projects controllable, transparent, and box-free",
+      subtitle: "Each step delivers defined outputs—transparent, predictable, and low-risk",
       steps: [
         {
           number: "01",
           title: "Book Consultation",
-          subtitle: "Align goals, confirm cooperation possibility",
-          description: "Understand your business goals, current status, and challenges, provide initial tech direction, and assess whether to enter consulting phase.",
-          note: "Free 1-hour consultation."
+          subtitle: "Align goals and assess fit",
+          description:
+            "Understand your goals, context, and challenges. Provide initial technical guidance and confirm whether consulting is appropriate.",
+          note: "Includes a free 1-hour consultation."
         },
         {
           number: "02",
           title: "Paid Consulting",
-          subtitle: "Get direction right first, then develop",
-          description: "Produce clear analysis results: requirement breakdown, feasibility verification, architecture draft, budget & timeline estimation, risk list, etc.",
-          note: "Consulting fees deductible from subsequent development."
+          subtitle: "Validate direction before development",
+          description:
+            "Produce actionable outputs: requirement breakdown, feasibility analysis, architecture draft, budget and timeline estimates, and a risk assessment.",
+          note: "Consulting fees are deductible from future development."
         },
         {
           number: "03",
           title: "System Planning",
-          subtitle: "Build formal executable tech blueprint",
-          description: "Deliver complete tech specs (flowcharts, architecture, data flow, role models, Roadmap) as the sole basis for subsequent development."
+          subtitle: "Create an executable technical blueprint",
+          description:
+            "Deliver complete specifications—flowcharts, architecture, data models, role models, and roadmap—to guide the entire development process."
         },
         {
           number: "04",
           title: "Development",
-          subtitle: "High-quality implementation per specs",
-          description: "Develop in stages based on specs, provide transparent progress, ensure system stability, security, maintainability, and scalability."
+          subtitle: "Build according to the blueprint",
+          description:
+            "Stage-based development with transparent progress. Ensure stability, security, maintainability, and long-term scalability."
         },
         {
           number: "05",
           title: "Review & Maintenance",
-          subtitle: "Evolve with the enterprise",
-          description: "Assist in acceptance, version updates, performance tuning, security checks, and system optimization, freeing enterprises from tech burdens."
+          subtitle: "Long-term system evolution",
+          description:
+            "Support acceptance, updates, tuning, security reviews, and ongoing optimization—removing long-term technical burdens."
         }
       ]
     },
@@ -395,36 +408,40 @@ export const serviceModelContent = {
       title: "Who We Help?",
       subtitle: "",
       targets: [
-        "Organizations wanting to adopt AI, automation, or new tech",
-        "Enterprises needing tech consulting for decisions",
-        "Need custom systems but lack tech architecture capability",
-        "Decision makers comparing teams and wanting to reduce risk",
-        "Enterprises limited by 3rd party tools/WordPress, needing refactor",
-        "Enterprises needing long-term tech partnership"
-      ]
+          "Organizations adopting AI, automation, or new technologies",
+          "Enterprises needing technical consulting for decision-making",
+          "Teams requiring custom systems but lacking technical architecture expertise",
+          "Decision-makers comparing vendors and wanting to reduce risk",
+          "Companies limited by WordPress or third-party tools and needing system refactoring",
+          "Enterprises seeking long-term technical partnership"
+        ]
     },
     faq: {
       title: "FAQ",
       subtitle: "",
       questions: [
         {
-          question: "Why pay consulting fee first?",
-          answer: "The consulting phase produces requirement analysis, architecture drafts, feasibility assessments, budget & timeline estimates. These are highly professional works, not just chat."
+          question: "Why pay a consulting fee first?",
+          answer:
+            "The consulting phase produces real deliverables: requirement analysis, architecture drafts, feasibility assessment, and budget/timeline estimates. These require expert work—not just conversation."
         },
         {
-          question: "What if we don't cooperate in the end?",
-          answer: "You retain all planning documents produced, which can be used by any engineering team, ensuring you don't lose time and cost due to wrong direction."
+          question: "What if we don’t proceed afterward?",
+          answer:
+            "You keep all planning deliverables, which any engineering team can execute. This ensures no wasted effort and prevents losses caused by choosing the wrong direction."
         },
         {
-          question: "Is consulting fee deductible?",
-          answer: "Yes, consulting fees are fully deductible from subsequent project development costs."
+          question: "Is the consulting fee deductible?",
+          answer:
+            "Yes. The full amount is credited toward the subsequent development project."
         }
       ]
     },
     cta: {
-      title: "Understand Our Professional Strength",
-      subtitle: "See how we help different enterprises reduce risk and successfully implement business strategies.",
-      buttonText: "View Past Experience"
+      title: "Explore Our Capabilities",
+      subtitle:
+        "See how we help organizations reduce risk and successfully execute their business strategies.",
+      buttonText: "View Experience"
     }
   }
 };

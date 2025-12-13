@@ -85,7 +85,7 @@
 }
 .hero-container {
     z-index: 3;
-    max-width: 796px;
+    max-width: 1000px;
     margin: 0 auto;
     text-align: left;
     margin: 75px 75px 0 75px;
@@ -129,18 +129,7 @@
     font-size: 32px;
 }
 
-.hero-section.lang-en .hero-slogan-container {
-    margin-bottom: 0px;
-    min-height: auto;
-}
 
-.hero-section.lang-en .hero-slogan-container div {
-    min-height: auto;
-}
-
-.hero-section.lang-en .hero-button-container {
-    margin-top: 5px;
-}
 /* End English Mode Styles */
 .hero-subtitle-container{
     min-height: 51px;

@@ -70,70 +70,70 @@ export const servicesContent = {
   },
   en: {
     title: "Our Experience",
-    description: "We have deep experience in consulting and system R&D, helping enterprises reduce technical risks and improve business implementation efficiency.",
+    description: "We bring deep expertise across consulting and system development, helping organizations reduce technical risk and accelerate successful product execution.",
     cards: [
-      {
-        id: "clients",
-        title: "Clients",
-        subtitle: "Enterprises",
-        stat: "500+",
-        statTitle: " Companies",
-        statSubtitle: "Clients from various industries worldwide",
-        items: [
-          "Publicly listed companies with capital over 100M",
-          "Startups valued at over 10M USD",
-          "Government units requiring strict compliance",
-          "Highly regulated financial institutions",
-          "Lean solopreneurs and content creators"
-        ]
-      },
-      {
-        id: "crossIndustry",
-        title: "Cross-Industry",
-        subtitle: "Process Optimization",
-        stat: "15+",
-        statTitle: " Industries",
-        statSubtitle: "Deep business integration, not just websites",
-        items: [
-          "E-commerce, Retail, Wholesale",
-          "Finance, Web3",
-          "Education, Public Sector, Research",
-          "Real Estate, Marketing, Insurance",
-          "Traditional Manufacturing"
-        ]
-      },
-      {
-        id: "consulting",
-        title: "Consulting",
-        subtitle: "Product Advisory",
-        stat: "10+",
-        statTitle: " Years Experience",
-        statSubtitle: "From concept to feasible solution",
-        items: [
-          "Enterprise AI Adoption Assessment & Planning",
-          "Product Planning & MVP Design, Prioritization",
-          "Technical Architecture, Feasibility & Risk Analysis",
-          "Requirements Inventory & Process Diagnosis",
-          "Development Process Optimization",
-          "Corporate Training: AI, Product Thinking, Tech Decisions"
-        ]
-      },
-      {
-        id: "development",
-        title: "R&D",
-        subtitle: "Tech Integration",
-        stat: "100+",
-        statTitle: " Projects Executed",
-        statSubtitle: "Complete technical solutions, not just coding",
-        items: [
-          "AI, LLM, Web3/On-chain Integration",
-          "Enterprise System Development & Integration",
-          "Business Process Automation & Optimization",
-          "Cloud Architecture & CI/CD Automation",
-          "Web & App Development",      
-          "Software Customization & Extension"        
-        ]
-      }
+{
+      id: "clients",
+      title: "Clients",
+      subtitle: "Enterprises",
+      stat: "500+",
+      statTitle: " Companies",
+      statSubtitle: "Trusted across diverse industries worldwide",
+      items: [
+        "Publicly listed enterprises with capital over 100M",
+        "Startups valued above 10M USD",
+        "Government agencies with strict compliance requirements",
+        "Highly regulated financial institutions",
+        "Lean solopreneurs and content creators"
+      ]
+    },
+    {
+      id: "crossIndustry",
+      title: "Cross-Industry",
+      subtitle: "Process Optimization",
+      stat: "15+",
+      statTitle: " Industries",
+      statSubtitle: "Deep business integration—not just websites",
+      items: [
+        "E-commerce, Retail, Wholesale",
+        "Finance, Web3",
+        "Education, Public Sector, Research",
+        "Real Estate, Marketing, Insurance",
+        "Traditional Manufacturing"
+      ]
+    },
+    {
+      id: "consulting",
+      title: "Consulting",
+      subtitle: "Product Advisory",
+      stat: "10+",
+      statTitle: " Years",
+      statSubtitle: "From concept to validated solutions",
+      items: [
+        "Enterprise AI adoption assessment & strategy",
+        "Product planning, MVP design & prioritization",
+        "Technical architecture, feasibility & risk analysis",
+        "Requirements discovery & process diagnosis",
+        "Development workflow design & optimization",
+        "Corporate workshops: AI, product thinking, tech decisions"
+      ]
+    },
+    {
+      id: "development",
+      title: "R&D",
+      subtitle: "Tech Integration",
+      stat: "100+",
+      statTitle: " Projects",
+      statSubtitle: "Complete technical solutions—not just coding",
+      items: [
+        "AI, LLM and Web3 / on-chain integration",
+        "Enterprise system development & integration",
+        "Business process automation & optimization",
+        "Cloud architecture & CI/CD automation",
+        "Web & application development",
+        "Software customization & extension"
+      ]
+    }
     ]
   }
 };

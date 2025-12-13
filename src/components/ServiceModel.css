@@ -1,7 +1,7 @@
 /* 服務模式區塊樣式 */
 .service-model-section {
   padding: 100px 20px;
-  background: linear-gradient(to bottom, #f2f7f9 0%, #ffffff 100%);
+  background: linear-gradient(to bottom, #f2f7f9 0%, rgb(245, 246, 249) 100%);
   position: relative;
   z-index: 5;
 }
@@ -18,7 +18,7 @@
 }
 
 .service-model-title {
-  font-size: 2rem;
+  font-size: 3rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
   color: #1a1a1a;
@@ -234,6 +234,7 @@
   margin-bottom: 0.5rem;
   color: #1a1a1a;
   text-align: center;
+  white-space: pre-line;
 }
 
 .reason-subtitle {

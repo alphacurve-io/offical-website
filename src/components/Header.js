@@ -80,7 +80,7 @@ const Header = () => {
         </nav>
         <div className="header-actions">
             <button className="lang-toggle" onClick={toggleLanguage}>
-                {language === 'zh' ? 'EN' : '中'}
+                {language === 'zh' ? 'EN' : '中文'}
             </button>
             <button className="menu-toggle" onClick={toggleMenu}>
             {isMenuOpen ? <MenuCloseIcon /> : <MenuOpenIcon />}

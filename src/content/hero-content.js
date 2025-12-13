@@ -22,15 +22,15 @@ export const heroContent = {
     }
   },
   en: {
-    title: "Worried about wrong direction after development?",
+    title: "Worried about building in the wrong direction?",
     subtitle: {
-      line1: "You need a team more professional than traditional outsourcing",
-      line2: "Providing complete support for",
+      line1: "Beyond traditional outsourcing. End-to-end support in",
+      line2: "",
       line2Highlight: "Consulting, R&D, and Tech Decisions"
     },
     description: {
-      line1: "A technical consulting team focused on 'Risk-Free, Faster Landing'",
-      line2: "Before investing heavily, we help you ensure direction, budget, and tech roadmap are on the right track"
+      line1: "A technical consulting partner focused on reducing risk and accelerating delivery.",
+      line2: "Before you invest heavily, we help validate direction, budget, and your technical roadmap."
     },
     button: {
       text: "Our Process",

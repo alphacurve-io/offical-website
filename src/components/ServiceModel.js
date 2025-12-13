@@ -22,7 +22,7 @@ const ServiceModel = () => {
         
         {/* Header */}
         <div className="service-model-header">
-          <h2>{header.title}</h2>
+          <h2 className="service-model-title">{header.title}</h2>
           <p>{header.subtitle}</p>
         </div>
 
