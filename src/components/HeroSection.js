@@ -42,8 +42,41 @@ const HeroSection = () => {
           </div>
         </div>
         <div className="hero-button-container">
-          <button className="hero-button" onClick={handleScrollToWhyConsulting}>
-            {heroContent.button.text}
+          <button className="hero-button-svg" onClick={handleScrollToWhyConsulting}>
+            <svg  
+              className="hero-button-svg-element"
+              width="180" 
+              height="50" 
+              viewBox="0 0 180 50"
+            >
+              <rect 
+                className="hero-button-line hero-button-line--outer"
+                strokeWidth="6"
+                stroke="#00bcd4" 
+                strokeLinecap="round"
+                fill="none" 
+                x="3" 
+                y="3" 
+                width="174" 
+                height="44" 
+                rx="8"
+              />
+              <rect 
+                className="hero-button-line hero-button-line--inner"
+                strokeWidth="3"
+                stroke="#008ba3" 
+                strokeLinecap="round"
+                fill="none" 
+                x="3" 
+                y="3" 
+                width="174" 
+                height="44" 
+                rx="8"
+              />
+            </svg>
+            <div className="hero-button-content">
+              {heroContent.button.text}
+            </div>
           </button>
           <p className="hero-footer">{heroContent.footer}</p>
         </div>

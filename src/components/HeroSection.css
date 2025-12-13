@@ -148,6 +148,14 @@
     position: relative;
     margin-top: 10px;
     z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-button-container .hero-button-svg {
+    margin-left: 0;
+    margin-right: auto;
   }
 
   .hero-button {
@@ -165,6 +173,105 @@
   
   .hero-button:hover {
     background-color: #008ba3;
+  }
+
+  /* SVG Animated Button Styles */
+  .hero-button-svg {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0;
+    margin: 0;
+    border: none;
+    display: block;
+    backface-visibility: hidden;
+    width: 180px;
+    height: 50px;
+    position: relative;
+    color: white;
+    font-family: 'Sora', sans-serif;
+    font-size: 16px;
+    transition: transform 300ms, color 300ms, background-color 300ms;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .hero-button-svg:hover,
+  .hero-button-svg:focus {
+    color: white;
+    background: rgba(0, 188, 212, 0.6);
+    transform: scale(1.05);
+  }
+
+  .hero-button-svg:hover .hero-button-line,
+  .hero-button-svg:focus .hero-button-line {
+    animation-play-state: paused;
+  }
+
+  .hero-button-svg-element {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  @keyframes hero-outer-dashoffset {
+    0% {
+      stroke-dashoffset: 0;
+      stroke-dasharray: 210px 210px;
+    }
+    50% {
+      stroke-dasharray: 140px 280px;
+    }
+    100% {
+      stroke-dashoffset: 420px;
+      stroke-dasharray: 210px 210px;
+    }
+  }
+
+  .hero-button-line--outer {
+    stroke-dasharray: 210px 210px;
+    stroke-dashoffset: 0;
+    animation: hero-outer-dashoffset infinite linear 6s;
+  }
+
+  @keyframes hero-inner-dashoffset {
+    0% {
+      stroke-dashoffset: 0;
+      stroke-dasharray: 210px 210px;
+    }
+    50% {
+      stroke-dasharray: 140px 280px;
+    }
+    100% {
+      stroke-dashoffset: -420px;
+      stroke-dasharray: 210px 210px;
+    }
+  }
+
+  .hero-button-line--inner {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 210px 210px;
+    animation: hero-inner-dashoffset infinite 5s;
+  }
+
+  .hero-button-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    padding: 0;
+    text-align: center;
+    margin: 0;
   }
   
   .hero-footer {
@@ -257,6 +364,13 @@
         margin-top: 8px;
         text-align: center;
         z-index: 3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hero-button-content {
+        justify-content: center;
     }
 
     .hero-button {
@@ -269,6 +383,24 @@
         cursor: pointer;
         border-radius: 5px;
         text-align: center;
+    }
+
+    .hero-button-svg {
+        width: 160px;
+        height: 45px;
+        font-size: 14px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+    }
+
+    .hero-button-svg:hover,
+    .hero-button-svg:focus {
+        background: rgba(0, 188, 212, 0.6);
+    }
+
+    .hero-button-svg .hero-button-svg-element {
+        width: 100%;
+        height: 100%;
     }
       
 }
