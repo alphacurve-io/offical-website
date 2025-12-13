@@ -71,7 +71,7 @@ const Header = () => {
             {nav.map((item, index) => (
               <li key={index}>
                 <div onClick={() => handleNavLinkClick(item.id)} className="nav-link-container">
-                  <div className="nav-title">{item.title}</div>
+                  <div className="nav-title" data-text={item.subtitle}>{item.title}</div>
                   <div className="nav-subtitle">{item.subtitle}</div>
                 </div>
               </li>
@@ -80,7 +80,7 @@ const Header = () => {
         </nav>
         <div className="header-actions">
             <button className="lang-toggle" onClick={toggleLanguage}>
-                {language === 'zh' ? 'EN' : '中文'}
+                {language === 'zh' ? 'EN' : 'ZH'}
             </button>
             <button className="menu-toggle" onClick={toggleMenu}>
             {isMenuOpen ? <MenuCloseIcon /> : <MenuOpenIcon />}

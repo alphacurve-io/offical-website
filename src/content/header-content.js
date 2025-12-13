@@ -7,23 +7,23 @@ export const headerContent = {
     nav: [
       {
         id: "hero",
-        title: "首頁",
-        subtitle: "home"
+        title: "首 頁",
+        subtitle: "Home"
       },
       {
         id: "services",
-        title: "服務",
-        subtitle: "service"
+        title: "服 務",
+        subtitle: "What we do"
       },
       {
         id: "team",
         title: "關於我們",
-        subtitle: "about us"
+        subtitle: "Who we are"
       },
       {
         id: "contact",
         title: "聯絡我們",
-        subtitle: "contact us"
+        subtitle: "Get in touch"
       }
     ]
   },
@@ -36,22 +36,22 @@ export const headerContent = {
       {
         id: "hero",
         title: "Home",
-        subtitle: ""
+        subtitle: "Get Back"
       },
       {
         id: "services",
         title: "Services",
-        subtitle: ""
+        subtitle: "What we do"
       },
       {
         id: "team",
         title: "About Us",
-        subtitle: ""
+        subtitle: "Who we are"
       },
       {
         id: "contact",
         title: "Contact",
-        subtitle: ""
+        subtitle: "Get in touch"
       }
     ]
   }
