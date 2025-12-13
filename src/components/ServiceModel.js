@@ -3,6 +3,30 @@ import './ServiceModel.css';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ReactComponent as CheckIcon } from '../assets/check-icon.svg';
 
+// Placeholder SVG
+const placeholderImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5QbGFjZWhvbGRlcjwvdGV4dD48L3N2Zz4=';
+
+// 獲取服務流程圖片
+// 圖片應該放在 src/assets/ 目錄下
+// 圖片路徑在 content 中指定（例如: "services/consulting.png"）
+// 如果圖片不存在，會使用 placeholder
+const getServiceImage = (imagePath) => {
+  if (!imagePath) {
+    return placeholderImage;
+  }
+  
+  // 嘗試使用 require 動態導入圖片
+  // 注意：webpack 需要在編譯時知道所有可能的模組
+  // 如果圖片路徑不正確，會觸發 onError 回調使用 placeholder
+  try {
+    const image = require(`../assets/${imagePath}`);
+    return image.default || image;
+  } catch (e) {
+    // 如果 require 失敗，返回 placeholder
+    return placeholderImage;
+  }
+};
+
 const ServiceModel = () => {
   const { content } = useLanguage();
   const serviceModelContent = content.serviceModel;
@@ -35,24 +59,39 @@ const ServiceModel = () => {
           <div className="service-items">
             {services.items.map((item) => (
               <div key={item.id} className="service-item">
-                <div className="service-item-header">
-                  <div className="service-number">{item.number}</div>
-                  <div className="service-title-group">
-                    <h4>{item.title}</h4>
-                    <p className="service-title-en">{item.subtitle}</p>
-                    {item.slogan && <p className="service-subtitle">{item.slogan}</p>}
-                  </div>
+                {/* 半透明圖片背景 */}
+                <div className="service-item-image-container">
+                  <img 
+                    src={getServiceImage(item.image)} 
+                    alt={item.title}
+                    className="service-item-image"
+                    onError={(e) => {
+                      e.target.src = placeholderImage;
+                    }}
+                  />
+                  <div className="service-item-image-overlay"></div>
                 </div>
-                <p className="service-description">{item.description}</p>
-                <ul className="service-benefits">
-                  {item.benefits.map((benefit, index) => (
-                    <li key={index}>
-                      <CheckIcon className="check-icon" />
-                      {benefit}
-                    </li>
-                  ))}
-                </ul>
-                <p className="service-note">{item.note}</p>
+                
+                <div className="service-item-content">
+                  <div className="service-item-header">
+                    <div className="service-number">{item.number}</div>
+                    <div className="service-title-group">
+                      <h4>{item.title}</h4>
+                      <p className="service-title-en">{item.subtitle}</p>
+                      {item.slogan && <p className="service-subtitle">{item.slogan}</p>}
+                    </div>
+                  </div>
+                  <p className="service-description">{item.description}</p>
+                  <ul className="service-benefits">
+                    {item.benefits.map((benefit, index) => (
+                      <li key={index}>
+                        <CheckIcon className="check-icon" />
+                        {benefit}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="service-note">{item.note}</p>
+                </div>
               </div>
             ))}
           </div>

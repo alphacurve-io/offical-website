@@ -19,6 +19,7 @@ export const serviceModelContent = {
           subtitle: "Consulting",
           slogan: "讓方向先對再開發",
           description: "釐清需求、驗證可行性，並提供技術與商業角度的完整分析。",
+          image: "services/consulting.png", // 圖片路徑：src/assets/services/consulting.png
           benefits: [
             "需求拆解與目標對齊",
             "系統功能可行性分析",
@@ -35,6 +36,7 @@ export const serviceModelContent = {
           subtitle: "Architecture & Planning",
           slogan: "打造可長期維護的技術藍圖",
           description: "在方向明確後，我們會協助您制定完整的系統規劃。",
+          image: "services/planning.png", // 圖片路徑：src/assets/services/planning.jpg
           benefits: [
             "系統與使用流程圖",
             "資料流與資料結構設計",
@@ -51,6 +53,7 @@ export const serviceModelContent = {
           subtitle: "Development & Integration",
           slogan: "讓系統更完整、更安全、更穩定",
           description: "依據規格書進行系統開發，並確保品質、安全性與擴充性。",
+          image: "services/development.png", // 圖片路徑：src/assets/services/development.png
           benefits: [
             "企業應用服務客製化開發",
             "後台管理 / CRM / 會員系統",
@@ -67,6 +70,7 @@ export const serviceModelContent = {
           subtitle: "Maintenance & Optimization",
           slogan: "無需再為技術煩惱，專注核心業務",
           description: "協助企業維持系統穩定運作，並持續根據業務需求進行優化。",
+          image: "services/maintenance.png", // 圖片路徑：src/assets/services/maintenance.png
           benefits: [
             "優化建議與技術傾聽",
             "功能巡檢與資安檢查",
@@ -238,6 +242,7 @@ export const serviceModelContent = {
             slogan: "Get the direction right before development",
             description:
               "Clarify requirements, verify feasibility, and conduct both technical and business analysis.",
+            image: "services/consulting.png", // Image path: src/assets/services/consulting.jpg
             benefits: [
               "Requirement breakdown & goal alignment",
               "System feasibility analysis",
@@ -255,6 +260,7 @@ export const serviceModelContent = {
             slogan: "Build a maintainable technical foundation",
             description:
               "Once direction is validated, we create a complete and executable system plan.",
+            image: "services/planning.png", // Image path: src/assets/services/planning.jpg
             benefits: [
               "System & user flow diagrams",
               "Data flow & structure design",
@@ -273,6 +279,7 @@ export const serviceModelContent = {
             slogan: "Build systems that are complete, secure, and scalable",
             description:
               "We develop according to specifications, ensuring quality, security, and long-term maintainability.",
+            image: "services/development.png", // Image path: src/assets/services/development.png
             benefits: [
               "Custom enterprise application development",
               "Admin panels, CRM, membership systems",
@@ -291,6 +298,7 @@ export const serviceModelContent = {
             slogan: "Reduce technical burden—focus on your core business",
             description:
               "We ensure long-term system stability and continuously optimize based on business needs.",
+            image: "services/maintenance.png", // Image path: src/assets/services/maintenance.png
             benefits: [
               "Optimization suggestions & technical advisory",
               "Feature inspection & security reviews",
