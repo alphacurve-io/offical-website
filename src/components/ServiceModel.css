@@ -473,6 +473,8 @@
 /* Section 4: 適合哪些企業 */
 .who-we-help-section {
   margin-bottom: 100px;
+  position: relative;
+  z-index: 2;
 }
 
 .target-grid {
@@ -516,6 +518,8 @@
 /* Section 5: FAQ */
 .faq-section {
   margin-bottom: 80px;
+  position: relative;
+  z-index: 2;
 }
 
 .faq-list {
