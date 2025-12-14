@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swipe Transition on Scroll</title>
+  <link rel="stylesheet" href="example.css">
+  <style>
+    :is([aria-label*='primary'] a, article):nth-of-type(1) { --i: 0; }
+    :is([aria-label*='primary'] a, article):nth-of-type(2) { --i: 1; }
+    :is([aria-label*='primary'] a, article):nth-of-type(3) { --i: 2; }
+    :is([aria-label*='primary'] a, article):nth-of-type(4) { --i: 3; }
+    :is([aria-label*='primary'] a, article):nth-of-type(5) { --i: 4; }
+  </style>
+</head>
+<body>
+  <div class="snaps" aria-hidden="true">
+    <div class="snap" id="cat0"></div>
+    <div class="snap" id="cat1"></div>
+    <div class="snap" id="cat2"></div>
+    <div class="snap" id="cat3"></div>
+    <div class="snap" id="cat4"></div>
+  </div>
+  <main style="--n: 5">
+    <nav aria-label="primary navigation">
+      <a href="#cat0">tiger</a>
+      <a href="#cat1">lion</a>
+      <a href="#cat2">jaguar</a>
+      <a href="#cat3">leopard</a>
+      <a href="#cat4">snow leopard</a>
+    </nav>
+    <article>
+      <header>
+        <h2>tiger</h2>
+        <em>Panthera tigris</em>
+      </header>
+      <section>
+        <figure>
+          <img src="https://images.unsplash.com/photo-1500467525088-aafe28c0a95e?w=2000"/>
+          <figcaption> 
+            <p>A large cat native to Asia. It has a powerful, muscular body with a large head and paws, a long tail and orange fur with black, mostly vertical stripes.</p>
+            <span>photo by <a href="https://unsplash.com/photos/selective-focus-of-tiger-laying-on-ground-LNSIGPuZXIg" target="_blank">Frida Lannerström</a></span>
+          </figcaption>
+        </figure>
+      </section>
+    </article>
+    <article>
+      <header>
+        <h2>lion</h2>
+        <em>Panthera leo</em>
+      </header>
+      <section>
+        <figure>
+          <img src="https://images.unsplash.com/photo-1575550959106-5a7defe28b56?w=2000"/>
+          <figcaption> 
+            <p>A large cat native to Sub-Saharan Africa and India. It has a muscular, broad-chested body, a short, rounded head, round ears and a dark, hairy tuft at the tip of its tail. Adult males are larger and have a prominent mane.</p>
+            <span>photo by <a href="https://unsplash.com/photos/brown-lion-on-green-grass-field-UxHol6SwLyM" target="_blank">Zdeněk Macháček</a></span>
+          </figcaption>
+        </figure>
+      </section>
+    </article>
+    <article>
+      <header>
+        <h2>jaguar</h2>
+        <em>Panthera onca</em>
+      </header>
+      <section>
+        <figure>
+          <img src="https://images.unsplash.com/photo-1717329353002-c83cee66f62b?w=2000"/>
+          <figcaption> 
+            <p>A large cat and the only living member of the genus Panthera that is native to the Americas. It is the biggest cat species in the Americas and the third largest in the world.</p>
+            <span>photo by <a href="https://unsplash.com/photos/a-large-leopard-walking-across-a-river-next-to-a-forest-TiXpOGYje6A" target="_blank">Joanne de Graaff</a></span>
+          </figcaption>
+        </figure>
+      </section>
+    </article>
+    <article>
+      <header>
+        <h2>leopard</h2>
+        <em>Panthera pardus</em>
+      </header>
+      <section>
+        <figure>
+          <img src="https://images.unsplash.com/photo-1504441487953-4ddc9b5135ca?w=2000"/>
+          <figcaption> 
+            <p>It has a pale yellowish to dark golden fur with dark spots grouped in rosettes. Spots fade toward the white underbelly and the insides and lower parts of the legs. Its fur is generally soft and thick, notably softer on the belly.</p>
+            <span>photo by <a href="https://unsplash.com/photos/shallow-focus-photography-of-leopard-6IUz4w_re8g" target="_blank">Alexandre St-Louis</a></span>
+          </figcaption>
+        </figure>
+      </section>
+    </article>
+    <article>
+      <header>
+        <h2>snow leopard</h2>
+        <em>Panthera uncia</em>
+      </header>
+      <section>
+        <figure>
+          <img src="https://images.unsplash.com/photo-1693675170787-88e156a58d53?w=2000"/>
+          <figcaption> 
+            <p>A large cat native to the mountain ranges of Central and South Asia. Its fur is whitish to grey with black spots on the head and neck, with larger rosettes on the back, flanks and bushy tail.</p>
+            <span>photo by <a href="https://unsplash.com/photos/a-snow-leopard-laying-on-top-of-a-rock-RZcSGK4dJPU" target="_blank">Lucas Doddema</a></span>
+          </figcaption>
+        </figure>
+      </section>
+    </article>
+  </main>
+</body>
+</html>

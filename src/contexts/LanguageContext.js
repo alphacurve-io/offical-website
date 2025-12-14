@@ -7,6 +7,7 @@ import { parallaxWordsContent } from '../content/parallax-words-content';
 import { serviceModelContent } from '../content/service-model-content';
 import { contactContent } from '../content/contact-content';
 import { footerContent } from '../content/footer-content';
+import { swipeTransitionContent } from '../content/swipe-transition-content';
 
 const LanguageContext = createContext();
 
@@ -26,6 +27,7 @@ export const LanguageProvider = ({ children }) => {
     team: teamContent[language],
     parallaxWords: parallaxWordsContent[language],
     serviceModel: serviceModelContent[language],
+    swipeTransition: swipeTransitionContent[language],
     contact: contactContent[language],
     footer: footerContent[language],
   };

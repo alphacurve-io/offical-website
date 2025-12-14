@@ -1,0 +1,444 @@
+/* Swipe Transition Section - 适配到 React 组件 */
+
+/* CSS 变量注册 */
+@property --w {
+  syntax: '<length>';
+  initial-value: 0px;
+  inherits: true;
+}
+
+@property --h {
+  syntax: '<length>';
+  initial-value: 0px;
+  inherits: true;
+}
+
+@property --p {
+  syntax: '<number>';
+  initial-value: 0;
+  inherits: true;
+}
+
+@property --off-ani {
+  syntax: '<number>';
+  initial-value: 0;
+  inherits: true;
+}
+
+@property --sel-ani {
+  syntax: '<number>';
+  initial-value: 0;
+  inherits: true;
+}
+
+/* Section 容器 */
+.swipe-transition-section {
+  position: relative;
+  width: 100%;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+}
+
+/* 占位空间，确保页面滚动正常 */
+.swipe-transition-spacer {
+  position: relative;
+  width: 100%;
+}
+
+/* 固定定位的主容器 */
+.swipe-transition-main {
+  position: fixed;
+  inset: 0;
+  container-type: size;
+  color: #ededed;
+  font: clamp(0.625em, 2vw, 1.25em) / 1.125 'Andika', sans-serif;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+}
+
+.swipe-transition-main.visible {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 当最后一个 item 需要隐藏时，使用更快的过渡以实现无缝衔接 */
+.swipe-transition-main:not(.visible) {
+  transition: opacity 0.1s ease, visibility 0.1s ease;
+}
+
+/* Grid 布局 */
+.swipe-transition-main,
+.swipe-transition-main article,
+.swipe-transition-main section,
+.swipe-transition-main figure,
+.swipe-transition-main figcaption {
+  display: grid;
+}
+
+.swipe-transition-main {
+  --h: 100vh;
+  height: var(--h);
+}
+
+@supports (top: 1dvh) {
+  .swipe-transition-main {
+    --h: 100dvh;
+  }
+}
+
+/* 所有元素重叠在同一位置 */
+.swipe-transition-main article,
+.swipe-transition-main header,
+.swipe-transition-main section,
+.swipe-transition-main figure,
+.swipe-transition-main img,
+.swipe-transition-main figcaption,
+.swipe-transition-main nav {
+  grid-area: 1 / 1;
+}
+
+/* 导航和文章的计算逻辑 */
+.swipe-transition-main [aria-label*='primary'] a,
+.swipe-transition-main article {
+  /* 当前选中的项目索引（由 JavaScript 设置） */
+  --j: var(--current-index, 0);
+  /* 当前项目与选中项目的差值 */
+  --dif: calc(var(--i) - var(--j));
+  /* 绝对值 */
+  --abs: max(var(--dif), calc(-1 * var(--dif)));
+  /* 是否被选中：1=是，0=否 */
+  --sel: calc(1 - min(1, var(--abs)));
+  /* 平滑过渡版本 */
+  --sel-ani: var(--sel);
+  /* 向下取整，用于显示控制（简化版，因为 round(down, ...) 可能不支持） */
+  --sel-dwn: var(--sel-ani);
+  transition: --sel-ani 0.65s linear;
+}
+
+/* 主导航（左侧） */
+.swipe-transition-main [aria-label*='primary'] {
+  display: grid;
+  place-self: center start;
+  width: 1lh;
+  border-radius: 1lh;
+  z-index: 3;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.swipe-transition-main [aria-label*='primary'] a {
+  display: grid;
+  grid-gap: 1em;
+  grid-template: 1lh / 100% auto;
+  overflow: hidden;
+  width: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  color: #34BFD1; /* 主视觉蓝色 */
+}
+
+.swipe-transition-main [aria-label*='primary'] a::before {
+  border: solid 0.375em transparent;
+  border-radius: 50%;
+  scale: calc(1 + var(--sel-ani));
+  background: currentcolor padding-box;
+  filter: saturate(var(--sel-ani));
+  content: '';
+}
+
+/* 文章样式 */
+.swipe-transition-main article {
+  --w: 100cqw;
+  --h: 100cqh;
+  /* 角度计算（简化版，避免 atan2） */
+  --a: clamp(40deg, 60deg, 75deg);
+  --b: calc(2 * var(--a));
+  /* 在堆栈中：1=是，0=否 */
+  --stk: clamp(0, calc(var(--dif) + 1), 1);
+  /* 离开堆栈：1=是，0=否 */
+  --off: calc(1 - var(--stk));
+  /* 平滑过渡版本 */
+  --off-ani: var(--off);
+  --off-sgn: calc(2 * var(--off) - 1);
+  --off-dwn: var(--off-ani);
+  /* 隐藏在堆栈中：1=是，0=否 */
+  --hid: calc(1 - var(--off-ani) - var(--sel-ani));
+  /* 进度计算（简化 pow，使用乘法） */
+  --prg: calc(
+    (var(--stk) + calc(var(--off-sgn) * var(--off-ani))) *
+    (var(--stk) + calc(var(--off-sgn) * var(--off-ani)))
+  );
+  --c0: rgb(0 0 0 / calc(var(--stk) + var(--sel)));
+  --c1: rgb(0 0 0 / var(--off));
+  z-index: calc(-1 * var(--i));
+  /* 使用 mask 控制可见性，移除缩放效果以获得更平滑的转场 */
+  mask: conic-gradient(
+    from calc(90deg - var(--a)) at 30%,
+    var(--c0) calc(var(--prg) * var(--b)),
+    var(--c1) 0% calc(var(--b)),
+    var(--c0) 0% calc(var(--b) + var(--prg) * (1turn - var(--b))),
+    var(--c1) 0%
+  );
+  transition-property: --off-ani, --sel-ani;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.swipe-transition-main article::before {
+  --dx: calc(1px / sin(var(--a)));
+  --y: calc(0.5 * var(--h));
+  --x: calc(30% + var(--y) / tan(var(--a)));
+  grid-area: 1 / 1;
+  z-index: 1;
+  background: rgba(222, 222, 222, 0.27);
+  clip-path: polygon(
+    calc(30% - var(--dx)) 50%,
+    calc(var(--x) - var(--dx)) calc(50% + var(--y)),
+    calc(var(--x) + var(--dx)) calc(50% + var(--y)),
+    calc(30% + var(--dx)) 50%,
+    calc(var(--x) + var(--dx)) calc(50% - var(--y)),
+    calc(var(--x) - var(--dx)) calc(50% - var(--y))
+  );
+  mask: radial-gradient(1em at 30%, transparent calc(100% - 1px), red);
+  mix-blend-mode: screen;
+  content: '';
+}
+
+/* Header 样式 */
+.swipe-transition-main header {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: baseline;
+  align-self: center;
+  z-index: 2;
+}
+
+.swipe-transition-main h2,
+.swipe-transition-main em,
+.swipe-transition-main figcaption {
+  translate: 0 calc((1 - var(--sel-dwn)) * 1lh);
+  opacity: var(--sel-dwn);
+  transition: 0.65s ease-out;
+  transition-property: translate, opacity;
+}
+
+.swipe-transition-main h2,
+.swipe-transition-main em {
+  box-sizing: border-box;
+  flex: 1 1 70%;
+  padding: 0 1em;
+}
+
+.swipe-transition-main h2 {
+  font: 300 2.5em 'Nunito', sans-serif;
+  font-variant: small-caps;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.swipe-transition-main em {
+  padding-left: 2lh;
+  max-width: 30%;
+  font: italic 1em 'Lora', serif;
+  text-align: right;
+}
+
+/* 图片样式 */
+.swipe-transition-main img {
+  width: 100%;
+  height: var(--h);
+  object-fit: cover;
+  object-position: var(--pos, center);
+  display: block;
+  position: relative;
+  z-index: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.swipe-transition-main figure img {
+  filter: brightness(0.2);
+}
+
+.swipe-transition-main figure {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.swipe-transition-main section {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+/* 图说样式 */
+.swipe-transition-main figcaption {
+  grid-gap: 0.5em;
+  place-self: start end;
+  z-index: 1;
+  padding: 1em;
+  max-width: 25em;
+  font-size: clamp(0.625rem, 0.75em, 1rem);
+  /* 向下移动，避免被 floating menu (header) 遮挡 */
+  margin-top: 80px;
+}
+
+.swipe-transition-main figcaption span {
+  place-self: end;
+  font-style: italic;
+}
+
+.swipe-transition-main figcaption a {
+  color: #fdd85d;
+}
+
+/* 底部导航（可选） */
+.swipe-transition-main nav {
+  --h: 6.25em;
+  display: flex;
+  place-self: end;
+  z-index: 1;
+  padding: 0.5em;
+  aspect-ratio: 2 / 1;
+  height: 6.25em;
+}
+
+/* 最后一个 item - 100% 宽幅 banner，作为过渡内容 */
+.swipe-transition-last-item {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #ededed;
+  font: clamp(0.625em, 2vw, 1.25em) / 1.125 'Andika', sans-serif;
+  z-index: 1;
+  background: #000;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+@supports (top: 1dvh) {
+  .swipe-transition-last-item {
+    min-height: 100dvh;
+  }
+}
+
+/* Banner 背景图片 */
+.swipe-transition-last-item section {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.swipe-transition-last-item figure {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.swipe-transition-last-item figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(0.3);
+  display: block;
+}
+
+/* Banner 内容区域 */
+.swipe-transition-last-item header {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 1200px;
+  width: 100%;
+  padding: 0 2em;
+  margin: 0 auto;
+}
+
+.swipe-transition-last-item h2 {
+  font: 300 2.5em 'Nunito', sans-serif;
+  font-variant: small-caps;
+  text-transform: capitalize;
+  margin: 0 0 0.5em 0;
+  color: #ededed;
+}
+
+.swipe-transition-last-item em {
+  font: italic 1.2em 'Lora', serif;
+  display: block;
+  margin-bottom: 1.5em;
+  color: rgba(237, 237, 237, 0.9);
+}
+
+.swipe-transition-last-item figcaption {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+  padding: 0 2em;
+  margin: 2em auto 0;
+}
+
+.swipe-transition-last-item figcaption p {
+  font-size: clamp(0.875rem, 1.2em, 1.125rem);
+  line-height: 1.6;
+  color: rgba(237, 237, 237, 0.85);
+  margin: 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .swipe-transition-main {
+    font-size: clamp(0.5em, 1.5vw, 1em);
+  }
+
+  .swipe-transition-main h2 {
+    font-size: 2em;
+  }
+
+  .swipe-transition-main figcaption {
+    max-width: 20em;
+    padding: 0.75em;
+  }
+
+  .swipe-transition-last-item {
+    min-height: 80vh;
+  }
+
+  .swipe-transition-last-item h2 {
+    font-size: 2em;
+  }
+
+  .swipe-transition-last-item em {
+    font-size: 1em;
+  }
+
+  .swipe-transition-last-item header,
+  .swipe-transition-last-item figcaption {
+    padding: 0 1.5em;
+  }
+}

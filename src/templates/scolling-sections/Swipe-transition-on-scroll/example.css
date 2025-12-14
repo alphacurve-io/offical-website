@@ -1,0 +1,280 @@
+/* width w and height h of each cat article, 
+ * used for aspect ratio so they must be registered */
+@property --w {
+  syntax: '<length>';
+  initial-value: 0px;
+  inherits: true;
+}
+
+@property --h {
+  syntax: '<length>';
+  initial-value: 0px;
+  inherits: true;
+}
+
+/* scroll relative progress, 
+ * animated on page scroll from 0 to 1, 
+ * needs to be registered for scroll animation */
+@property --p {
+  syntax: '<number>';
+  initial-value: 0;
+  inherits: true;
+}
+
+/* off the stack flag, animated version, 
+ * needs to be registered to be transitioned */
+@property --off-ani {
+  syntax: '<number>';
+  initial-value: 0;
+  inherits: true;
+}
+
+/* selected flag, animated version, 
+ * needs to be registered to be transitioned */
+@property --sel-ani {
+  syntax: '<number>';
+  initial-value: 0;
+  inherits: true;
+}
+
+* { margin: 0; }
+
+html {
+  scrollbar-color: gold #121212;
+  scroll-snap-type: y mandatory;
+  scroll-snap-stop: always;
+}
+
+/* grid everything! */
+div, main, article, section, figure, figcaption { display: grid; }
+
+div, main {
+  --h: 100vh;
+  height: var(--h);
+  /* because maybe mobile? ¯\_(ツ)_/¯ */
+}
+
+@supports (top: 1dvh) {
+  div, main {
+    --h: 100dvh;
+  }
+}
+
+/* awkward we have to do this, 
+ * old Chrome scroll snapping idea was better */
+.snap {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+main {
+  /* so we can use container query units later */
+  container-type: size;
+  /* so stuff inside it doesn't move with scroll */
+  position: fixed;
+  /* shorthand for all offsets, see 
+   * https://bsky.app/profile/anatudor.bsky.social/post/3lfesl2dpj22u */
+  inset: 0;
+  color: #ededed;
+  /* make font-size scale with viewport within reasonable limit */
+  font: clamp(.625em, 2vw, 1.25em)/ 1.125 andika, sans-serif;
+  /* this triggers the whole magic, 
+   * animating p from 0 when we're at the top of the page
+   * to 1 when we've scrolled all the way to the bottom */
+  animation: p 1s linear both;
+  animation-timeline: scroll();
+}
+
+@keyframes p { to { --p: 1; } }
+
+article, header, section, figure, img, figcaption, nav {
+  grid-area: 1/ 1;
+}
+
+[aria-label*='primary'] a, article {
+  /* index of currently selected article, 
+   * always an integer! (that's why we use round()) */
+  --j: round(var(--p)*(var(--n) - 1));
+  /* difference between this article index and 
+   * index of currently selected article */
+  --dif: var(--i) - var(--j);
+  /* not yet supported in Chrome without flag...
+   * and support test now fails ¯\_(ツ)_/¯ */
+  --abs: abs(var(--dif));
+  /* abs value of this difference, 
+   * using fallback, see 
+   * https://css-tricks.com/using-absolute-value-sign-rounding-and-modulo-in-css-today/ */
+  /* abs = 0 if this article index = currently selected article index
+   * and > 0 if different (this article not currently selected) */
+  --abs: max(var(--dif), -1*(var(--dif)));
+  /* is the currently selected one: sel is 1 YES, 0 NO */
+  /* min(1, var(--abs)) is 0 if this article currently selected
+   * and is 1 if this article not currently selected */
+  --sel: calc(1 - min(1, var(--abs)));
+  /* same value, but doesn't change abruptly */
+  --sel-ani: var(--sel);
+  /* 0 if --sel-ani < 1, 1 if --sel-ani is 1, 
+   * so 0 if this article not currently selected one OR 
+   * currently selected one, but --sel-ani in process 
+   * of transitioning from 0 to 1 and is not YET 1 */
+  --sel-dwn: round(down, var(--sel-ani));
+  transition: --sel-ani .65s linear;
+}
+
+/* main navi on the left */
+[aria-label*='primary'] {
+  display: grid;
+  place-self: center start;
+  width: 1lh;
+  border-radius: 1lh;
+  z-index: 3;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+[aria-label*='primary'] a {
+  display: grid;
+  grid-gap: 1em;
+  grid-template: 1lh/ 100% auto;
+  overflow: hidden;
+  width: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+[aria-label*='primary'] a::before {
+  border: solid .375em #0000;
+  border-radius: 50%;
+  /* scale up smoothly if currently selected */
+  scale: calc(1 + var(--sel-ani));
+  background: currentcolor padding-box;
+  /* desaturate if not selected */
+  filter: Saturate(var(--sel-ani));
+  content: '';
+}
+
+article {
+  --w: 100cqw;
+  --h: 100cqh;
+  /* angle of diagonal, but within limits */
+  --a: clamp(40deg, atan2(var(--h), var(--w)), 75deg);
+  --b: 2*var(--a); /* 2x this angle */
+  /* in the stack: 1 YES, 0 NO */
+  --stk: clamp(0, var(--dif) + 1, 1);
+  /* off the stack: 1 YES, 0 NO */
+  --off: calc(1 - var(--stk));
+  /* same value, but doesn't change abruptly */
+  --off-ani: var(--off);
+  --off-sgn: calc(2*var(--off) - 1);
+  --off-dwn: round(down, var(--off-ani));
+  /* hidden in stack under sel one: 1 YES, 0 NO */
+  --hid: calc(1 - var(--off-ani) - var(--sel-ani));
+  --prg: pow(var(--stk) + var(--off-sgn)*var(--off-ani), 2);
+  --c0: rgb(0 0 0/ calc(var(--stk) + var(--sel)));
+  --c1: rgb(0 0 0/ var(--off));
+  z-index: calc(-1*var(--i));
+  /* prevent clicks once it's off the stack */
+  scale: calc(1 - var(--off-dwn));
+  mask: 
+    conic-gradient(from calc(90deg - var(--a)) at 30%, 
+        var(--c0) calc(var(--prg)*var(--b)), 
+        var(--c1) 0% calc(var(--b)), 
+        var(--c0) 0% calc(var(--b) + var(--prg)*(1turn - var(--b))), 
+        var(--c1) 0%);
+  transition-property: --off-ani, --sel-ani;
+}
+
+article::before {
+  --dx: 1px/sin(var(--a));
+  --y: .5*var(--h);
+  --x: 30% + var(--y)/tan(var(--a));
+  grid-area: 1/ 1;
+  z-index: 1;
+  background: #dedede45;
+  clip-path: 
+    polygon(
+      calc(30% - var(--dx)) 50%, 
+      calc(var(--x) - var(--dx)) calc(50% + var(--y)), 
+      calc(var(--x) + var(--dx)) calc(50% + var(--y)), 
+      calc(30% + var(--dx)) 50%, 
+      calc(var(--x) + var(--dx)) calc(50% - var(--y)), 
+      calc(var(--x) - var(--dx)) calc(50% - var(--y)));
+  mask: 
+    radial-gradient(1em at 30%, #0000 calc(100% - 1px), red);
+  mix-blend-mode: screen;
+  content: '';
+}
+
+header {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: baseline;
+  align-self: center;
+  z-index: 2;
+}
+
+h2, em, figcaption {
+  translate: 0 calc((1 - var(--sel-dwn))*1lh);
+  opacity: var(--sel-dwn);
+  transition: .65s ease-out;
+  transition-property: translate, opacity;
+}
+
+h2, em {
+  box-sizing: border-box;
+  flex: 1 1 70%;
+  padding: 0 1em;
+}
+
+h2 {
+  font: 300 2.5em nunito, sans-serif;
+  font-variant: small-caps;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+em {
+  padding-left: 2lh;
+  max-width: 30%;
+  font: italic 1em lora, serif;
+  text-align: right;
+}
+
+img {
+  width: 100%;
+  height: var(--h);
+  object-fit: cover;
+  object-position: var(--pos);
+}
+
+figure img { filter: brightness(.2); }
+
+figcaption {
+  grid-gap: .5em;
+  place-self: start end;
+  z-index: 1;
+  padding: 1em;
+  max-width: 25em;
+  font-size: clamp(.625rem, .75em, 1rem);
+}
+
+span {
+  place-self: end;
+  font-style: italic;
+}
+
+a {
+  color: #fdd85d;
+}
+
+nav {
+  --h: 6.25em;
+  display: flex;
+  place-self: end;
+  z-index: 1;
+  padding: .5em;
+  aspect-ratio: 2/ 1;
+  height: 6.25em;
+}
+

@@ -14,10 +14,11 @@
         rgba(231, 237, 242, 0.71) 97%,
         rgba(245, 246, 249, 1) 100%
       );
-    padding: 64px 20px;
+    padding: 0 20px 64px 20px;
     display: flex;
     justify-content: center;
     align-items: center;
+    /* 移除顶部 padding，让最后一个 item 和联络表单无缝衔接 */
   }
   
   .contact-container {

@@ -6,6 +6,7 @@ import Services from './components/Services';
 import Team from './components/Team';
 import ParallaxWords from './components/ParallaxWords';
 import ServiceModel from './components/ServiceModel';
+import SwipeTransition from './components/SwipeTransition';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import CustomCursor from './components/CustomCursor';
@@ -22,6 +23,7 @@ const App = () => {
         <Team />
         <ParallaxWords />
         <ServiceModel />
+        <SwipeTransition />
         <ContactForm />
         <Footer />
       </div>
