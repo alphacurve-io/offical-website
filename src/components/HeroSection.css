@@ -158,6 +158,18 @@
     margin-right: auto;
   }
 
+  /* 平板和手机：按钮居中 */
+  @media (max-width: 768x) {
+    .hero-button-container {
+      align-items: center !important;
+    }
+
+    .hero-button-container .hero-button-svg {
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+  }
+
   .hero-button {
     font-family: 'Sora', sans-serif;
     font-size: 16px; 
@@ -319,6 +331,18 @@
     }
 
 }
+
+/* 平板样式 */
+@media (min-width: 769px) and (max-width: 768px) {
+    .hero-button-container {
+        align-items: center;
+    }
+
+    .hero-button-container .hero-button-svg {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
 /* Mobile Styles */
 @media (max-width: 768px) {
     .hero-slogan-container div {
@@ -367,6 +391,11 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+    }
+
+    .hero-button-container .hero-button-svg {
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .hero-button-content {

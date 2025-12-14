@@ -102,10 +102,9 @@
     justify-content: center;
     align-items: flex-start;
     flex: 1;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     min-height: 0;
     margin: auto 0;
-    transition: justify-content 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                margin 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   /* hover 时内容上移 */
@@ -120,8 +119,8 @@
     font-weight: bold;
     margin-bottom: 24px;
     margin-top: 0;
-    transition: font-size 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                margin-bottom 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: font-size 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                margin-bottom 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: font-size, margin-bottom;
   }
 
@@ -215,8 +214,8 @@
     align-items: center;
     color: #FFFFFF;
     vertical-align: middle;
-    transition: margin-top 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                margin-bottom 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: margin-top 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                margin-bottom 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: margin-top, margin-bottom;
   }
 
@@ -255,7 +254,7 @@
     font-size: 16px;
     font-weight: bold;
     margin: 0;
-    transition: font-size 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: font-size 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: font-size;
   }
 
@@ -269,7 +268,7 @@
     font-size: 16px;
     color: #CCCCCC;
     margin: 0;
-    transition: font-size 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: font-size 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: font-size;
   }
 
