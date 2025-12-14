@@ -37,37 +37,66 @@ const ParallaxWords = () => {
   const backgroundColor = useMemo(() => {
     const progress = scrollProgress;
     
-    // 從 Team 的結束色開始: rgba(247,248,250,1) - 淺灰
+    // 從 Team 的結束色開始: rgba(159,224,232,1) - 淺灰
     // 過渡到藍色: rgba(70, 197, 213, 1)
     // 然後深色: rgba(21, 93, 103, 1)
     // 最後到 ServiceModel: #f2f7f9 = rgb(242, 247, 249)
     // 在 80% 時完成過渡，之後保持 ServiceModel 背景色
-    
+    const colorRange = [
+      [159, 224, 232], //start rgba(159, 224, 232, 1) 區間1
+      [70, 197, 213], //mid1 rgba(70, 197, 213, 1) 區間2
+      [21, 93, 103], //mid2 rgba(21, 93, 103, 1) 區間3
+      [18, 37, 40], //mid3 rgb(18, 37, 40) 區間4
+      [70, 197, 213], //mid4 rgba(70, 197, 213, 1) 區間5
+      [242, 247, 249] //end rgb(242, 247, 249) 區間6
+    ];
     let r, g, b;
     
-    if (progress < 0.05) {
-      // 0-25%: 從淺灰到藍色
-      const t = progress / 0.1;
-      r = Math.round(247 + (70 - 247) * t);
-      g = Math.round(248 + (197 - 248) * t);
-      b = Math.round(250 + (213 - 250) * t);
-    } else if (progress < 0.8) {
-      // 25-50%: 從藍色到深色
-      const t = (progress - 0.1) / 0.7;
-      r = Math.round(70 + (21 - 70) * t);
-      g = Math.round(197 + (93 - 197) * t);
-      b = Math.round(213 + (103 - 213) * t);
-    } else if (progress < 0.8) {
-      // 50-80%: 從深色到 ServiceModel 淺色
-      const t = (progress - 0.5) / 0.3;
-      r = Math.round(21 + (242 - 21) * t);
-      g = Math.round(93 + (247 - 93) * t);
-      b = Math.round(103 + (249 - 103) * t);
-    } else {
-      // 80-100%: 保持 ServiceModel 背景色
-      r = 242;
-      g = 247;
-      b = 249;
+    // 區間 1: 0% - 10% (progress 0.0 - 0.1)
+    // 從 colorRange[0] 過渡到 colorRange[1]
+    if (progress < 0.1) {
+      const t = progress / 0.1; // progress=0 時 t=0, progress=0.1 時 t=1
+      r = Math.round(colorRange[0][0] + (colorRange[1][0] - colorRange[0][0]) * t);
+      g = Math.round(colorRange[0][1] + (colorRange[1][1] - colorRange[0][1]) * t);
+      b = Math.round(colorRange[0][2] + (colorRange[1][2] - colorRange[0][2]) * t);
+    } 
+    // 區間 2: 10% - 30% (progress 0.1 - 0.3)
+    // 從 colorRange[1] 過渡到 colorRange[2]
+    else if (progress < 0.3) {
+      const t = (progress - 0.1) / (0.3 - 0.1); // progress=0.1 時 t=0, progress=0.3 時 t=1
+      r = Math.round(colorRange[1][0] + (colorRange[2][0] - colorRange[1][0]) * t);
+      g = Math.round(colorRange[1][1] + (colorRange[2][1] - colorRange[1][1]) * t);
+      b = Math.round(colorRange[1][2] + (colorRange[2][2] - colorRange[1][2]) * t);
+    } 
+    // 區間 3: 30% - 50% (progress 0.3 - 0.5)
+    // 從 colorRange[2] 過渡到 colorRange[3]
+    else if (progress < 0.5) {
+      const t = (progress - 0.3) / (0.5 - 0.3); // progress=0.3 時 t=0, progress=0.5 時 t=1
+      r = Math.round(colorRange[2][0] + (colorRange[3][0] - colorRange[2][0]) * t);
+      g = Math.round(colorRange[2][1] + (colorRange[3][1] - colorRange[2][1]) * t);
+      b = Math.round(colorRange[2][2] + (colorRange[3][2] - colorRange[2][2]) * t);
+    } 
+    // 區間 4: 50% - 65% (progress 0.5 - 0.65)
+    // 從 colorRange[3] 過渡到 colorRange[4]
+    else if (progress < 0.65) {
+      const t = (progress - 0.5) / (0.65 - 0.5); // progress=0.5 時 t=0, progress=0.65 時 t=1
+      r = Math.round(colorRange[3][0] + (colorRange[4][0] - colorRange[3][0]) * t);
+      g = Math.round(colorRange[3][1] + (colorRange[4][1] - colorRange[3][1]) * t);
+      b = Math.round(colorRange[3][2] + (colorRange[4][2] - colorRange[3][2]) * t);
+    }
+    // 區間 5: 65% - 88% (progress 0.65 - 0.88)
+    // 從 colorRange[4] 過渡到 colorRange[5]
+    else if (progress < 0.88) {
+      const t = (progress - 0.65) / (0.88 - 0.65); // progress=0.65 時 t=0, progress=0.88 時 t=1
+      r = Math.round(colorRange[4][0] + (colorRange[5][0] - colorRange[4][0]) * t);
+      g = Math.round(colorRange[4][1] + (colorRange[5][1] - colorRange[4][1]) * t);
+      b = Math.round(colorRange[4][2] + (colorRange[5][2] - colorRange[4][2]) * t);
+    } 
+    // 最終: 85% 之後保持最終顏色
+    else {
+      r = colorRange[5][0];
+      g = colorRange[5][1];
+      b = colorRange[5][2];
     }
     
     return `rgb(${r}, ${g}, ${b})`;
