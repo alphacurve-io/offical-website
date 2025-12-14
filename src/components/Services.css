@@ -62,6 +62,8 @@
 
   .services-card {
     width: 307px;
+    height: 280px;
+    max-height: 280px;
     background: linear-gradient(135deg, rgba(26, 95, 122, 0.4) 0%, rgba(13, 148, 136, 0.4) 100%);
     border: 3px solid #34BFD1;
     border-radius: 19px;
@@ -69,8 +71,18 @@
     text-align: left;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 11;
-    transition: all 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out,
+                border 0.3s ease-in-out,
+                background 0.3s ease-in-out,
+                box-shadow 0.3s ease-in-out,
+                height 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                max-height 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                padding-bottom 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
   
   .services-card:hover {
@@ -78,32 +90,73 @@
     border: 4px solid #34BFD1;
     background: linear-gradient(135deg, rgba(26, 95, 122, 0.7) 0%, rgba(13, 148, 136, 0.7) 100%);
     box-shadow: 0 8px 20px rgba(52, 191, 209, 0.3), 0 0 30px rgba(52, 191, 209, 0.2);
+    height: auto;
+    max-height: 500px;
+    padding-bottom: 20px;
+  }
+
+  /* 卡片内容容器 - 未 hover 时垂直居中 */
+  .services-card-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    flex: 1;
+    min-height: 0;
+    margin: auto 0;
+    transition: justify-content 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                margin 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  /* hover 时内容上移 */
+  .services-card:hover .services-card-content {
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin: 0;
   }
   
   .services-card-main-title {
-    font-size: 20px;
+    font-size: 28px;
     font-weight: bold;
-    margin-bottom: 10px;
+    margin-bottom: 24px;
+    margin-top: 0;
+    transition: font-size 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                margin-bottom 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: font-size, margin-bottom;
   }
 
-  .services-card-title {
+  /* hover 时字体缩小并调整底部间距 */
+  .services-card:hover .services-card-main-title {
     font-size: 20px;
-    font-weight: bold;
     margin-bottom: 10px;
-  }
-
-  .services-card-stat {
-    font-family: 'Inter', sans-serif;
-    font-size: 16px;
-    font-weight: bold;
-    color: #00d4ff;
-    margin-bottom: 20px;
   }
   
   .services-list {
     list-style: none;
     padding: 0;
     margin: 0;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                height 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: opacity, transform, height;
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  /* hover 时显示 items 列表 */
+  .services-card:hover .services-list.visible,
+  .services-list.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    height: auto;
+    overflow: visible;
   }
   
   .services-list li {
@@ -111,6 +164,41 @@
     font-size: 14px;
     margin-bottom: 10px;
     vertical-align: middle;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: opacity, transform;
+  }
+
+  /* 每个 item 依次显示 */
+  .services-card:hover .services-list.visible li {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .services-card:hover .services-list.visible li:nth-child(1) {
+    transition-delay: 0.1s;
+  }
+  .services-card:hover .services-list.visible li:nth-child(2) {
+    transition-delay: 0.15s;
+  }
+  .services-card:hover .services-list.visible li:nth-child(3) {
+    transition-delay: 0.2s;
+  }
+  .services-card:hover .services-list.visible li:nth-child(4) {
+    transition-delay: 0.25s;
+  }
+  .services-card:hover .services-list.visible li:nth-child(5) {
+    transition-delay: 0.3s;
+  }
+  .services-card:hover .services-list.visible li:nth-child(6) {
+    transition-delay: 0.35s;
+  }
+
+  /* 鼠标离开时，items 依次隐藏（反向动画） */
+  .services-list:not(.visible) li {
+    transition-delay: 0s;
   }
 
   .check-icon {
@@ -122,22 +210,38 @@
 
   .services-card-stat-container {
     display: flex;
-    margin-top: 32px;
-    margin-bottom: 32px;
+    margin-top: 0;
+    margin-bottom: 0;
     align-items: center;
     color: #FFFFFF;
     vertical-align: middle;
+    transition: margin-top 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                margin-bottom 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: margin-top, margin-bottom;
+  }
+
+  /* hover 时调整间距 */
+  .services-card:hover .services-card-stat-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
   }
 
   .services-card-stat {
-    font-size: 36px; /* Larger font size for emphasis */
+    font-family: 'Inter', sans-serif;
+    font-size: 48px;
     font-weight: 800;
-    margin-right: 8px; /* Space between the number and text */
+    color: #00d4ff;
+    margin-right: 8px;
     margin-top: 0px;
     margin-bottom: 0px;
     text-align: center;
-    /*垂直置中*/
     vertical-align: middle;
+    transition: font-size 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  /* hover 时字体缩小 */
+  .services-card:hover .services-card-stat {
+    font-size: 36px;
   }
 
   .services-card-text {
@@ -148,14 +252,28 @@
 
   .services-card-title {
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
+    font-size: 16px;
     font-weight: bold;
     margin: 0;
+    transition: font-size 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: font-size;
+  }
+
+  /* hover 时字体缩小 */
+  .services-card:hover .services-card-title {
+    font-size: 12px;
   }
 
   .services-card-subtitle {
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    color: #CCCCCC; /* Lighter color for subtitle */
+    font-size: 16px;
+    color: #CCCCCC;
     margin: 0;
+    transition: font-size 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: font-size;
+  }
+
+  /* hover 时字体缩小 */
+  .services-card:hover .services-card-subtitle {
+    font-size: 12px;
   }
