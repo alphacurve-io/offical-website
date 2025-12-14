@@ -90,9 +90,12 @@ export const serviceModelContent = {
       reasons: [
         {
           icon: "❗",
+          figcaption: "可用性風險",
           title: "做出來不能用？",
+          image: "reasons/reason1.png",
           subtitle: "要降低開發風險，避免做錯方向，多數專案失敗不是因為技術問題，而是方向問題。",
-          problems: [
+          buttonText: "這是什麼風險？",
+          filters: [
             "❌ 需求未被明確定義",
             "❌ 做一半才發現功能不可行",
             "❌ 預算與期望落差巨大",
@@ -103,9 +106,12 @@ export const serviceModelContent = {
         },
         {
           icon: "💬",
+          figcaption: "預期管理",
           title: "溝通不順利？",
+          image: "reasons/reason2.png",
           subtitle: "減少溝通成本與認知落差，透明流程與清晰輸出＝溝通效率全面提升。",
-          problems: [
+          buttonText: "為什麼會這樣？",
+          filters: [
             "🔥 需求越做越多、版本不斷變更",
             "🔥 開發與企業理解不同步",
             "🔥 開發限制與技術瓶頸後期爆發",
@@ -116,9 +122,12 @@ export const serviceModelContent = {
         },
         {
           icon: "💰",
+          figcaption: "資金風險",
           title: "預算超支？",
+          image: "reasons/reason3.png",
           subtitle: "讓預算與時程更可控，需要充足的資訊（需客製?第三方限制?需額外開發?）",
-          benefits: [
+          buttonText: "如何避免？",
+          filters: [
             "💡 有共識的預算區間",
             "💡 客觀的成本估算",
             "💡 合理的工期推估",
@@ -129,8 +138,11 @@ export const serviceModelContent = {
         },
         {
           icon: "🎯",
+          figcaption: "實現性風險",
           title: "怕選錯團隊？",
+          image: "reasons/reason4.png",
           subtitle: "協助企業做出最適合的技術選擇，不是比較價格，而是比較風險、擴充性與可維護性。",
+          buttonText: "如何選擇？",
           filters: [
             "⭐ 避免被低價方案誤導",
             "⭐ 提升決策品質",
@@ -317,8 +329,11 @@ export const serviceModelContent = {
       reasons: [
         {
           icon: "❗",
-          title: "Built but\nunusable?",
+          figcaption: "Usability Risk",
+          title: "Built but unusable?",
+          image: "reasons/reason1.png",
           subtitle: "Most failures come from unclear direction—not technology.",
+          buttonText: "What is this risk?",
           problems: [
             "❌ Unclear or shifting requirements",
             "❌ Feasibility issues discovered mid-project",
@@ -330,8 +345,11 @@ export const serviceModelContent = {
         },
         {
           icon: "💬",
+          figcaption: "Expectation Mgmt",
           title: "Communication issues?",
+          image: "reasons/reason2.png",
           subtitle: "Reduce misalignment and communication overhead with clear outputs.",
+          buttonText: "Why is this happening?",
           problems: [
             "🔥 Scope keeps growing, versions keep changing",
             "🔥 Misaligned expectations between business and development",
@@ -343,8 +361,11 @@ export const serviceModelContent = {
         },
         {
           icon: "💰",
+          figcaption: "Funding Risk",
           title: "Budget\noverruns?",
+          image: "reasons/reason3.png",
           subtitle: "Predictable budgets require clear information and risk visibility.",
+          buttonText: "How to avoid?",
           benefits: [
             "💡 Shared understanding of budget range",
             "💡 Objective cost estimates",
@@ -356,8 +377,11 @@ export const serviceModelContent = {
         },
         {
           icon: "🎯",
+          figcaption: "Feasibility Risk",
           title: "Choosing the right team?",
+          image: "reasons/reason4.png",
           subtitle: "Choose based on risk, scalability, maintainability—not price alone.",
+          buttonText: "How to choose?",
           filters: [
             "⭐ Avoid being misled by low-cost proposals",
             "⭐ Improve the quality of technical decisions",
