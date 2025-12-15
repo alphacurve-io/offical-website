@@ -48,6 +48,27 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
+        // 立即定義全局函數，確保在任何時候都可以使用
+        window.getCameraAngles = function() {
+            // 這個函數會在後面的代碼中重新定義，這裡先定義一個占位符
+            console.log('⚠️ 相機尚未初始化，請等待頁面完全加載後再使用此函數');
+            return null;
+        };
+        
+        window.setAnswerCameraAngles = function(angles) {
+            if (!angles || typeof angles !== 'object') {
+                console.error('請提供角度對象，格式：{ radius, rotationX, rotationY, lookAtY }');
+                return;
+            }
+            window.answerCameraAngles = {
+                radius: angles.radius || 10,
+                rotationX: angles.rotationX || 0,
+                rotationY: angles.rotationY || 0,
+                lookAtY: angles.lookAtY || 1.5
+            };
+            console.log('✅ 回答角度已設置:', window.answerCameraAngles);
+        };
+        
         // 從 URL 參數讀取自訂人物設定（由 React 傳入）
         // people = encodeURIComponent(JSON.stringify([{ bodyColor, hairColor, expression }, ...]))
         function getCustomPeopleConfigs() {
@@ -75,6 +96,27 @@
             } catch (e) {
                 console.warn('Failed to parse board title:', e);
                 return null;
+            }
+        }
+
+        // 從 URL 讀取文本內容（由 React 傳入）
+        function getTextContent() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const raw = params.get('textContent');
+                if (!raw) return null;
+                const decoded = decodeURIComponent(raw);
+                return JSON.parse(decoded);
+            } catch (e) {
+                console.warn('Failed to parse text content:', e);
+                // 返回默認文本
+                return {
+                    chatPrompt: '你有什麼問題想問嗎？',
+                    inputPlaceholder: '輸入你的問題...',
+                    sendButton: '發送',
+                    loadingText: '思考中...',
+                    errorText: '抱歉，發生錯誤，請稍後再試。'
+                };
             }
         }
 
@@ -580,11 +622,403 @@
         bubble.style.transition = 'opacity 0.3s ease';
         document.body.appendChild(bubble);
 
+        // 讀取文本內容
+        const textContent = getTextContent();
+        
+        // 聊天提示對話框
+        const chatPromptDialog = document.createElement('div');
+        chatPromptDialog.style.position = 'fixed';
+        chatPromptDialog.style.top = '50%';
+        chatPromptDialog.style.left = '50%';
+        chatPromptDialog.style.transform = 'translate(-50%, -50%)';
+        chatPromptDialog.style.zIndex = '1000';
+        chatPromptDialog.style.background = 'rgba(255, 255, 255, 0.95)';
+        chatPromptDialog.style.padding = '20px 30px';
+        chatPromptDialog.style.borderRadius = '16px';
+        chatPromptDialog.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+        chatPromptDialog.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
+        chatPromptDialog.style.fontSize = '18px';
+        chatPromptDialog.style.color = '#333';
+        chatPromptDialog.style.textAlign = 'center';
+        chatPromptDialog.style.display = 'none';
+        chatPromptDialog.textContent = textContent.chatPrompt;
+        document.body.appendChild(chatPromptDialog);
+
+        // 輸入框容器
+        const inputContainer = document.createElement('div');
+        inputContainer.style.position = 'fixed';
+        inputContainer.style.bottom = '30px';
+        inputContainer.style.left = '50%';
+        inputContainer.style.transform = 'translateX(-50%)';
+        inputContainer.style.zIndex = '1000';
+        inputContainer.style.background = 'rgba(255, 255, 255, 0.95)';
+        inputContainer.style.padding = '15px 20px';
+        inputContainer.style.borderRadius = '12px';
+        inputContainer.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+        inputContainer.style.display = 'none';
+        inputContainer.style.width = '90%';
+        inputContainer.style.maxWidth = '500px';
+        inputContainer.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
+
+        const inputWrapper = document.createElement('div');
+        inputWrapper.style.display = 'flex';
+        inputWrapper.style.gap = '10px';
+        inputWrapper.style.alignItems = 'center';
+
+        const questionInput = document.createElement('input');
+        questionInput.type = 'text';
+        questionInput.placeholder = textContent.inputPlaceholder;
+        questionInput.style.flex = '1';
+        questionInput.style.padding = '10px 15px';
+        questionInput.style.border = '2px solid #e0e0e0';
+        questionInput.style.borderRadius = '8px';
+        questionInput.style.fontSize = '14px';
+        questionInput.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
+        questionInput.style.outline = 'none';
+        questionInput.style.transition = 'border-color 0.3s';
+        questionInput.addEventListener('focus', () => {
+            questionInput.style.borderColor = '#156697';
+        });
+        questionInput.addEventListener('blur', () => {
+            questionInput.style.borderColor = '#e0e0e0';
+        });
+
+        const sendButton = document.createElement('button');
+        sendButton.textContent = textContent.sendButton;
+        sendButton.style.padding = '10px 20px';
+        sendButton.style.background = '#156697';
+        sendButton.style.color = '#fff';
+        sendButton.style.border = 'none';
+        sendButton.style.borderRadius = '8px';
+        sendButton.style.fontSize = '14px';
+        sendButton.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
+        sendButton.style.cursor = 'pointer';
+        sendButton.style.transition = 'background 0.3s';
+        sendButton.addEventListener('mouseenter', () => {
+            sendButton.style.background = '#0f4d6e';
+        });
+        sendButton.addEventListener('mouseleave', () => {
+            sendButton.style.background = '#156697';
+        });
+
+        inputWrapper.appendChild(questionInput);
+        inputWrapper.appendChild(sendButton);
+        inputContainer.appendChild(inputWrapper);
+        document.body.appendChild(inputContainer);
+
+        // 顯示提示對話框，然後顯示輸入框
+        let promptShown = false;
+        function showChatPrompt() {
+            if (promptShown) return;
+            promptShown = true;
+            
+            // 顯示提示對話框
+            chatPromptDialog.style.display = 'block';
+            chatPromptDialog.style.opacity = '0';
+            chatPromptDialog.style.transform = 'translate(-50%, -50%) scale(0.9)';
+            
+            setTimeout(() => {
+                chatPromptDialog.style.transition = 'opacity 0.3s, transform 0.3s';
+                chatPromptDialog.style.opacity = '1';
+                chatPromptDialog.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 10);
+
+            // 3秒後隱藏提示，顯示輸入框
+            setTimeout(() => {
+                chatPromptDialog.style.opacity = '0';
+                chatPromptDialog.style.transform = 'translate(-50%, -50%) scale(0.9)';
+                setTimeout(() => {
+                    chatPromptDialog.style.display = 'none';
+                    inputContainer.style.display = 'block';
+                    inputContainer.style.opacity = '0';
+                    setTimeout(() => {
+                        inputContainer.style.transition = 'opacity 0.3s';
+                        inputContainer.style.opacity = '1';
+                        questionInput.focus();
+                    }, 10);
+                }, 300);
+            }, 3000);
+        }
+
+        // 延遲顯示提示（進入房間後2秒）
+        setTimeout(showChatPrompt, 2000);
+
+        // 發送問題到 API
+        async function sendQuestion(question) {
+            if (!question.trim()) return;
+
+            // 顯示載入狀態
+            sendButton.disabled = true;
+            sendButton.textContent = textContent.loadingText;
+            sendButton.style.background = '#999';
+
+            try {
+                // 確定 API URL（與 submit 表單保持一致）
+                // 如果是 localhost，使用本地 API；否則使用生產環境的 API 路徑
+                let apiUrl;
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    apiUrl = 'http://localhost:8080/api/chat';
+                } else {
+                    // 生產環境：使用與 submit 表單相同的 API 路徑
+                    // submit 表單使用：https://alphacurve.io/website/api/submit
+                    // chat API 使用：https://alphacurve.io/api/chat
+                    const protocol = window.location.protocol;
+                    const hostname = window.location.hostname;
+                    apiUrl = `${protocol}//${hostname}/api/chat`;
+                }
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question.trim() })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // 顯示回答（使用第一個小人）
+                if (people.length > 0) {
+                    showAnswerBubble(people[0], data.answer);
+                }
+
+                // 清空輸入框
+                questionInput.value = '';
+            } catch (error) {
+                console.error('Error sending question:', error);
+                // 顯示錯誤訊息
+                if (people.length > 0) {
+                    showAnswerBubble(people[0], textContent.errorText);
+                }
+            } finally {
+                sendButton.disabled = false;
+                sendButton.textContent = textContent.sendButton;
+                sendButton.style.background = '#156697';
+            }
+        }
+
+        // 檢查對話泡泡是否在屏幕範圍內
+        function isBubbleInView(person) {
+            const worldPos = new THREE.Vector3();
+            person.getWorldPosition(worldPos);
+            worldPos.y += 2.4; // 氣泡在頭頂上方
+
+            const projected = worldPos.clone().project(camera);
+            
+            // 檢查是否在視錐體內（z 在 -1 到 1 之間）
+            if (projected.z < -1 || projected.z > 1) {
+                return false;
+            }
+            
+            // 檢查是否在屏幕範圍內（考慮邊距）
+            const margin = 120; // 邊距（像素），增加邊距確保完全可見
+            const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+            
+            // 檢查是否在屏幕範圍內（考慮對話泡泡的寬度和高度）
+            const bubbleWidth = 180; // 對話泡泡的最大寬度
+            const bubbleHeight = 80; // 對話泡泡的估計高度（增加以確保完全可見）
+            const topMargin = 150; // 頂部邊距（像素），確保不會超出頂部
+            
+            return x >= -margin && 
+                   x <= window.innerWidth + margin &&
+                   y >= topMargin && // 確保有足夠的頂部空間
+                   y <= window.innerHeight - margin &&
+                   x + bubbleWidth / 2 >= 0 &&
+                   x - bubbleWidth / 2 <= window.innerWidth &&
+                   y + bubbleHeight / 2 >= 0 &&
+                   y - bubbleHeight / 2 <= window.innerHeight;
+        }
+
+        // 顯示回答的對話泡泡
+        function showAnswerBubble(person, answer) {
+            activeBubblePerson = person;
+            bubble.textContent = answer;
+            // 先隱藏，等待相機移動到位
+            bubble.style.opacity = '0';
+            shouldShowBubble = false; // 重置顯示標記
+            bubbleVisibleUntil = performance.now() + 15000; // 顯示15秒（AI回答通常較長）
+
+            // 保存原始相機位置
+            cameraOriginal.radius = cameraRadius;
+            cameraOriginal.rotationX = targetRotationX;
+            cameraOriginal.rotationY = targetRotationY;
+            cameraOriginal.lookAtY = 1;
+
+            // 計算小人的位置和朝向
+            const personPos = new THREE.Vector3();
+            person.getWorldPosition(personPos);
+            
+            // 計算相機應該移動到的位置（從側面角度拍攝，避免被牆壁遮擋）
+            // 牆壁在 z = -6 的位置，小人在 z = -3（正面）或 z = 3（背面）
+            // 改為從側面（右側）和稍微偏上的角度拍攝，確保不會被牆壁遮擋
+            const personRotation = person.rotation.y;
+            
+            // 相機應該在小人的側面，稍微偏上，距離適中（zoom in）
+            const distance = 6; // 相機到小人的距離（zoom in）
+            const height = 2.5; // 相機高度偏移（相對於小人，稍微向上看，避免牆壁）
+            
+            // 判斷小人的位置，選擇合適的拍攝角度
+            // 如果小人在正面（z < 0），從右側拍攝；如果在背面，從左側拍攝
+            const isFrontSide = personPos.z < 0;
+            const sideOffset = isFrontSide ? Math.PI / 3 : -Math.PI / 3; // 60度角，從側面拍攝
+            
+            // 計算側面角度（從側面60度角拍攝，避免牆壁）
+            const sideAngle = personRotation + sideOffset;
+            
+            // 計算相機目標位置（在小人的側前方，避免牆壁）
+            const targetX = personPos.x + Math.sin(sideAngle) * distance;
+            const targetZ = personPos.z + Math.cos(sideAngle) * distance;
+            const targetY = personPos.y + height;
+            
+            // 計算相機應該看向的方向（小人的頭部位置）
+            const lookAtX = personPos.x;
+            const lookAtY = personPos.y + 1.5; // 看向小人的頭部
+            const lookAtZ = personPos.z;
+            
+            // 計算從相機位置（原點附近）到目標位置的向量
+            // 相機的坐標系是：原點在 (0, 8, 0)，所以需要計算相對位置
+            const dx = targetX - 0;
+            const dz = targetZ - 0;
+            const dy = targetY - 8; // 相機的基礎高度是 8
+            
+            // 計算相機旋轉角度（轉換為球坐標）
+            const distance2D = Math.sqrt(dx * dx + dz * dz);
+            const targetRotY = Math.atan2(dx, dz);
+            const targetRotX = Math.atan2(dy, distance2D);
+            
+            // 檢查是否有預設的回答角度
+            if (window.answerCameraAngles) {
+                // 使用預設的角度
+                cameraTarget.radius = window.answerCameraAngles.radius;
+                cameraTarget.rotationX = window.answerCameraAngles.rotationX;
+                cameraTarget.rotationY = window.answerCameraAngles.rotationY;
+                cameraTarget.lookAtY = window.answerCameraAngles.lookAtY;
+                console.log('使用預設的回答角度:', window.answerCameraAngles);
+            } else {
+                // 使用你提供的默認角度（針對第一個小人）
+                // 這些角度是從你手動調整後獲取的
+                const defaultAnswerAngles = {
+                    radius: 6.885531693638559,
+                    rotationX: -1.0262568468508941,
+                    rotationY: 0.7722066350945912,
+                    lookAtY: 1.5
+                };
+                
+                cameraTarget.radius = defaultAnswerAngles.radius;
+                cameraTarget.rotationX = defaultAnswerAngles.rotationX;
+                cameraTarget.rotationY = defaultAnswerAngles.rotationY;
+                cameraTarget.lookAtY = defaultAnswerAngles.lookAtY;
+                console.log('使用默認的回答角度:', defaultAnswerAngles);
+            }
+            
+            // 如果上面的條件都不滿足，使用計算的角度（保留原有邏輯作為備用）
+            if (false) {
+                // 計算相機到原點的距離（radius）
+                const targetRadius = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                
+                // 設置相機目標
+                cameraTarget.radius = targetRadius;
+                cameraTarget.rotationX = targetRotX;
+                cameraTarget.rotationY = targetRotY;
+                cameraTarget.lookAtY = lookAtY;
+                
+                // 添加調試信息（可選）
+                console.log('Camera moving to person (計算的角度):', {
+                    personPos: { x: personPos.x, y: personPos.y, z: personPos.z },
+                    targetRadius: targetRadius,
+                    targetRotX: targetRotX,
+                    targetRotY: targetRotY,
+                    currentRadius: cameraRadius,
+                    currentRotX: targetRotationX,
+                    currentRotY: targetRotationY
+                });
+            }
+            
+            // 強制啟動相機移動
+            isCameraMoving = true;
+
+            // 等待相機移動到位並檢查對話泡泡是否在範圍內
+            // 使用持續更新機制，在動畫循環中更新位置
+            // 注意：使用全局的 shouldShowBubble，不要重新声明
+            
+            // 持續檢查函數
+            function checkAndShowBubble() {
+                // 更新泡泡位置（在動畫循環中也會更新，這裡確保初始位置正確）
+                const worldPos = new THREE.Vector3();
+                person.getWorldPosition(worldPos);
+                worldPos.y += 2.4; // 把氣泡移到頭頂上方一點
+
+                const projected = worldPos.clone().project(camera);
+                const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
+                const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+
+                bubble.style.left = `${x}px`;
+                bubble.style.top = `${y - 20}px`;
+                
+                // 檢查是否在範圍內且相機已移動到位
+                const inView = isBubbleInView(person);
+                const cameraStopped = !isCameraMoving;
+                
+                if (inView && cameraStopped) {
+                    // 對話泡泡在範圍內且相機已停止，標記為可以顯示
+                    shouldShowBubble = true;
+                    bubble.style.opacity = '1';
+                } else if (!cameraStopped) {
+                    // 相機還在移動，繼續檢查
+                    requestAnimationFrame(checkAndShowBubble);
+                } else if (!inView) {
+                    // 相機已停止但不在範圍內，調整位置或強制顯示
+                    // 如果 y 位置太高（超出頂部），調整到安全位置
+                    if (y < 150) {
+                        bubble.style.top = '150px'; // 強制設置到安全位置
+                    }
+                    shouldShowBubble = true;
+                    bubble.style.opacity = '1';
+                } else {
+                    // 其他情況，繼續檢查
+                    requestAnimationFrame(checkAndShowBubble);
+                }
+            }
+            
+            // 立即開始檢查（不延遲，讓位置立即更新）
+            checkAndShowBubble();
+            
+            // 重置隨機對話的時間，避免立即切換
+            lastBubbleSwitch = performance.now();
+            
+            // 15秒後恢復相機位置
+            setTimeout(() => {
+                cameraTarget.radius = cameraOriginal.radius;
+                cameraTarget.rotationX = cameraOriginal.rotationX;
+                cameraTarget.rotationY = cameraOriginal.rotationY;
+                cameraTarget.lookAtY = cameraOriginal.lookAtY;
+                isCameraMoving = true;
+            }, 15000);
+        }
+
+        // 發送按鈕點擊事件
+        sendButton.addEventListener('click', () => {
+            sendQuestion(questionInput.value);
+        });
+
+        // Enter 鍵發送
+        questionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendQuestion(questionInput.value);
+            }
+        });
+
         let activeBubblePerson = null;
         let bubbleVisibleUntil = 0;
         const bubbleDuration = 4000; // 氣泡顯示 4 秒
         const bubbleInterval = 5500; // 約每 5.5 秒隨機出現一次
         let lastBubbleSwitch = 0;
+        let shouldShowBubble = false; // 標記是否應該顯示氣泡
 
         // 滑鼠控制
         let mouseX = 0;
@@ -592,11 +1026,131 @@
         let targetRotationX = 0;
         let targetRotationY = 0;
         let isMouseDown = false;
+        
+        // 添加全局函數，用於打印當前相機角度信息
+        window.getCameraAngles = function() {
+            const personPos = new THREE.Vector3();
+            if (people.length > 0) {
+                people[0].getWorldPosition(personPos);
+            }
+            
+            const info = {
+                cameraRadius: cameraRadius,
+                targetRotationX: targetRotationX,
+                targetRotationY: targetRotationY,
+                cameraPosition: {
+                    x: camera.position.x,
+                    y: camera.position.y,
+                    z: camera.position.z
+                },
+                personPosition: {
+                    x: personPos.x,
+                    y: personPos.y,
+                    z: personPos.z
+                },
+                // 計算相機到小人的向量（用於設置回答時的角度）
+                relativeToPerson: {
+                    dx: camera.position.x - personPos.x,
+                    dy: camera.position.y - personPos.y,
+                    dz: camera.position.z - personPos.z
+                }
+            };
+            
+            console.log('═══════════════════════════════════════');
+            console.log('📷 當前相機角度信息');
+            console.log('═══════════════════════════════════════');
+            console.log('相機半徑 (radius):', info.cameraRadius);
+            console.log('相機旋轉 X (rotationX):', info.targetRotationX);
+            console.log('相機旋轉 Y (rotationY):', info.targetRotationY);
+            console.log('');
+            console.log('相機位置:', info.cameraPosition);
+            console.log('小人位置:', info.personPosition);
+            console.log('相機相對小人位置:', info.relativeToPerson);
+            console.log('');
+            console.log('═══════════════════════════════════════');
+            console.log('📋 複製以下 JSON 給我來設置回答角度:');
+            console.log('═══════════════════════════════════════');
+            const answerAngles = {
+                radius: info.cameraRadius,
+                rotationX: info.targetRotationX,
+                rotationY: info.targetRotationY,
+                lookAtY: personPos.y + 1.5
+            };
+            console.log(JSON.stringify(answerAngles, null, 2));
+            console.log('');
+            console.log('或者直接在控制台執行:');
+            console.log(`setAnswerCameraAngles(${JSON.stringify(answerAngles)})`);
+            console.log('═══════════════════════════════════════');
+            
+            return info;
+        };
+        
+        // 添加設置回答角度的函數
+        window.setAnswerCameraAngles = function(angles) {
+            if (!angles || typeof angles !== 'object') {
+                console.error('請提供角度對象，格式：{ radius, rotationX, rotationY, lookAtY }');
+                return;
+            }
+            
+            // 保存設置的角度
+            window.answerCameraAngles = {
+                radius: angles.radius || 10,
+                rotationX: angles.rotationX || 0,
+                rotationY: angles.rotationY || 0,
+                lookAtY: angles.lookAtY || 1.5
+            };
+            
+            console.log('✅ 回答角度已設置:', window.answerCameraAngles);
+            console.log('下次回答時將使用這些角度');
+        };
+        
+        // 在控制台提示用戶可以使用這些函數
+        // 確保函數在全局作用域中可用
+        console.log('═══════════════════════════════════════');
+        console.log('💡 相機角度控制函數已就緒');
+        console.log('═══════════════════════════════════════');
+        console.log('使用方法：');
+        console.log('  1. 手動調整相機到想要的角度（拖動鼠標旋轉，滾輪縮放）');
+        console.log('  2. 在控制台輸入：getCameraAngles()');
+        console.log('  3. 複製輸出的 JSON 格式角度信息');
+        console.log('  4. 或者直接執行：setAnswerCameraAngles({ radius, rotationX, rotationY, lookAtY })');
+        console.log('═══════════════════════════════════════');
+        
+        // 驗證函數是否正確加載
+        if (typeof window.getCameraAngles === 'function') {
+            console.log('✅ getCameraAngles 函數已就緒，可以立即使用');
+        } else {
+            console.error('❌ getCameraAngles 函數未正確加載');
+        }
+        
+        if (typeof window.setAnswerCameraAngles === 'function') {
+            console.log('✅ setAnswerCameraAngles 函數已就緒，可以立即使用');
+        } else {
+            console.error('❌ setAnswerCameraAngles 函數未正確加載');
+        }
+        
+        // 如果需要，可以手動調用 getCameraAngles() 來獲取角度信息
 
         // 相機縮放（距離）控制
         let cameraRadius = camera.position.length();   // 目前相機到原點的距離
         const minRadius = 10;  // 最靠近的距離
         const maxRadius = 22;  // 最遠的距離
+        
+        // 相機平滑移動狀態
+        let cameraTarget = {
+            radius: cameraRadius,
+            rotationX: targetRotationX,
+            rotationY: targetRotationY,
+            lookAtY: 1
+        };
+        let cameraOriginal = {
+            radius: cameraRadius,
+            rotationX: targetRotationX,
+            rotationY: targetRotationY,
+            lookAtY: 1
+        };
+        let isCameraMoving = false;
+        const cameraMoveSpeed = 0.12; // 相機移動速度（0-1，越大越快，使用更快的速度減少卡頓）
 
         document.addEventListener('mousemove', (event) => {
             mouseX = (event.clientX / window.innerWidth) * 2 - 1;
@@ -829,11 +1383,34 @@
                 worldPos.y += 2.4; // 把氣泡移到頭頂上方一點
 
                 const projected = worldPos.clone().project(camera);
-                const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
-                const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+                let x = (projected.x * 0.5 + 0.5) * window.innerWidth;
+                let y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+
+                // 確保氣泡不會超出頂部範圍
+                const minTop = 150; // 最小頂部位置
+                if (y < minTop) {
+                    y = minTop;
+                }
+                
+                // 確保氣泡不會超出左右邊界
+                const bubbleWidth = 180;
+                const margin = 20;
+                if (x - bubbleWidth / 2 < margin) {
+                    x = margin + bubbleWidth / 2;
+                } else if (x + bubbleWidth / 2 > window.innerWidth - margin) {
+                    x = window.innerWidth - margin - bubbleWidth / 2;
+                }
 
                 bubble.style.left = `${x}px`;
                 bubble.style.top = `${y - 20}px`;
+                
+                // 如果對話泡泡在範圍內，確保它是可見的
+                if (isBubbleInView(activeBubblePerson) || shouldShowBubble) {
+                    bubble.style.opacity = '1';
+                } else if (isCameraMoving) {
+                    // 如果相機還在移動且還沒標記為可顯示，暫時隱藏
+                    bubble.style.opacity = '0';
+                }
             }
         }
 
@@ -841,12 +1418,53 @@
         function animate() {
             requestAnimationFrame(animate);
 
+            // 平滑移動相機到目標位置（使用緩動函數減少卡頓）
+            if (isCameraMoving) {
+                const radiusDiff = cameraTarget.radius - cameraRadius;
+                const rotXDiff = cameraTarget.rotationX - targetRotationX;
+                const rotYDiff = cameraTarget.rotationY - targetRotationY;
+                
+                // 計算距離，使用更寬鬆的停止條件
+                const radiusDist = Math.abs(radiusDiff);
+                const rotXDist = Math.abs(rotXDiff);
+                const rotYDist = Math.abs(rotYDiff);
+                
+                // 如果距離目標很近，停止移動
+                if (radiusDist < 0.15 && rotXDist < 0.015 && rotYDist < 0.015) {
+                    cameraRadius = cameraTarget.radius;
+                    targetRotationX = cameraTarget.rotationX;
+                    targetRotationY = cameraTarget.rotationY;
+                    isCameraMoving = false;
+                } else {
+                    // 使用自適應速度：距離越遠，移動越快（但有限制）
+                    const adaptiveSpeed = Math.min(cameraMoveSpeed * (1 + radiusDist * 0.15), 0.2);
+                    
+                    // 平滑插值移動
+                    cameraRadius += radiusDiff * adaptiveSpeed;
+                    targetRotationX += rotXDiff * adaptiveSpeed;
+                    targetRotationY += rotYDiff * adaptiveSpeed;
+                    
+                    // 確保相機確實移動了
+                    if (Math.abs(radiusDiff) > 0.01 || Math.abs(rotXDiff) > 0.001 || Math.abs(rotYDiff) > 0.001) {
+                        // 相機正在移動，繼續
+                    }
+                }
+            }
+
             // 平滑旋轉相機（使用受限制的 cameraRadius）
             const radius = cameraRadius;
             camera.position.x = radius * Math.sin(targetRotationY) * Math.cos(targetRotationX);
             camera.position.y = radius * Math.sin(targetRotationX) + 8;
             camera.position.z = radius * Math.cos(targetRotationY) * Math.cos(targetRotationX);
-            camera.lookAt(0, 1, 0);
+            
+            // 如果正在移動到小人，看向小人的位置；否則看向原點
+            if (isCameraMoving && activeBubblePerson) {
+                const personPos = new THREE.Vector3();
+                activeBubblePerson.getWorldPosition(personPos);
+                camera.lookAt(personPos.x, cameraTarget.lookAtY, personPos.z);
+            } else {
+                camera.lookAt(0, 1, 0);
+            }
 
             // 更新手臂动画
             updateArmAnimations();

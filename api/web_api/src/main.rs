@@ -1,8 +1,10 @@
 mod telegram_bot;
+mod ollama;
 use actix_multipart::Multipart;
 use actix_web::{
-    App, Error, HttpResponse, HttpServer, Responder, post
+    App, Error, HttpResponse, HttpServer, Responder, post, web
 };
+use serde::Deserialize;
 use futures_util::TryStreamExt as _;
 use serde::Serialize;
 use std::io::Write;
@@ -29,12 +31,181 @@ struct ContactForm {
     file_content: Option<Vec<u8>>,
 }
 
+#[derive(Debug, Deserialize)]
+struct ChatRequest {
+    question: String,
+}
+
+#[derive(Debug, Serialize)]
+struct ChatResponse {
+    answer: String,
+}
+
 async fn health_check() -> impl Responder {
     HttpResponse::Ok().json(serde_json::json!({
         "status": "healthy",
         "service": "alphacurve-web-api",
         "timestamp": chrono::Utc::now().to_rfc3339()
     }))
+}
+
+/// 读取预设的 RAG 文档
+fn load_rag_context() -> Result<String, Box<dyn std::error::Error>> {
+    // 尝试从多个可能的位置读取文件
+    let possible_paths = [
+        "/usr/local/bin/rag_context.txt",
+        "./rag_context.txt",
+        "../rag_context.txt",
+        "api/web_api/rag_context.txt",
+    ];
+
+    for path in &possible_paths {
+        if let Ok(content) = std::fs::read_to_string(path) {
+            return Ok(content);
+        }
+    }
+
+    // 如果找不到文件，返回默认内容
+    Ok("Alphacurve is a technology consulting company specializing in AI solutions and software development.".to_string())
+}
+
+/// 验证请求来源是否为允许的域名
+fn is_allowed_origin(req: &actix_web::HttpRequest) -> bool {
+    // 从环境变量获取允许的域名，默认为 alphacurve.io
+    let allowed_domains = env::var("ALLOWED_DOMAINS")
+        .unwrap_or_else(|_| "alphacurve.io,www.alphacurve.io".to_string());
+    
+    let domains: Vec<&str> = allowed_domains.split(',').map(|s| s.trim()).collect();
+    
+    // 检查 Host 头，允许 localhost 和 127.0.0.1（服务器端测试）
+    if let Some(host) = req.headers().get("host") {
+        if let Ok(host_str) = host.to_str() {
+            // 允许 localhost 和 127.0.0.1（服务器端直接调用）
+            if host_str.contains("localhost") || host_str.contains("127.0.0.1") {
+                return true;
+            }
+            
+            // 检查是否匹配允许的域名
+            for domain in &domains {
+                if host_str.contains(domain) {
+                    return true;
+                }
+            }
+        }
+    }
+    
+    // 检查 Origin 头
+    if let Some(origin) = req.headers().get("origin") {
+        if let Ok(origin_str) = origin.to_str() {
+            // 允许 localhost（开发环境）
+            if origin_str.contains("localhost") || origin_str.contains("127.0.0.1") {
+                return true;
+            }
+            
+            // 检查是否匹配允许的域名
+            for domain in &domains {
+                if origin_str.contains(domain) {
+                    return true;
+                }
+            }
+        }
+    }
+    
+    // 检查 Referer 头（作为备用）
+    if let Some(referer) = req.headers().get("referer") {
+        if let Ok(referer_str) = referer.to_str() {
+            // 允许 localhost（开发环境）
+            if referer_str.contains("localhost") || referer_str.contains("127.0.0.1") {
+                return true;
+            }
+            
+            // 检查是否匹配允许的域名
+            for domain in &domains {
+                if referer_str.contains(domain) {
+                    return true;
+                }
+            }
+        }
+    }
+    
+    // 如果没有 Origin 或 Referer，且 Host 是 localhost，允许通过（服务器端直接调用）
+    if req.headers().get("origin").is_none() && req.headers().get("referer").is_none() {
+        if let Some(host) = req.headers().get("host") {
+            if let Ok(host_str) = host.to_str() {
+                if host_str.contains("localhost") || host_str.contains("127.0.0.1") {
+                    return true;
+                }
+            }
+        }
+    }
+    
+    false
+}
+
+/// RAG 聊天端点
+#[post("/api/chat")]
+async fn chat_endpoint(
+    req: web::Json<ChatRequest>,
+    http_req: actix_web::HttpRequest,
+) -> Result<impl Responder, Error> {
+    // 验证请求来源
+    if !is_allowed_origin(&http_req) {
+        return Ok(HttpResponse::Forbidden().json(serde_json::json!({
+            "error": "Forbidden",
+            "message": "This API can only be called from authorized domains"
+        })));
+    }
+    // 加载 RAG 上下文
+    let rag_context = match load_rag_context() {
+        Ok(context) => context,
+        Err(e) => {
+            eprintln!("Warning: Failed to load RAG context: {}", e);
+            "".to_string()
+        }
+    };
+
+    // 构建包含 RAG 上下文的 prompt
+    let prompt = format!(
+        r#"You are a helpful assistant for Alphacurve, a technology consulting company.
+
+Context about Alphacurve:
+{}
+
+Website Information:
+- Alphacurve provides AI solutions and software development services
+- We help businesses implement cutting-edge technology solutions
+- Our team specializes in consulting, development, and technical support
+
+Based on the context above, please answer the following question in a helpful and professional manner.
+
+IMPORTANT: Your answer must be concise and not exceed 100 characters (including spaces and punctuation). Be direct and to the point.
+
+LANGUAGE RULES:
+- If the user's question is written in Traditional Chinese (正體 / 繁體中文), you MUST answer entirely in Traditional Chinese characters and NEVER use Simplified Chinese characters.
+- If the user's question is in another language, respond in that language.
+
+Question: {}
+
+Answer:"#,
+        rag_context,
+        req.question
+    );
+
+    // 调用 Ollama API
+    match ollama::generate_response(&prompt).await {
+        Ok(answer) => {
+            Ok(HttpResponse::Ok().json(ChatResponse {
+                answer,
+            }))
+        }
+        Err(e) => {
+            eprintln!("Error calling Ollama API: {}", e);
+            Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Failed to generate response",
+                "message": e.to_string()
+            })))
+        }
+    }
 }
 
 #[post("/website/api/submit")]
@@ -147,10 +318,33 @@ async fn submit_form(mut payload: Multipart) -> Result<impl Responder, Error> {
 async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
+        // 从环境变量获取允许的域名，默认为 alphacurve.io
+        let allowed_domains = env::var("ALLOWED_DOMAINS")
+            .unwrap_or_else(|_| "alphacurve.io,www.alphacurve.io".to_string());
+        
+        let domains_clone = allowed_domains.clone();
+        
+        // 创建 CORS 配置，使用动态检查
         let cors = Cors::default()
-            .allowed_origin("http://localhost:3000") // Replace with your allowed origin
+            .allowed_origin_fn(move |origin, _req_head| {
+                if let Ok(origin_str) = origin.to_str() {
+                    // 允许 localhost（开发环境）
+                    if origin_str.starts_with("http://localhost:") {
+                        return true;
+                    }
+                    
+                    // 检查是否匹配允许的域名
+                    for domain in domains_clone.split(',') {
+                        let domain = domain.trim();
+                        if origin_str.contains(domain) {
+                            return true;
+                        }
+                    }
+                }
+                false
+            })
             .allowed_methods(vec!["GET", "POST", "OPTIONS"])
-            .allowed_headers(vec!["Content-Type", "Authorization"])
+            .allowed_headers(vec!["Content-Type", "Authorization", "Origin", "Referer"])
             .max_age(3600);
 
         App::new()
@@ -158,6 +352,7 @@ async fn main() -> std::io::Result<()> {
             .route("/health", actix_web::web::get().to(health_check))
             .route("/healthz", actix_web::web::get().to(health_check))
             .service(submit_form)
+            .service(chat_endpoint)
     })
     // bind to all interfaces
     .bind("0.0.0.0:8080")?
