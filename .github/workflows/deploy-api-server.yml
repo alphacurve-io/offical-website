@@ -192,6 +192,14 @@ jobs:
             fi
             sudo chmod +x /usr/local/bin/web_api
             
+            # 複製 RAG 上下文文件到系統目錄
+            if [ -f "$REPO_DIR/api/web_api/rag_context.txt" ]; then
+              sudo cp "$REPO_DIR/api/web_api/rag_context.txt" /usr/local/bin/rag_context.txt
+              echo "✅ RAG context file copied"
+            else
+              echo "⚠️ Warning: rag_context.txt not found, using default context"
+            fi
+            
             # 確保 .env 文件存在（如果需要的話）
             if [ ! -f /usr/local/bin/.env ]; then
               echo "Warning: /usr/local/bin/.env not found. Service may need environment variables."
@@ -208,6 +216,10 @@ jobs:
             Group=${{ secrets.GCP_VM_USER }}
             ExecStart=/usr/local/bin/web_api
             EnvironmentFile=/usr/local/bin/.env
+            Environment="OLLAMA_BASE_URL=${{ secrets.OLLAMA_BASE_URL }}"
+            Environment="OLLAMA_API_KEY=${{ secrets.OLLAMA_API_KEY }}"
+            Environment="OLLAMA_MODEL=gpt-oss:120b"
+            Environment="ALLOWED_DOMAINS=${{ secrets.ALLOWED_DOMAINS }}"
             Restart=always
             RestartSec=5
             
