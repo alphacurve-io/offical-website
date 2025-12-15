@@ -621,6 +621,22 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   position: relative;
   z-index: 1;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+}
+
+.cta-button-text {
+  display: inline-block;
+}
+
+.cta-button-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  vertical-align: middle;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .cta-button:hover {

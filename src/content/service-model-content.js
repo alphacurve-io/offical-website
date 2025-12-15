@@ -231,9 +231,12 @@ export const serviceModelContent = {
 
     // CTA Section
     cta: {
-      title: "先了解我們的專業實力",
-      subtitle: "看看我們如何協助不同企業降低風險、成功落地商業策略。",
-      buttonText: "查看過往經驗"
+      title: "還有很多問題需要解答嗎？",
+      subtitle: "專人諮詢，快速解答您的疑問",
+      buttonText: "加入Line ",
+      link: "https://page.line.me/alphacurve", // 可以是 anchor (如 "#services") 或完整 URL (如 "https://example.com")
+      icon: "LINE_Brand_icon.png", // 图标路径，相对于 src/assets/ 目录
+      iconPosition: "right" // 图标位置，可选 "left" 或 "right"，默认为 "right"
     }
   },
   en: {
@@ -470,10 +473,13 @@ export const serviceModelContent = {
       ]
     },
     cta: {
-      title: "Explore Our Capabilities",
+      title: "Still have questions?",
       subtitle:
-        "See how we help organizations reduce risk and successfully execute their business strategies.",
-      buttonText: "View Experience"
+        "Get personalized advice from our experts",
+      buttonText: "Join Line",
+      link: "https://page.line.me/alphacurve", // 可以是 anchor (如 "#services") 或完整 URL (如 "https://example.com")
+      icon: "LINE_Brand_icon.png", // 图标路径，相对于 src/assets/ 目录
+      iconPosition: "right" // 图标位置，可选 "left" 或 "right"，默认为 "right"
     }
   }
 };
