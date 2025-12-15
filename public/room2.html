@@ -654,6 +654,28 @@
         // 開始加載人物
         loadPeople();
 
+        // 加載 kid1.glb 並設置在白板前左右移動
+        let kid1 = null;
+        async function loadKid1() {
+            try {
+                kid1 = await createPersonFromGLB('/assets/3d-models/kid1.glb');
+                // 設置初始位置：在白板前（z = -5.5，稍微在白板前面）
+                // 白板位置是 z = -5.89，所以 kid1 在 z = -5.5
+                kid1.position.set(0, 0, -5.5);
+                kid1.rotation.y = Math.PI; // 面向白板
+                scene.add(kid1);
+                console.log('✅ kid1.glb 加載成功');
+            } catch (error) {
+                console.warn('⚠️ kid1.glb 加載失敗:', error);
+            }
+        }
+        loadKid1();
+
+        // kid1 移動動畫參數
+        let kid1MoveTime = 0;
+        const kid1MoveSpeed = 0.015; // 移動速度（快速）
+        const kid1MoveRange = 2.0; // 左右移動範圍（白板寬度是 5，所以範圍是 -2.5 到 2.5，這裡用 2.0）
+
         // 牆壁與白板
         function createWalls() {
             const walls = new THREE.Group();
@@ -1631,6 +1653,13 @@
                     person.userData.mixer.update(deltaTime);
                 }
             });
+
+            // 更新 kid1 的左右移動動畫
+            if (kid1) {
+                kid1MoveTime += deltaTime * kid1MoveSpeed;
+                // 使用正弦波實現左右來回移動
+                kid1.position.x = Math.sin(kid1MoveTime) * kid1MoveRange;
+            }
 
             // 更新手臂动画
             updateArmAnimations();
