@@ -370,6 +370,15 @@
             rightArm.castShadow = true;
             person.add(rightArm);
 
+            // 存储手臂引用以便动画
+            person.userData.leftArm = leftArm;
+            person.userData.rightArm = rightArm;
+            person.userData.armAnimation = {
+                leftArm: 'none', // 'none', 'raise', 'point', 'spread'
+                rightArm: 'none', // 'none', 'raise', 'point', 'spread'
+                time: 0
+            };
+
             return person;
         }
 
@@ -410,13 +419,13 @@
 
         const defaultPersonConfigs = [
             // 正面三人
-            { pos: [-3, 0, -3], rot: 0.5, body: 0x2c5f2d, hair: 0x654321, expression: 'smile' },
-            { pos: [0, 0, -3], rot: 0, body: 0x1e3a5f, hair: 0xffd700, expression: 'surprised' },
-            { pos: [3, 0, -3], rot: -0.5, body: 0x1a1a4e, hair: 0x8b4513, expression: 'neutral' },
+            { pos: [-3, 0, -3], rot: 0.5, body: 0x2c5f2d, hair: 0x654321, expression: 'smile', leftArm: 'raise', rightArm: 'raise' },
+            { pos: [0, 0, -3], rot: 0, body: 0x1e3a5f, hair: 0xffd700, expression: 'surprised', leftArm: 'spread', rightArm: 'spread' },
+            { pos: [3, 0, -3], rot: -0.5, body: 0x1a1a4e, hair: 0x8b4513, expression: 'neutral', leftArm: 'none', rightArm: 'point' },
             // 背面三人
-            { pos: [-3, 0, 3], rot: 2.6, body: 0x1a1a4e, hair: 0x8b4513, expression: 'sad' },
-            { pos: [0, 0, 3], rot: Math.PI, body: 0x2c5f2d, hair: 0xffa500, expression: 'smile' },
-            { pos: [3, 0, 3], rot: -2.6, body: 0x1e3a5f, hair: 0x654321, expression: 'neutral' }
+            { pos: [-3, 0, 3], rot: 2.6, body: 0x1a1a4e, hair: 0x8b4513, expression: 'sad', leftArm: 'raise', rightArm: 'none' },
+            { pos: [0, 0, 3], rot: Math.PI, body: 0x2c5f2d, hair: 0xffa500, expression: 'smile', leftArm: 'spread', rightArm: 'raise' },
+            { pos: [3, 0, 3], rot: -2.6, body: 0x1e3a5f, hair: 0x654321, expression: 'neutral', leftArm: 'point', rightArm: 'spread' }
         ];
 
         const externalPeople = getCustomPeopleConfigs();
@@ -429,14 +438,23 @@
                 hair: hexToColorNumber(override.hairColor, cfg.hair),
                 expression: override.expression || cfg.expression,
                 messages: Array.isArray(override.messages) ? override.messages : (cfg.messages || []),
+                leftArm: override.leftArm || cfg.leftArm || 'none',
+                rightArm: override.rightArm || cfg.rightArm || 'none',
             };
         });
 
-        personConfigs.forEach(config => {
+        personConfigs.forEach((config, index) => {
             const person = createLegoPerson(config.body, config.hair, config.expression);
             person.position.set(...config.pos);
             person.rotation.y = config.rot;
             person.userData.messages = config.messages || [];
+            // 设置左右手动画类型，每个人物有不同的动画延迟
+            person.userData.armAnimation.leftArm = config.leftArm || 'none';
+            person.userData.armAnimation.rightArm = config.rightArm || 'none';
+            // 为每个人物设置不同的时间偏移，避免所有人同时动作
+            // 每个人物偏移 1/6 的周期（约 667ms），这样6个人物的动作会完全错开
+            const cycleDuration = 4000;
+            person.userData.armAnimation.time = (index / personConfigs.length) * cycleDuration;
             scene.add(person);
             people.push(person);
         });
@@ -641,6 +659,97 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
+        // 更新手臂动画
+        let lastAnimationTime = performance.now();
+        function updateArmAnimations() {
+            const now = performance.now();
+            const deltaTime = now - lastAnimationTime;
+            lastAnimationTime = now;
+            const cycleDuration = 4000; // 一个完整周期（毫秒）
+
+            people.forEach(person => {
+                const anim = person.userData.armAnimation;
+                if (!anim) return;
+
+                const leftArm = person.userData.leftArm;
+                const rightArm = person.userData.rightArm;
+                if (!leftArm || !rightArm) return;
+
+                // 更新时间
+                anim.time += deltaTime;
+                
+                // 为左右手设置不同的时间偏移，避免同时动作
+                const leftPhaseOffset = 0; // 左手偏移
+                const rightPhaseOffset = 0.5; // 右手偏移 50%，这样左右手不会同时动作
+                
+                const basePhase = (anim.time % cycleDuration) / cycleDuration;
+                const leftPhase = (basePhase + leftPhaseOffset) % 1;
+                const rightPhase = (basePhase + rightPhaseOffset) % 1;
+
+                // 更新手臂动画
+                function updateArm(arm, armType, baseRotationZ, phase) {
+                    if (armType === 'none') {
+                        // 无动作，保持默认位置
+                        arm.rotation.z = baseRotationZ;
+                        arm.rotation.x = 0;
+                        return;
+                    }
+
+                    // 重新设计动画阶段：
+                    // 0-0.1: 举起 (0 -> 1)
+                    // 0.1-0.2: 保持举起 (1)
+                    // 0.2-0.3: 放下 (1 -> 0)
+                    // 0.3-1.0: 休息/放下 (0)
+                    let animAmount = 0;
+                    if (phase < 0.1) {
+                        // 举起阶段：0 到 1
+                        animAmount = phase / 0.1;
+                    } else if (phase < 0.2) {
+                        // 保持举起：1
+                        animAmount = 1;
+                    } else if (phase < 0.3) {
+                        // 放下阶段：1 到 0
+                        animAmount = 1 - (phase - 0.2) / 0.1;
+                    } else {
+                        // 休息阶段：0（手放下）
+                        animAmount = 0;
+                    }
+
+                    switch (armType) {
+                        case 'raise': {
+                            // 举起又放下
+                            const raiseAmount = animAmount * 1.2; // 0 到 1.2 弧度
+                            // 左手（baseRotationZ > 0）时增加，右手（baseRotationZ < 0）时减少
+                            arm.rotation.z = baseRotationZ + (baseRotationZ > 0 ? raiseAmount : -raiseAmount);
+                            arm.rotation.x = 0;
+                            break;
+                        }
+                        case 'spread': {
+                            // 向外张开又合起来
+                            const spreadAmount = animAmount * 0.8; // 0 到 0.8 弧度
+                            // 左手（baseRotationZ > 0）时增加，右手（baseRotationZ < 0）时减少
+                            arm.rotation.z = baseRotationZ + (baseRotationZ > 0 ? spreadAmount : -spreadAmount);
+                            arm.rotation.x = 0;
+                            break;
+                        }
+                        case 'point': {
+                            // 向前指又放下
+                            const pointAmount = animAmount * 0.6;
+                            // 向前指需要调整 z 旋转（向前）和 x 旋转（向下倾斜）
+                            arm.rotation.z = baseRotationZ - pointAmount * 0.5;
+                            arm.rotation.x = pointAmount * 0.8; // 向前倾斜
+                            break;
+                        }
+                    }
+                }
+
+                // 更新左右手（左手基础旋转是 0.3，右手是 -0.3）
+                // 使用不同的 phase 偏移，让左右手不会同时动作
+                updateArm(leftArm, anim.leftArm, 0.3, leftPhase);
+                updateArm(rightArm, anim.rightArm, -0.3, rightPhase);
+            });
+        }
+
         // 更新眼睛位置
         function updateEyes() {
             // 創建一個虛擬的滑鼠位置點
@@ -738,6 +847,9 @@
             camera.position.y = radius * Math.sin(targetRotationX) + 8;
             camera.position.z = radius * Math.cos(targetRotationY) * Math.cos(targetRotationX);
             camera.lookAt(0, 1, 0);
+
+            // 更新手臂动画
+            updateArmAnimations();
 
             // 更新眼睛
             updateEyes();
