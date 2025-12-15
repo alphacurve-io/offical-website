@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 import './ContactForm.css';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -11,8 +11,9 @@ import { ReactComponent as MapPinIcon } from '../assets/map-pin.svg';
 import videoSrc from '../assets/map-background-video.mp4';
 
 const ContactForm = () => {
-    const { content } = useLanguage();
-    const { contactInfo, form } = content.contact;
+  const { content } = useLanguage();
+  const { contactInfo, form } = content.contact;
+  const room2Config = content.room2;
 
     const [formData, setFormData] = useState({
         name: '',
@@ -73,6 +74,71 @@ const ContactForm = () => {
     }
 
   }
+
+  // 長按彩蛋：進度條 + 3D 會議室
+  const [isPressing, setIsPressing] = useState(false);
+  const [pressProgress, setPressProgress] = useState(0);
+  const [showRoom, setShowRoom] = useState(false);
+  const pressTimerRef = useRef(null);
+
+  const startLongPress = () => {
+    // 僅在桌機上顯示 tooltip 的邏輯保留，長按另行處理
+    if (pressTimerRef.current) {
+      clearInterval(pressTimerRef.current);
+    }
+    setIsPressing(true);
+    setPressProgress(0);
+
+    const duration = 1500; // 長按 1.5 秒到 100%
+    const startTime = Date.now();
+
+    pressTimerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const percent = Math.min(100, (elapsed / duration) * 100);
+      setPressProgress(percent);
+
+      if (percent >= 100) {
+        clearInterval(pressTimerRef.current);
+        pressTimerRef.current = null;
+        setIsPressing(false);
+        setShowRoom(true);
+      }
+    }, 30);
+  };
+
+  const cancelLongPress = () => {
+    if (pressTimerRef.current) {
+      clearInterval(pressTimerRef.current);
+      pressTimerRef.current = null;
+    }
+    setIsPressing(false);
+    setPressProgress(0);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (pressTimerRef.current) {
+        clearInterval(pressTimerRef.current);
+      }
+    };
+  }, []);
+
+  const room2Url = React.useMemo(() => {
+    try {
+      const people = room2Config?.people || [];
+      const encoded = encodeURIComponent(JSON.stringify(people));
+      const base = `/room2.html?people=${encoded}`;
+      const title = room2Config?.boardTitle;
+      if (title) {
+        const titleEncoded = encodeURIComponent(title);
+        return `${base}&title=${titleEncoded}`;
+      }
+      return base;
+    } catch (e) {
+      console.warn('Failed to encode room2 config', e);
+      return '/room2.html';
+    }
+  }, [room2Config]);
   const handleMapPinHover = () => {
     const mapInfo = document.querySelector('.map-info');
     if (window.innerWidth < 768) {
@@ -133,7 +199,32 @@ const ContactForm = () => {
         </div>
         
         <div className="contact-map-container">
-          <div className="map"><MapPinIcon className="map-pin-icon" onClick={handleMapPinClick} onMouseOver={handleMapPinHover} /></div>
+          <div className="map">
+            <div className="map-pin-wrapper">
+              <MapPinIcon
+                className="map-pin-icon"
+                onClick={handleMapPinClick}
+                onMouseOver={handleMapPinHover}
+                onMouseDown={startLongPress}
+                onMouseUp={cancelLongPress}
+                onMouseLeave={cancelLongPress}
+                onTouchStart={startLongPress}
+                onTouchEnd={cancelLongPress}
+                onTouchCancel={cancelLongPress}
+              />
+              {isPressing && (
+                <div className="map-press-progress">
+                  <div
+                    className="map-press-progress-bar"
+                    style={{ width: `${pressProgress}%` }}
+                  />
+                  <span className="map-press-progress-text">
+                    {Math.round(pressProgress)}%
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
           <div className="map-info">
             <p>{contactInfo.company_name_en}</p>
             <h3>{contactInfo.company_name}</h3>
@@ -155,6 +246,24 @@ const ContactForm = () => {
       </div>
       <script src="./MapSectionVideo.js"></script>
       {/* video section end */}
+      {showRoom && (
+        <div className="room2-modal-overlay" onClick={() => setShowRoom(false)}>
+          <div className="room2-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="room2-modal-close"
+              onClick={() => setShowRoom(false)}
+            >
+              ×
+            </button>
+            <iframe
+              title="3D Meeting Room"
+              src={room2Url}
+              className="room2-iframe"
+            />
+          </div>
+        </div>
+      )}
     </section>
   );
 };

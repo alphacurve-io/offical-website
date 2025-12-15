@@ -6,6 +6,7 @@ import { teamContent } from '../content/team-content';
 import { parallaxWordsContent } from '../content/parallax-words-content';
 import { serviceModelContent } from '../content/service-model-content';
 import { contactContent } from '../content/contact-content';
+import { room2Content } from '../content/room2-content';
 import { footerContent } from '../content/footer-content';
 import { swipeTransitionContent } from '../content/swipe-transition-content';
 
@@ -30,6 +31,7 @@ export const LanguageProvider = ({ children }) => {
     swipeTransition: swipeTransitionContent[language],
     contact: contactContent[language],
     footer: footerContent[language],
+    room2: room2Content[language],
   };
 
   return (

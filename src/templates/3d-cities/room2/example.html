@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js 樂高風格會議場景</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #333;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        #info h3 {
+            margin: 0 0 10px 0;
+            color: #1a73e8;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>🧱 樂高會議場景</h3>
+        <p>拖曳滑鼠旋轉視角</p>
+        <p>滾輪縮放</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // 場景設置
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf0f0f0);
+
+        // 相機
+        const camera = new THREE.PerspectiveCamera(
+            45,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
+        camera.position.set(0, 8, 15);
+        camera.lookAt(0, 0, 0);
+
+        // 渲染器
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        // 光源
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 10, 5);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.camera.left = -10;
+        directionalLight.shadow.camera.right = 10;
+        directionalLight.shadow.camera.top = 10;
+        directionalLight.shadow.camera.bottom = -10;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        scene.add(directionalLight);
+
+        // 地板
+        const floorGeometry = new THREE.PlaneGeometry(30, 30);
+        const floorMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xe0e0e0,
+            roughness: 0.8,
+            metalness: 0.2
+        });
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = -0.5;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        // 創建會議桌
+        function createTable() {
+            const table = new THREE.Group();
+
+            // 桌面
+            const topGeometry = new THREE.BoxGeometry(6, 0.2, 4);
+            const topMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xffffff,
+                roughness: 0.3,
+                metalness: 0.1
+            });
+            const top = new THREE.Mesh(topGeometry, topMaterial);
+            top.position.y = 1;
+            top.castShadow = true;
+            top.receiveShadow = true;
+            table.add(top);
+
+            // 桌腳
+            const legGeometry = new THREE.BoxGeometry(0.15, 1, 0.15);
+            const legMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xcccccc,
+                roughness: 0.5
+            });
+
+            const legPositions = [
+                [-2.5, 0.5, -1.5],
+                [2.5, 0.5, -1.5],
+                [-2.5, 0.5, 1.5],
+                [2.5, 0.5, 1.5]
+            ];
+
+            legPositions.forEach(pos => {
+                const leg = new THREE.Mesh(legGeometry, legMaterial);
+                leg.position.set(...pos);
+                leg.castShadow = true;
+                table.add(leg);
+            });
+
+            // 桌上物品 - 筆記型電腦
+            const laptopBase = new THREE.BoxGeometry(0.6, 0.05, 0.4);
+            const laptopScreen = new THREE.BoxGeometry(0.6, 0.5, 0.05);
+            const laptopMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
+            
+            const laptop = new THREE.Group();
+            const base = new THREE.Mesh(laptopBase, laptopMaterial);
+            base.position.y = 1.15;
+            const screen = new THREE.Mesh(laptopScreen, laptopMaterial);
+            screen.position.set(0, 1.4, -0.15);
+            screen.rotation.x = -0.3;
+            laptop.add(base, screen);
+            laptop.position.set(-1.5, 0, 0);
+            table.add(laptop);
+
+            // 文件
+            const docGeometry = new THREE.BoxGeometry(0.3, 0.02, 0.4);
+            const docMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            const document = new THREE.Mesh(docGeometry, docMaterial);
+            document.position.set(1.5, 1.12, 0.5);
+            table.add(document);
+
+            // 手機
+            const phoneGeometry = new THREE.BoxGeometry(0.15, 0.02, 0.25);
+            const phoneMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
+            const phone = new THREE.Mesh(phoneGeometry, phoneMaterial);
+            phone.position.set(0.8, 1.12, -0.8);
+            table.add(phone);
+
+            return table;
+        }
+
+        // 創建樂高人物
+        // expression: 'neutral' | 'smile' | 'sad' | 'surprised'
+        function createLegoPerson(bodyColor, hairColor, expression = 'neutral') {
+            const person = new THREE.Group();
+
+            // 身體
+            const bodyGeometry = new THREE.BoxGeometry(0.8, 1.2, 0.6);
+            const bodyMaterial = new THREE.MeshStandardMaterial({ 
+                color: bodyColor,
+                roughness: 0.4
+            });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.position.y = 0.6;
+            body.castShadow = true;
+            person.add(body);
+
+            // 頭部
+            const headGeometry = new THREE.BoxGeometry(0.7, 0.8, 0.7);
+            const headMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xffd700,
+                roughness: 0.3
+            });
+            const head = new THREE.Mesh(headGeometry, headMaterial);
+            head.position.y = 1.6;
+            head.castShadow = true;
+            person.add(head);
+
+            // 頭髮
+            const hairGeometry = new THREE.BoxGeometry(0.72, 0.3, 0.72);
+            const hairMaterial = new THREE.MeshStandardMaterial({ 
+                color: hairColor,
+                roughness: 0.6
+            });
+            const hair = new THREE.Mesh(hairGeometry, hairMaterial);
+            hair.position.y = 2.05;
+            hair.castShadow = true;
+            person.add(hair);
+
+            // 眼睛容器
+            const eyesGroup = new THREE.Group();
+            eyesGroup.position.set(0, 1.6, 0.36);
+
+            // 左眼
+            const leftEye = createEye();
+            leftEye.position.x = -0.2;
+            eyesGroup.add(leftEye);
+
+            // 右眼
+            const rightEye = createEye();
+            rightEye.position.x = 0.2;
+            eyesGroup.add(rightEye);
+
+            person.add(eyesGroup);
+            person.userData.eyes = [leftEye, rightEye];
+
+            // 嘴巴（表情）
+            let mouth;
+            if (expression === 'surprised') {
+                // 驚訝：圓形嘴巴
+                const mouthGeometry = new THREE.CircleGeometry(0.09, 24);
+                const mouthMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0x000000,
+                    side: THREE.DoubleSide
+                });
+                mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
+                mouth.position.set(0, 1.35, 0.37);
+            } else {
+                // 其他：長條嘴
+                const mouthGeometry = new THREE.BoxGeometry(
+                    expression === 'smile' ? 0.35 : 0.25,
+                    0.05,
+                    0.05
+                );
+                const mouthMaterial = new THREE.MeshStandardMaterial({ 
+                    color: expression === 'smile' ? 0xcc0000 : 0x000000 
+                });
+                mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
+                mouth.position.set(
+                    0, 
+                    expression === 'sad' ? 1.47 : 1.4, 
+                    0.36
+                );
+            }
+            person.add(mouth);
+
+            // 手臂
+            const armGeometry = new THREE.BoxGeometry(0.2, 0.8, 0.2);
+            const armMaterial = new THREE.MeshStandardMaterial({ 
+                color: bodyColor,
+                roughness: 0.4
+            });
+
+            const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+            leftArm.position.set(-0.5, 0.8, 0);
+            leftArm.rotation.z = 0.3;
+            leftArm.castShadow = true;
+            person.add(leftArm);
+
+            const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+            rightArm.position.set(0.5, 0.8, 0);
+            rightArm.rotation.z = -0.3;
+            rightArm.castShadow = true;
+            person.add(rightArm);
+
+            return person;
+        }
+
+        // 創建眼睛
+        function createEye() {
+            const eyeGroup = new THREE.Group();
+
+            // 眼白
+            const whiteGeometry = new THREE.CircleGeometry(0.12, 16);
+            const whiteMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xffffff,
+                side: THREE.DoubleSide
+            });
+            const white = new THREE.Mesh(whiteGeometry, whiteMaterial);
+            eyeGroup.add(white);
+
+            // 眼珠（可移動）
+            const pupilGeometry = new THREE.CircleGeometry(0.05, 16);
+            const pupilMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x000000,
+                side: THREE.DoubleSide
+            });
+            const pupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
+            pupil.position.z = 0.01;
+            eyeGroup.add(pupil);
+
+            eyeGroup.userData.pupil = pupil;
+
+            return eyeGroup;
+        }
+
+        // 添加會議桌
+        const table = createTable();
+        scene.add(table);
+
+        // 添加人物
+        const people = [];
+        const personConfigs = [
+            // 正面三人
+            { pos: [-3, 0, -3], rot: 0.5, body: 0x2c5f2d, hair: 0x654321, expression: 'smile' },
+            { pos: [0, 0, -3], rot: 0, body: 0x1e3a5f, hair: 0xffd700, expression: 'surprised' },
+            { pos: [3, 0, -3], rot: -0.5, body: 0x1a1a4e, hair: 0x8b4513, expression: 'neutral' },
+            // 背面三人
+            { pos: [-3, 0, 3], rot: 2.6, body: 0x1a1a4e, hair: 0x8b4513, expression: 'sad' },
+            { pos: [0, 0, 3], rot: Math.PI, body: 0x2c5f2d, hair: 0xffa500, expression: 'smile' },
+            { pos: [3, 0, 3], rot: -2.6, body: 0x1e3a5f, hair: 0x654321, expression: 'neutral' }
+        ];
+
+        personConfigs.forEach(config => {
+            const person = createLegoPerson(config.body, config.hair, config.expression);
+            person.position.set(...config.pos);
+            person.rotation.y = config.rot;
+            scene.add(person);
+            people.push(person);
+        });
+
+        // 滑鼠控制
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetRotationX = 0;
+        let targetRotationY = 0;
+        let isMouseDown = false;
+
+        // 相機縮放（距離）控制
+        let cameraRadius = camera.position.length();   // 目前相機到原點的距離
+        const minRadius = 10;  // 最靠近的距離（你可以調整）
+        const maxRadius = 22;  // 最遠的距離（你可以調整）
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            // 如果滑鼠按下，旋轉相機
+            if (isMouseDown) {
+                targetRotationY += event.movementX * 0.005;
+                targetRotationX += event.movementY * 0.005;
+                targetRotationX = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, targetRotationX));
+            }
+        });
+
+        document.addEventListener('mousedown', () => {
+            isMouseDown = true;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isMouseDown = false;
+        });
+
+        // 滾輪縮放（限制在指定距離範圍）
+        document.addEventListener('wheel', (event) => {
+            event.preventDefault();
+
+            // deltaY > 0 滾輪往下（拉遠），deltaY < 0 滾輪往上（拉近）
+            cameraRadius += event.deltaY * 0.02;
+            cameraRadius = Math.max(minRadius, Math.min(maxRadius, cameraRadius));
+        }, { passive: false });
+
+        // 觸控支援
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', (event) => {
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+        });
+
+        document.addEventListener('touchmove', (event) => {
+            const touch = event.touches[0];
+            mouseX = (touch.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(touch.clientY / window.innerHeight) * 2 + 1;
+
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = touch.clientY - touchStartY;
+
+            targetRotationY += deltaX * 0.005;
+            targetRotationX += deltaY * 0.005;
+            targetRotationX = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, targetRotationX));
+
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+        });
+
+        // 響應式
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // 更新眼睛位置
+        function updateEyes() {
+            // 創建一個虛擬的滑鼠位置點
+            const vector = new THREE.Vector3(mouseX, mouseY, 0.5);
+            vector.unproject(camera);
+            
+            const dir = vector.sub(camera.position).normalize();
+            const distance = -camera.position.y / dir.y;
+            const pos = camera.position.clone().add(dir.multiplyScalar(distance));
+
+            people.forEach(person => {
+                const eyes = person.userData.eyes;
+                if (eyes) {
+                    eyes.forEach(eye => {
+                        const pupil = eye.userData.pupil;
+                        if (pupil) {
+                            // 計算眼睛看向滑鼠的方向
+                            const eyeWorldPos = new THREE.Vector3();
+                            eye.getWorldPosition(eyeWorldPos);
+
+                            const lookDir = new THREE.Vector3()
+                                .subVectors(pos, eyeWorldPos)
+                                .normalize();
+
+                            // 將方向轉換為眼睛的局部坐標
+                            const localDir = eye.worldToLocal(lookDir.clone().add(eyeWorldPos))
+                                .sub(eye.worldToLocal(eyeWorldPos.clone()));
+
+                            // 限制瞳孔移動範圍
+                            const maxDistance = 0.06;
+                            const distance = Math.min(maxDistance, localDir.length());
+                            localDir.normalize().multiplyScalar(distance);
+
+                            pupil.position.x = localDir.x;
+                            pupil.position.y = localDir.y;
+                        }
+                    });
+                }
+            });
+        }
+
+        // 動畫循環
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 平滑旋轉相機（使用受限制的 cameraRadius）
+            const radius = cameraRadius;
+            camera.position.x = radius * Math.sin(targetRotationY) * Math.cos(targetRotationX);
+            camera.position.y = radius * Math.sin(targetRotationX) + 8;
+            camera.position.z = radius * Math.cos(targetRotationY) * Math.cos(targetRotationX);
+            camera.lookAt(0, 1, 0);
+
+            // 更新眼睛
+            updateEyes();
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

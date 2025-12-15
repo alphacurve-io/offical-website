@@ -284,20 +284,59 @@
     color: #00a8cc;
   }
   
-  .map-pin-icon {
-    width: 46px; /* Adjust size as needed */
-    height: 68px;
+  .map-pin-wrapper {
     position: absolute;
-    /* 水平與垂直置中 */
+    /* 以原本 pin 的位置為基準 */
     top: 335.695px;
     left: 299px;
     transform: translate(-23px, -34px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
   }
 
-  .map-pin-icon:hover {
-    /* 置中放大 */
-    transform: translate(-23px, -34px) scale(1.1);
+  .map-pin-icon {
+    width: 46px; /* Adjust size as needed */
+    height: 68px;
+    position: relative;
+    z-index: 1;
     transition: transform 0.3s ease-in-out;
+  }
+  
+  .map-pin-icon:hover {
+    transform: scale(1.1);
+  }
+  
+  /* 長按進度條 */
+  .map-press-progress {
+    position: relative;
+    width: 60px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.35);
+  }
+  
+  .map-press-progress-bar {
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #34BFD1, #4A90E2);
+    transition: width 0.03s linear;
+  }
+
+  .map-press-progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 9px;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
   }
   .contact-item-text {
     display: flex;
@@ -377,6 +416,72 @@
     object-fit: cover;
     z-index: 0;
     opacity: 0.5;
+}
+
+/* 3D 會議室浮動視窗 */
+.room2-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(4px);
+}
+
+.room2-modal {
+    position: relative;
+    width: 90%;
+    max-width: 960px;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+}
+
+.room2-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.room2-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    z-index: 2;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    border: none;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+}
+
+.room2-modal-close:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+@media (max-width: 768px) {
+    .room2-modal {
+        width: 96%;
+        max-width: none;
+        border-radius: 14px;
+    }
+
+    .map-press-progress {
+        width: 54px;
+        height: 9px;
+    }
 }
 
 @media (max-width: 1116px) {
