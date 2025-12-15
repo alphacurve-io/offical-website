@@ -47,6 +47,7 @@
     </div> -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script>
         // 立即定義全局函數，確保在任何時候都可以使用
         window.getCameraAngles = function() {
@@ -129,6 +130,7 @@
 
         // 場景設置
         const scene = new THREE.Scene();
+        const clock = new THREE.Clock(); // 用于动画混合器的时间计算
         scene.background = new THREE.Color(0xf0f0f0);
 
         // 相機
@@ -282,6 +284,101 @@
             table.add(phone);
 
             return table;
+        }
+
+        // 加載 GLB 模型人物
+        function createPersonFromGLB(modelPath) {
+            return new Promise((resolve, reject) => {
+                const loader = new THREE.GLTFLoader();
+                loader.load(
+                    modelPath,
+                    (gltf) => {
+                        const person = gltf.scene;
+                        
+                        // 啟用陰影
+                        person.traverse((child) => {
+                            if (child.isMesh) {
+                                child.castShadow = true;
+                                child.receiveShadow = true;
+                            }
+                        });
+                        
+                        // 計算模型的邊界框以進行縮放
+                        const box = new THREE.Box3().setFromObject(person);
+                        const size = box.getSize(new THREE.Vector3());
+                        const maxDimension = Math.max(size.x, size.y, size.z);
+                        
+                        // 將模型縮放到合適的大小（約 1.5 單位高，比樂高人物稍小）
+                        const targetHeight = 0.03;
+                        const scale = targetHeight / maxDimension;
+                        person.scale.set(scale, scale, scale);
+                        
+                        // 調整模型位置，使其底部在地面上
+                        const center = box.getCenter(new THREE.Vector3());
+                        person.position.y = -center.y * scale;
+                        
+                        // 初始化手臂動畫數據結構（與樂高人物保持一致）
+                        // 嘗試找到手臂骨骼或網格
+                        let leftArm = null;
+                        let rightArm = null;
+                        
+                        person.traverse((child) => {
+                            if (child.isMesh || child.isBone) {
+                                const name = child.name.toLowerCase();
+                                if (name.includes('arm') || name.includes('hand')) {
+                                    if (name.includes('left') || name.includes('l_')) {
+                                        leftArm = child;
+                                    } else if (name.includes('right') || name.includes('r_')) {
+                                        rightArm = child;
+                                    }
+                                }
+                            }
+                        });
+                        
+                        // 如果找不到命名的手臂，嘗試通過位置判斷
+                        if (!leftArm || !rightArm) {
+                            person.traverse((child) => {
+                                if (child.isMesh && child.position.x < -0.1) {
+                                    leftArm = child;
+                                } else if (child.isMesh && child.position.x > 0.1) {
+                                    rightArm = child;
+                                }
+                            });
+                        }
+                        
+                        // 設置用戶數據，與樂高人物保持一致
+                        person.userData.leftArm = leftArm;
+                        person.userData.rightArm = rightArm;
+                        person.userData.armAnimation = {
+                            leftArm: 'none',
+                            rightArm: 'none',
+                            time: 0
+                        };
+                        person.userData.eyes = []; // GLB 模型可能沒有眼睛，留空
+                        person.userData.isGLBModel = true; // 標記這是 GLB 模型
+                        
+                        // 如果有動畫，設置動畫混合器
+                        if (gltf.animations && gltf.animations.length > 0) {
+                            const mixer = new THREE.AnimationMixer(person);
+                            gltf.animations.forEach((clip) => {
+                                mixer.clipAction(clip).play();
+                            });
+                            person.userData.mixer = mixer;
+                            person.userData.animations = gltf.animations;
+                        }
+                        
+                        resolve(person);
+                    },
+                    (progress) => {
+                        // 加載進度（可選）
+                        // console.log('Loading progress:', (progress.loaded / progress.total * 100) + '%');
+                    },
+                    (error) => {
+                        console.error('Error loading GLB model:', error);
+                        reject(error);
+                    }
+                );
+            });
         }
 
         // 創建樂高人物
@@ -485,21 +582,77 @@
             };
         });
 
-        personConfigs.forEach((config, index) => {
-            const person = createLegoPerson(config.body, config.hair, config.expression);
-            person.position.set(...config.pos);
-            person.rotation.y = config.rot;
-            person.userData.messages = config.messages || [];
-            // 设置左右手动画类型，每个人物有不同的动画延迟
-            person.userData.armAnimation.leftArm = config.leftArm || 'none';
-            person.userData.armAnimation.rightArm = config.rightArm || 'none';
-            // 为每个人物设置不同的时间偏移，避免所有人同时动作
-            // 每个人物偏移 1/6 的周期（约 667ms），这样6个人物的动作会完全错开
-            const cycleDuration = 4000;
-            person.userData.armAnimation.time = (index / personConfigs.length) * cycleDuration;
-            scene.add(person);
-            people.push(person);
-        });
+        // 異步加載人物（第一個使用 GLB 模型，其他使用樂高人物）
+        async function loadPeople() {
+            for (let index = 0; index < personConfigs.length; index++) {
+                const config = personConfigs[index];
+                let person;
+                
+                // 第一個人物（index 0）使用 GLB 模型
+                if (index === 0) {
+                    try {
+                        // 使用相對路徑，從 public 目錄開始
+                        person = await createPersonFromGLB('/assets/3d-models/Meshy_AI_Animation_Talk_with_Left_Hand_Raised_withSkin.glb');
+                        console.log('✅ GLB 模型加載成功 (index 0)');
+                    } catch (error) {
+                        console.warn('⚠️ GLB 模型加載失敗，使用樂高人物替代:', error);
+                        // 如果加載失敗，回退到樂高人物
+                        person = createLegoPerson(config.body, config.hair, config.expression);
+                    }
+                } else if (index === 1) {
+                    // 第二個人物（index 1）使用 women1.glb
+                    try {
+                        person = await createPersonFromGLB('/assets/3d-models/women1.glb');
+                        console.log('✅ GLB 模型加載成功 (index 1)');
+                    } catch (error) {
+                        console.warn('⚠️ GLB 模型加載失敗，使用樂高人物替代:', error);
+                        person = createLegoPerson(config.body, config.hair, config.expression);
+                    }
+                } else if (index === 2) {
+                    // 第三個人物（index 2）使用 man2.glb
+                    try {
+                        person = await createPersonFromGLB('/assets/3d-models/man2.glb');
+                        console.log('✅ GLB 模型加載成功 (index 2)');
+                    } catch (error) {
+                        console.warn('⚠️ GLB 模型加載失敗，使用樂高人物替代:', error);
+                        person = createLegoPerson(config.body, config.hair, config.expression);
+                    }
+                } else if (index === 3) {
+                    // 第四個人物（index 3）使用 women2.glb
+                    try {
+                        person = await createPersonFromGLB('/assets/3d-models/women2.glb');
+                        console.log('✅ GLB 模型加載成功 (index 3)');
+                    } catch (error) {
+                        console.warn('⚠️ GLB 模型加載失敗，使用樂高人物替代:', error);
+                        person = createLegoPerson(config.body, config.hair, config.expression);
+                    }
+                } else {
+                    // 其他人物使用樂高人物
+                    person = createLegoPerson(config.body, config.hair, config.expression);
+                }
+                
+                // 設置位置和旋轉
+                person.position.set(...config.pos);
+                person.rotation.y = config.rot;
+                person.userData.messages = config.messages || [];
+                
+                // 設置左右手動畫類型，每個人物有不同的動畫延遲
+                if (person.userData.armAnimation) {
+                    person.userData.armAnimation.leftArm = config.leftArm || 'none';
+                    person.userData.armAnimation.rightArm = config.rightArm || 'none';
+                    // 為每個人物設置不同的時間偏移，避免所有人同時動作
+                    // 每個人物偏移 1/6 的周期（約 667ms），這樣6個人物的動作會完全錯開
+                    const cycleDuration = 4000;
+                    person.userData.armAnimation.time = (index / personConfigs.length) * cycleDuration;
+                }
+                
+                scene.add(person);
+                people.push(person);
+            }
+        }
+        
+        // 開始加載人物
+        loadPeople();
 
         // 牆壁與白板
         function createWalls() {
@@ -1222,6 +1375,11 @@
             const cycleDuration = 4000; // 一个完整周期（毫秒）
 
             people.forEach(person => {
+                // 如果是 GLB 模型且有内置动画，跳过手臂动画（使用模型自己的动画）
+                if (person.userData.isGLBModel && person.userData.mixer) {
+                    return;
+                }
+                
                 const anim = person.userData.armAnimation;
                 if (!anim) return;
 
@@ -1465,6 +1623,14 @@
             } else {
                 camera.lookAt(0, 1, 0);
             }
+
+            // 更新 GLB 模型的動畫混合器（如果有）
+            const deltaTime = clock.getDelta();
+            people.forEach(person => {
+                if (person.userData.mixer) {
+                    person.userData.mixer.update(deltaTime);
+                }
+            });
 
             // 更新手臂动画
             updateArmAnimations();
