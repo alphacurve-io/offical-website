@@ -1,7 +1,7 @@
 mod telegram_bot;
 use actix_multipart::Multipart;
 use actix_web::{
-    App, Error, HttpResponse, HttpServer, Responder, get, post
+    App, Error, HttpResponse, HttpServer, Responder, post
 };
 use futures_util::TryStreamExt as _;
 use serde::Serialize;
@@ -29,8 +29,6 @@ struct ContactForm {
     file_content: Option<Vec<u8>>,
 }
 
-#[get("/health")]
-#[get("/healthz")]
 async fn health_check() -> impl Responder {
     HttpResponse::Ok().json(serde_json::json!({
         "status": "healthy",
@@ -157,7 +155,8 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(cors)
-            .service(health_check)
+            .route("/health", actix_web::web::get().to(health_check))
+            .route("/healthz", actix_web::web::get().to(health_check))
             .service(submit_form)
     })
     // bind to all interfaces

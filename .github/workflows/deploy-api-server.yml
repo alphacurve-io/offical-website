@@ -180,7 +180,16 @@ jobs:
             fi
             
             # 複製二進制文件到系統目錄
-            sudo cp ./target/release/web_api /usr/local/bin/web_api
+            # 使用 CARGO_TARGET_DIR 來找到正確的構建路徑
+            if [ -f "$CARGO_TARGET_DIR/release/web_api" ]; then
+              sudo cp "$CARGO_TARGET_DIR/release/web_api" /usr/local/bin/web_api
+            elif [ -f "./target/release/web_api" ]; then
+              sudo cp ./target/release/web_api /usr/local/bin/web_api
+            else
+              echo "❌ Error: web_api binary not found in expected locations"
+              echo "Checked: $CARGO_TARGET_DIR/release/web_api and ./target/release/web_api"
+              exit 1
+            fi
             sudo chmod +x /usr/local/bin/web_api
             
             # 確保 .env 文件存在（如果需要的話）
