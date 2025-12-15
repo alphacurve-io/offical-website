@@ -15,6 +15,7 @@ export const room2Content = {
     sendButton: '發送',
     loadingText: '思考中...',
     errorText: '抱歉，發生錯誤，請稍後再試。',
+    kid1Message: '安靜！我快要想出解決辦法了...',
     people: [
       { 
         bodyColor: '#2c5f2d',
@@ -74,6 +75,7 @@ export const room2Content = {
     sendButton: 'Send',
     loadingText: 'Thinking...',
     errorText: 'Sorry, an error occurred. Please try again later.',
+    kid1Message: 'Quiet! I\'m about to figure out the solution...',
     people: [
       { 
         bodyColor: '#2c5f2d',

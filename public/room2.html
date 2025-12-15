@@ -654,7 +654,7 @@
         // 開始加載人物
         loadPeople();
 
-        // 加載 kid1.glb 並設置在白板前左右移動
+        // 加載 kid1.glb 並設置在白板前
         let kid1 = null;
         async function loadKid1() {
             try {
@@ -664,17 +664,22 @@
                 kid1.position.set(0, 0, -5.5);
                 kid1.rotation.y = Math.PI; // 面向白板
                 scene.add(kid1);
-                console.log('✅ kid1.glb 加載成功');
+                
+                // 設置 kid1 的對話消息（用於隨機顯示）
+                // 注意：textContent 在後面定義，所以這裡使用延遲獲取或默認值
+                const kid1Message = (typeof textContent !== 'undefined' && textContent?.kid1Message) 
+                    ? textContent.kid1Message 
+                    : '安靜！我快要想出解決辦法了...';
+                kid1.userData.messages = [kid1Message];
+                
+                console.log('✅ kid1.glb 加載成功，對話:', kid1Message);
             } catch (error) {
                 console.warn('⚠️ kid1.glb 加載失敗:', error);
             }
         }
+        
+        // 開始加載 kid1（對話會在 textContent 讀取後更新）
         loadKid1();
-
-        // kid1 移動動畫參數
-        let kid1MoveTime = 0;
-        const kid1MoveSpeed = 0.015; // 移動速度（快速）
-        const kid1MoveRange = 2.0; // 左右移動範圍（白板寬度是 5，所以範圍是 -2.5 到 2.5，這裡用 2.0）
 
         // 牆壁與白板
         function createWalls() {
@@ -799,6 +804,11 @@
 
         // 讀取文本內容
         const textContent = getTextContent();
+        
+        // 更新 kid1 的對話消息（如果已經加載）
+        if (kid1 && textContent?.kid1Message) {
+            kid1.userData.messages = [textContent.kid1Message];
+        }
         
         // 聊天提示對話框
         const chatPromptDialog = document.createElement('div');
@@ -1188,6 +1198,84 @@
             }
         });
 
+        // 點擊檢測（Raycaster）
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        // 點擊檢測：點擊 kid1 時顯示對話
+        function onMouseClick(event) {
+            // 檢查是否點擊在 UI 元素上（輸入框、按鈕等）
+            const target = event.target;
+            if (target.tagName === 'INPUT' || target.tagName === 'BUTTON' || 
+                target.closest('.room2-input-container') || 
+                target.closest('.room2-chat-prompt')) {
+                return; // 如果點擊在 UI 元素上，不處理
+            }
+
+            // 計算滑鼠在標準化設備坐標中的位置（-1 到 +1）
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            // 更新射線投射器
+            raycaster.setFromCamera(mouse, camera);
+
+            // 如果 kid1 存在，檢查是否被點擊
+            if (kid1) {
+                // 獲取 kid1 的所有子對象（包括所有網格）
+                const intersects = raycaster.intersectObject(kid1, true);
+                
+                if (intersects.length > 0) {
+                    console.log('✅ 點擊了 kid1', intersects[0]);
+                    // 點擊了 kid1，顯示對話
+                    const kid1Message = textContent?.kid1Message || '安靜！我快要想出解決辦法了...';
+                    showKid1Bubble(kid1Message);
+                    event.stopPropagation(); // 阻止事件冒泡
+                    event.preventDefault(); // 阻止默認行為
+                } else {
+                    // 調試：檢查是否接近 kid1
+                    const kid1Pos = new THREE.Vector3();
+                    kid1.getWorldPosition(kid1Pos);
+                    const projected = kid1Pos.clone().project(camera);
+                    const screenX = (projected.x * 0.5 + 0.5) * window.innerWidth;
+                    const screenY = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+                    const clickX = event.clientX;
+                    const clickY = event.clientY;
+                    const distance = Math.sqrt(Math.pow(screenX - clickX, 2) + Math.pow(screenY - clickY, 2));
+                    if (distance < 100) {
+                        console.log('🔍 點擊接近 kid1，但未檢測到碰撞。距離:', distance, 'kid1 位置:', kid1Pos);
+                    }
+                }
+            } else {
+                console.log('⚠️ kid1 尚未加載');
+            }
+        }
+
+        // 顯示 kid1 的對話氣泡（簡單版本，不移動相機）
+        function showKid1Bubble(message) {
+            activeBubblePerson = kid1;
+            bubble.textContent = message;
+            bubble.style.opacity = '1';
+            bubbleVisibleUntil = performance.now() + 4000; // 顯示 4 秒
+            lastBubbleSwitch = performance.now();
+            
+            // 更新氣泡位置
+            const worldPos = new THREE.Vector3();
+            kid1.getWorldPosition(worldPos);
+            worldPos.y += 1.5; // 氣泡在頭頂上方
+            
+            const projected = worldPos.clone().project(camera);
+            const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+            
+            bubble.style.left = `${x}px`;
+            bubble.style.top = `${y - 20}px`;
+            
+            console.log('💬 顯示 kid1 對話:', message);
+        }
+
+        // 添加點擊事件監聽器（使用 capture 模式確保能捕獲事件）
+        renderer.domElement.addEventListener('click', onMouseClick, true);
+
         let activeBubblePerson = null;
         let bubbleVisibleUntil = 0;
         const bubbleDuration = 4000; // 氣泡顯示 4 秒
@@ -1538,7 +1626,13 @@
                     return;
                 }
 
+                // 收集所有有對話的人物（包括 kid1）
                 const candidates = people.filter(p => Array.isArray(p.userData.messages) && p.userData.messages.length > 0);
+                // 如果 kid1 存在且有對話，也加入候選列表
+                if (kid1 && Array.isArray(kid1.userData.messages) && kid1.userData.messages.length > 0) {
+                    candidates.push(kid1);
+                }
+                
                 if (candidates.length === 0) {
                     bubble.style.opacity = '0';
                     activeBubblePerson = null;
@@ -1560,7 +1654,9 @@
             if (activeBubblePerson) {
                 const worldPos = new THREE.Vector3();
                 activeBubblePerson.getWorldPosition(worldPos);
-                worldPos.y += 2.4; // 把氣泡移到頭頂上方一點
+                // 如果是 kid1，使用較小的偏移（因為 kid1 比較小）
+                const yOffset = activeBubblePerson === kid1 ? 1.5 : 2.4;
+                worldPos.y += yOffset; // 把氣泡移到頭頂上方一點
 
                 const projected = worldPos.clone().project(camera);
                 let x = (projected.x * 0.5 + 0.5) * window.innerWidth;
@@ -1653,13 +1749,6 @@
                     person.userData.mixer.update(deltaTime);
                 }
             });
-
-            // 更新 kid1 的左右移動動畫
-            if (kid1) {
-                kid1MoveTime += deltaTime * kid1MoveSpeed;
-                // 使用正弦波實現左右來回移動
-                kid1.position.x = Math.sin(kid1MoveTime) * kid1MoveRange;
-            }
 
             // 更新手臂动画
             updateArmAnimations();
