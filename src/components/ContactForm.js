@@ -127,12 +127,25 @@ const ContactForm = () => {
     try {
       const people = room2Config?.people || [];
       const encoded = encodeURIComponent(JSON.stringify(people));
-      const base = `/room2.html?people=${encoded}`;
+      let base = `/room2.html?people=${encoded}`;
+      
       const title = room2Config?.boardTitle;
       if (title) {
         const titleEncoded = encodeURIComponent(title);
-        return `${base}&title=${titleEncoded}`;
+        base = `${base}&title=${titleEncoded}`;
       }
+      
+      // 添加文本内容
+      const textContent = {
+        chatPrompt: room2Config?.chatPrompt || '你有什麼問題想問嗎？',
+        inputPlaceholder: room2Config?.inputPlaceholder || '輸入你的問題...',
+        sendButton: room2Config?.sendButton || '發送',
+        loadingText: room2Config?.loadingText || '思考中...',
+        errorText: room2Config?.errorText || '抱歉，發生錯誤，請稍後再試。',
+      };
+      const textContentEncoded = encodeURIComponent(JSON.stringify(textContent));
+      base = `${base}&textContent=${textContentEncoded}`;
+      
       return base;
     } catch (e) {
       console.warn('Failed to encode room2 config', e);

@@ -10,6 +10,11 @@
 export const room2Content = {
   zh: {
     boardTitle: '客戶會議',
+    chatPrompt: '你有什麼問題想問嗎？',
+    inputPlaceholder: '輸入你的問題...',
+    sendButton: '發送',
+    loadingText: '思考中...',
+    errorText: '抱歉，發生錯誤，請稍後再試。',
     people: [
       { 
         bodyColor: '#2c5f2d',
@@ -64,6 +69,11 @@ export const room2Content = {
   en: {
     // English can共用同一組顏色與表情，或之後再獨立調整
     boardTitle: 'Client Meeting',
+    chatPrompt: 'Do you have any questions?',
+    inputPlaceholder: 'Type your question...',
+    sendButton: 'Send',
+    loadingText: 'Thinking...',
+    errorText: 'Sorry, an error occurred. Please try again later.',
     people: [
       { 
         bodyColor: '#2c5f2d',

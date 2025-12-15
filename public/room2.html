@@ -78,6 +78,27 @@
             }
         }
 
+        // 從 URL 讀取文本內容（由 React 傳入）
+        function getTextContent() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const raw = params.get('textContent');
+                if (!raw) return null;
+                const decoded = decodeURIComponent(raw);
+                return JSON.parse(decoded);
+            } catch (e) {
+                console.warn('Failed to parse text content:', e);
+                // 返回默認文本
+                return {
+                    chatPrompt: '你有什麼問題想問嗎？',
+                    inputPlaceholder: '輸入你的問題...',
+                    sendButton: '發送',
+                    loadingText: '思考中...',
+                    errorText: '抱歉，發生錯誤，請稍後再試。'
+                };
+            }
+        }
+
         function hexToColorNumber(hex, fallback) {
             if (!hex || typeof hex !== 'string') return fallback;
             const cleaned = hex.replace('#', '');
@@ -579,6 +600,220 @@
         bubble.style.opacity = '0';
         bubble.style.transition = 'opacity 0.3s ease';
         document.body.appendChild(bubble);
+
+        // 讀取文本內容
+        const textContent = getTextContent();
+        
+        // 聊天提示對話框
+        const chatPromptDialog = document.createElement('div');
+        chatPromptDialog.style.position = 'fixed';
+        chatPromptDialog.style.top = '50%';
+        chatPromptDialog.style.left = '50%';
+        chatPromptDialog.style.transform = 'translate(-50%, -50%)';
+        chatPromptDialog.style.zIndex = '1000';
+        chatPromptDialog.style.background = 'rgba(255, 255, 255, 0.95)';
+        chatPromptDialog.style.padding = '20px 30px';
+        chatPromptDialog.style.borderRadius = '16px';
+        chatPromptDialog.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+        chatPromptDialog.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
+        chatPromptDialog.style.fontSize = '18px';
+        chatPromptDialog.style.color = '#333';
+        chatPromptDialog.style.textAlign = 'center';
+        chatPromptDialog.style.display = 'none';
+        chatPromptDialog.textContent = textContent.chatPrompt;
+        document.body.appendChild(chatPromptDialog);
+
+        // 輸入框容器
+        const inputContainer = document.createElement('div');
+        inputContainer.style.position = 'fixed';
+        inputContainer.style.bottom = '30px';
+        inputContainer.style.left = '50%';
+        inputContainer.style.transform = 'translateX(-50%)';
+        inputContainer.style.zIndex = '1000';
+        inputContainer.style.background = 'rgba(255, 255, 255, 0.95)';
+        inputContainer.style.padding = '15px 20px';
+        inputContainer.style.borderRadius = '12px';
+        inputContainer.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+        inputContainer.style.display = 'none';
+        inputContainer.style.width = '90%';
+        inputContainer.style.maxWidth = '500px';
+        inputContainer.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
+
+        const inputWrapper = document.createElement('div');
+        inputWrapper.style.display = 'flex';
+        inputWrapper.style.gap = '10px';
+        inputWrapper.style.alignItems = 'center';
+
+        const questionInput = document.createElement('input');
+        questionInput.type = 'text';
+        questionInput.placeholder = textContent.inputPlaceholder;
+        questionInput.style.flex = '1';
+        questionInput.style.padding = '10px 15px';
+        questionInput.style.border = '2px solid #e0e0e0';
+        questionInput.style.borderRadius = '8px';
+        questionInput.style.fontSize = '14px';
+        questionInput.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
+        questionInput.style.outline = 'none';
+        questionInput.style.transition = 'border-color 0.3s';
+        questionInput.addEventListener('focus', () => {
+            questionInput.style.borderColor = '#156697';
+        });
+        questionInput.addEventListener('blur', () => {
+            questionInput.style.borderColor = '#e0e0e0';
+        });
+
+        const sendButton = document.createElement('button');
+        sendButton.textContent = textContent.sendButton;
+        sendButton.style.padding = '10px 20px';
+        sendButton.style.background = '#156697';
+        sendButton.style.color = '#fff';
+        sendButton.style.border = 'none';
+        sendButton.style.borderRadius = '8px';
+        sendButton.style.fontSize = '14px';
+        sendButton.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
+        sendButton.style.cursor = 'pointer';
+        sendButton.style.transition = 'background 0.3s';
+        sendButton.addEventListener('mouseenter', () => {
+            sendButton.style.background = '#0f4d6e';
+        });
+        sendButton.addEventListener('mouseleave', () => {
+            sendButton.style.background = '#156697';
+        });
+
+        inputWrapper.appendChild(questionInput);
+        inputWrapper.appendChild(sendButton);
+        inputContainer.appendChild(inputWrapper);
+        document.body.appendChild(inputContainer);
+
+        // 顯示提示對話框，然後顯示輸入框
+        let promptShown = false;
+        function showChatPrompt() {
+            if (promptShown) return;
+            promptShown = true;
+            
+            // 顯示提示對話框
+            chatPromptDialog.style.display = 'block';
+            chatPromptDialog.style.opacity = '0';
+            chatPromptDialog.style.transform = 'translate(-50%, -50%) scale(0.9)';
+            
+            setTimeout(() => {
+                chatPromptDialog.style.transition = 'opacity 0.3s, transform 0.3s';
+                chatPromptDialog.style.opacity = '1';
+                chatPromptDialog.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 10);
+
+            // 3秒後隱藏提示，顯示輸入框
+            setTimeout(() => {
+                chatPromptDialog.style.opacity = '0';
+                chatPromptDialog.style.transform = 'translate(-50%, -50%) scale(0.9)';
+                setTimeout(() => {
+                    chatPromptDialog.style.display = 'none';
+                    inputContainer.style.display = 'block';
+                    inputContainer.style.opacity = '0';
+                    setTimeout(() => {
+                        inputContainer.style.transition = 'opacity 0.3s';
+                        inputContainer.style.opacity = '1';
+                        questionInput.focus();
+                    }, 10);
+                }, 300);
+            }, 3000);
+        }
+
+        // 延遲顯示提示（進入房間後2秒）
+        setTimeout(showChatPrompt, 2000);
+
+        // 發送問題到 API
+        async function sendQuestion(question) {
+            if (!question.trim()) return;
+
+            // 顯示載入狀態
+            sendButton.disabled = true;
+            sendButton.textContent = textContent.loadingText;
+            sendButton.style.background = '#999';
+
+            try {
+                // 確定 API URL（與 submit 表單保持一致）
+                // 如果是 localhost，使用本地 API；否則使用生產環境的 API 路徑
+                let apiUrl;
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    apiUrl = 'http://localhost:8080/api/chat';
+                } else {
+                    // 生產環境：使用與 submit 表單相同的 API 路徑
+                    // submit 表單使用：https://alphacurve.io/website/api/submit
+                    // chat API 使用：https://alphacurve.io/api/chat
+                    const protocol = window.location.protocol;
+                    const hostname = window.location.hostname;
+                    apiUrl = `${protocol}//${hostname}/api/chat`;
+                }
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question.trim() })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // 顯示回答（使用第一個小人）
+                if (people.length > 0) {
+                    showAnswerBubble(people[0], data.answer);
+                }
+
+                // 清空輸入框
+                questionInput.value = '';
+            } catch (error) {
+                console.error('Error sending question:', error);
+                // 顯示錯誤訊息
+                if (people.length > 0) {
+                    showAnswerBubble(people[0], textContent.errorText);
+                }
+            } finally {
+                sendButton.disabled = false;
+                sendButton.textContent = textContent.sendButton;
+                sendButton.style.background = '#156697';
+            }
+        }
+
+        // 顯示回答的對話泡泡
+        function showAnswerBubble(person, answer) {
+            activeBubblePerson = person;
+            bubble.textContent = answer;
+            bubble.style.opacity = '1';
+            bubbleVisibleUntil = performance.now() + 15000; // 顯示15秒（AI回答通常較長）
+
+            // 立即更新泡泡位置
+            const worldPos = new THREE.Vector3();
+            person.getWorldPosition(worldPos);
+            worldPos.y += 2.4; // 把氣泡移到頭頂上方一點
+
+            const projected = worldPos.clone().project(camera);
+            const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+
+            bubble.style.left = `${x}px`;
+            bubble.style.top = `${y - 20}px`;
+            
+            // 重置隨機對話的時間，避免立即切換
+            lastBubbleSwitch = performance.now();
+        }
+
+        // 發送按鈕點擊事件
+        sendButton.addEventListener('click', () => {
+            sendQuestion(questionInput.value);
+        });
+
+        // Enter 鍵發送
+        questionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendQuestion(questionInput.value);
+            }
+        });
 
         let activeBubblePerson = null;
         let bubbleVisibleUntil = 0;
