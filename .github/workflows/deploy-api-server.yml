@@ -1,0 +1,256 @@
+name: Deploy API Server
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'api/**'
+      - '.github/workflows/deploy-api-server.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+
+      - name: Add VM to known hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.GCP_VM_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy API Server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.GCP_VM_IP }}
+          username: ${{ secrets.GCP_VM_USER }}
+          key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+          script_stop: true
+          command_timeout: 30m
+          script: |
+            # 設定變數
+            # 使用 GitHub Actions 內建的 GITHUB_TOKEN
+            # 如果 offical-website 是私有倉庫且無法訪問，請在 Repository secrets 中添加 GITHUB_TOKEN_PAT
+            # 並將下面的 ${{ secrets.GITHUB_TOKEN }} 改為 ${{ secrets.GITHUB_TOKEN_PAT }}
+            REPO_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/alphacurve-io/offical-website.git"
+            REPO_DIR="$HOME/offical-website"
+            
+            # 清理舊的 repository（如果存在）
+            if [ -d "$REPO_DIR" ]; then
+              rm -rf "$REPO_DIR"
+            fi
+            
+            # Clone repository，增加重試機制和更好的錯誤處理
+            echo "Cloning repository..."
+            MAX_RETRIES=3
+            RETRY_COUNT=0
+            
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if git clone "$REPO_URL" "$REPO_DIR" 2>&1; then
+                echo "✅ Repository cloned successfully"
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                  echo "⚠️  Clone failed, retrying ($RETRY_COUNT/$MAX_RETRIES)..."
+                  sleep 2
+                else
+                  echo "❌ Failed to clone repository after $MAX_RETRIES attempts"
+                  echo "Please check:"
+                  echo "  1. GITHUB_TOKEN has access to alphacurve-io/offical-website"
+                  echo "  2. Repository name is correct"
+                  echo "  3. Network connectivity"
+                  exit 1
+                fi
+              fi
+            done
+            
+            # 等待其他 dpkg 進程完成
+            echo "Waiting for any running dpkg processes to complete..."
+            MAX_WAIT=300  # 最多等待 5 分鐘
+            WAIT_COUNT=0
+            while fuser /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/apt/archives/lock >/dev/null 2>&1; do
+              if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
+                echo "⚠️  Timeout waiting for dpkg lock. Attempting to continue..."
+                break
+              fi
+              echo "  Waiting for dpkg lock to be released... (${WAIT_COUNT}s)"
+              sleep 5
+              WAIT_COUNT=$((WAIT_COUNT + 5))
+            done
+            
+            # 先處理損壞的包，避免 dpkg --configure 時卡住
+            # 強制移除處於不一致狀態的 google-cloud-cli 包
+            sudo dpkg --remove --force-remove-reinstreq --force-remove-depends google-cloud-cli-anthoscli 2>/dev/null || true
+            sudo dpkg --remove --force-remove-reinstreq --force-remove-depends google-cloud-cli 2>/dev/null || true
+            
+            # 修復可能被中斷的 dpkg 狀態（跳過無法配置的包）
+            sudo dpkg --configure -a || true
+            
+            # 清理並修復依賴
+            sudo apt-get install -f -y || true
+            sudo apt-get autoremove -y || true
+            sudo apt-get autoclean || true
+            
+            # 安裝必要的系統套件
+            sudo apt-get update -qq
+            
+            # 檢查需要的包是否已安裝
+            NEEDED_PACKAGES="build-essential pkg-config libssl-dev"
+            MISSING_PACKAGES=""
+            for pkg in $NEEDED_PACKAGES; do
+              if ! dpkg -l | grep -q "^ii  $pkg "; then
+                MISSING_PACKAGES="$MISSING_PACKAGES $pkg"
+              fi
+            done
+            
+            # 只安裝缺失的包，忽略 google-cloud-cli 的錯誤
+            if [ -n "$MISSING_PACKAGES" ]; then
+              echo "Installing missing packages: $MISSING_PACKAGES"
+              # 使用 --fix-broken 和忽略錯誤的方式安裝
+              DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --fix-broken --allow-remove-essential --allow-change-held-packages $MISSING_PACKAGES 2>&1 | grep -v "google-cloud-cli" || {
+                # 即使有錯誤，也檢查包是否真的安裝成功
+                for pkg in $MISSING_PACKAGES; do
+                  if ! dpkg -l | grep -q "^ii  $pkg "; then
+                    echo "⚠️  Warning: $pkg may not be installed correctly, but continuing..."
+                  fi
+                done
+              }
+            else
+              echo "✅ All required packages are already installed"
+            fi
+            
+            # 驗證關鍵包是否可用
+            for pkg in build-essential pkg-config libssl-dev; do
+              if command -v $(echo $pkg | sed 's/build-essential/gcc/; s/pkg-config/pkg-config/; s/libssl-dev//') >/dev/null 2>&1 || dpkg -l | grep -q "^ii  $pkg "; then
+                echo "✅ $pkg is available"
+              else
+                echo "❌ $pkg is missing, but continuing (may cause build issues)"
+              fi
+            done
+            
+            # 安裝或更新 Rust
+            if ! command -v rustc &> /dev/null; then
+              curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+              source $HOME/.cargo/env
+            else
+              source $HOME/.cargo/env
+              rustup update -y
+            fi
+            
+            # 顯示 Rust 版本
+            rustc --version
+            cargo --version
+            
+            # 編譯 Rust 專案
+            cd "$REPO_DIR/api/web_api"
+            if [ ! -d "src" ]; then
+              echo "❌ Error: api/web_api/src directory not found in repository"
+              echo "Repository structure may be incorrect"
+              exit 1
+            fi
+            
+            # 使用 cargo 緩存目錄來加速編譯
+            export CARGO_HOME="$HOME/.cargo"
+            export CARGO_TARGET_DIR="$HOME/.cargo-target"
+            
+            # 如果緩存存在，顯示緩存大小
+            if [ -d "$CARGO_TARGET_DIR" ]; then
+              echo "📦 Using cached Cargo target directory"
+              du -sh "$CARGO_TARGET_DIR" 2>/dev/null || true
+            fi
+            
+            # 編譯（使用緩存會自動加速）
+            echo "🔨 Building Rust project (this may take a while on first build)..."
+            cargo build --release
+            
+            # 停止舊的服務（如果正在運行）
+            if sudo systemctl is-active --quiet web_api.service; then
+              sudo systemctl stop web_api.service
+            fi
+            
+            # 停止佔用 8080 端口的進程
+            if lsof -t -i :8080 > /dev/null 2>&1; then
+              sudo kill -9 $(sudo lsof -t -i :8080) || true
+            fi
+            
+            # 複製二進制文件到系統目錄
+            sudo cp ./target/release/web_api /usr/local/bin/web_api
+            sudo chmod +x /usr/local/bin/web_api
+            
+            # 確保 .env 文件存在（如果需要的話）
+            if [ ! -f /usr/local/bin/.env ]; then
+              echo "Warning: /usr/local/bin/.env not found. Service may need environment variables."
+            fi
+            
+            # 更新 systemd 服務文件
+            sudo tee /etc/systemd/system/web_api.service > /dev/null <<EOF
+            [Unit]
+            Description=AlphaCurve Web API Service
+            After=network.target
+            
+            [Service]
+            User=${{ secrets.GCP_VM_USER }}
+            Group=${{ secrets.GCP_VM_USER }}
+            ExecStart=/usr/local/bin/web_api
+            EnvironmentFile=/usr/local/bin/.env
+            Restart=always
+            RestartSec=5
+            
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+            
+            # 重新載入 systemd 並啟動服務
+            sudo systemctl daemon-reload
+            sudo systemctl enable web_api.service
+            sudo systemctl restart web_api.service
+            
+            # 等待服務啟動
+            sleep 3
+            
+            # 檢查服務狀態
+            sudo systemctl status web_api.service --no-pager
+            
+            # 驗證服務是否正常運行
+            if sudo systemctl is-active --quiet web_api.service; then
+              echo "✅ Service is active"
+              
+              # 等待服務完全啟動
+              sleep 2
+              
+              # 健康檢查 - 測試 /health endpoint
+              if curl -f -s http://localhost:8080/health > /dev/null; then
+                echo "✅ Health check passed!"
+                curl -s http://localhost:8080/health | jq . || curl -s http://localhost:8080/health
+              else
+                echo "⚠️  Health check failed, but service is running"
+                curl -v http://localhost:8080/health || true
+              fi
+              
+              echo "✅ API Server deployed successfully!"
+            else
+              echo "❌ API Server failed to start"
+              sudo journalctl -u web_api.service -n 50 --no-pager
+              exit 1
+            fi
+
+      - name: Send Telegram Notification
+        if: always()
+        uses: appleboy/telegram-action@v1.0.0
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            🚀 API Server Deployment
+            Status: ${{ job.status }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+            ${{ job.status == 'success' && '✅ Deployment successful!' || '❌ Deployment failed!' }}
+

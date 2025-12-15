@@ -1,7 +1,7 @@
 mod telegram_bot;
 use actix_multipart::Multipart;
 use actix_web::{
-    App, Error, HttpResponse, HttpServer, Responder, post
+    App, Error, HttpResponse, HttpServer, Responder, get, post
 };
 use futures_util::TryStreamExt as _;
 use serde::Serialize;
@@ -27,6 +27,16 @@ struct ContactForm {
     /// 這裡為了示範，我們直接把檔案讀到記憶體 (Vec<u8>)
     /// 真實應用中建議儲存到檔案系統或雲端儲存服務。
     file_content: Option<Vec<u8>>,
+}
+
+#[get("/health")]
+#[get("/healthz")]
+async fn health_check() -> impl Responder {
+    HttpResponse::Ok().json(serde_json::json!({
+        "status": "healthy",
+        "service": "alphacurve-web-api",
+        "timestamp": chrono::Utc::now().to_rfc3339()
+    }))
 }
 
 #[post("/website/api/submit")]
@@ -147,6 +157,7 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(cors)
+            .service(health_check)
             .service(submit_form)
     })
     // bind to all interfaces
