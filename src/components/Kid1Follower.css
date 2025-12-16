@@ -37,7 +37,8 @@
   word-wrap: break-word;
   white-space: normal;
   text-align: center;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-100%);
+  transform-origin: bottom center;
   animation: bubbleFadeIn 0.3s ease-out;
 }
 
@@ -57,11 +58,11 @@
 @keyframes bubbleFadeIn {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(10px);
+    transform: translateX(-50%) translateY(-100%) translateY(-10px);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateX(-50%) translateY(-100%);
   }
 }
 
