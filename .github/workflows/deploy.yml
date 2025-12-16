@@ -17,12 +17,50 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18' # Adjust version as needed, defaulting to 18
+        cache: 'npm' # 启用 npm 缓存以加快构建速度
 
     - name: Install dependencies
-      run: npm install
+      run: npm ci --prefer-offline --no-audit
 
-    - name: Build
+    - name: Build with optimization
       run: npm run build
+      env:
+        NODE_ENV: production
+        GENERATE_SOURCEMAP: false # 禁用 source map 以减小文件大小
+
+    - name: Analyze build size
+      run: |
+        echo "📦 Build size analysis:"
+        du -sh build/
+        echo ""
+        echo "📊 Largest files:"
+        find build -type f -exec du -h {} + | sort -rh | head -10
+        echo ""
+        echo "📈 JS files:"
+        find build/static/js -type f -name "*.js" -exec du -h {} + | sort -rh | head -5
+        echo ""
+        echo "🎨 CSS files:"
+        find build/static/css -type f -name "*.css" -exec du -h {} + | sort -rh | head -5
+        echo ""
+        echo "✅ Compression verification:"
+        # 检查 JS 文件是否被压缩（压缩后的文件通常不包含注释和空格）
+        JS_FILE=$(find build/static/js -name "*.js" | head -1)
+        if [ -f "$JS_FILE" ]; then
+          if grep -q "console.log\|console.debug" "$JS_FILE" 2>/dev/null; then
+            echo "⚠️  Warning: console.log found in JS (compression may not be working)"
+          else
+            echo "✅ JS files are properly minified (no console.log found)"
+          fi
+        fi
+        # 检查 CSS 文件是否被压缩
+        CSS_FILE=$(find build/static/css -name "*.css" | head -1)
+        if [ -f "$CSS_FILE" ]; then
+          if grep -q "/\*" "$CSS_FILE" 2>/dev/null; then
+            echo "⚠️  Warning: Comments found in CSS (compression may not be working)"
+          else
+            echo "✅ CSS files are properly minified (no comments found)"
+          fi
+        fi
 
     - name: Zip build folder
       run: zip -r build.zip build

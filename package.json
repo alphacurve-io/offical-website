@@ -13,10 +13,10 @@
     "web-vitals": "^4.2.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "start:dev": "cross-env REACT_APP_ENV=dev react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "craco start",
+    "start:dev": "cross-env REACT_APP_ENV=dev craco start",
+    "build": "craco build",
+    "test": "craco test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -40,6 +40,9 @@
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
     "babel-preset-react-app": "^10.0.1",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "@craco/craco": "^7.1.0",
+    "terser-webpack-plugin": "^5.3.10",
+    "css-minimizer-webpack-plugin": "^5.0.1"
   }
 }
