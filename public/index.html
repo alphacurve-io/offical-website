@@ -43,14 +43,37 @@
     <meta name="twitter:description" content="Integrate technology and business strategy with Alphacurve.io to break through tech bottlenecks and unleash your business potential." />
     <!-- <meta name="twitter:image" content="https://alphacurve.io/twitter-image.png" /> -->
     <meta data-rh="true" name="twitter:image:src" content="https://alphacurve.io/twitter-image.png"/>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QK3V12N7GB"></script>
+    <!-- Google tag (gtag.js) - 延迟加载以减少初始 JavaScript -->
     <script>
+      // 初始化 dataLayer（用于事件队列）
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-QK3V12N7GB');
+      
+      // 延迟加载 GA4 - 在页面交互后或 3 秒后加载
+      function loadGA4() {
+        if (window.gtag && window.gtag.loaded) return; // 避免重复加载
+        
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-QK3V12N7GB';
+        script.onload = function() {
+          gtag('js', new Date());
+          gtag('config', 'G-QK3V12N7GB', {
+            allow_google_signals: false,
+            allow_ad_personalization_signals: false
+          });
+          window.gtag.loaded = true;
+        };
+        document.head.appendChild(script);
+      }
+      
+      // 在用户交互时加载（点击、滚动、键盘输入）
+      ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+        document.addEventListener(event, loadGA4, { once: true, passive: true });
+      });
+      
+      // 3 秒后自动加载（即使用户没有交互）
+      setTimeout(loadGA4, 3000);
     </script>
   </head>
   <body>

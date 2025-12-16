@@ -12,22 +12,33 @@
  * @param {object} parameters - 事件参数
  */
 export const trackEvent = (eventName, parameters = {}) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    // 添加通用参数
-    const eventData = {
-      ...parameters,
-      timestamp: Date.now(),
-      // 可以添加更多通用参数，如页面路径、语言等
-      page_path: window.location.pathname,
-      page_title: document.title,
-    };
-    
+  if (typeof window === 'undefined') return;
+  
+  // 添加通用参数
+  const eventData = {
+    ...parameters,
+    timestamp: Date.now(),
+    page_path: window.location.pathname,
+    page_title: document.title,
+  };
+  
+  // 如果 gtag 已加载，立即发送事件
+  if (window.gtag && typeof window.gtag === 'function') {
     window.gtag('event', eventName, eventData);
-    
-    // 开发环境下打印到控制台
-    if (process.env.NODE_ENV === 'development') {
-      console.log('📊 GA Event:', eventName, eventData);
+  } else {
+    // 如果 gtag 未加载，将事件推入 dataLayer 队列
+    // GA4 加载后会自动处理队列中的事件
+    if (window.dataLayer) {
+      window.dataLayer.push({
+        event: eventName,
+        ...eventData
+      });
     }
+  }
+  
+  // 开发环境下打印到控制台
+  if (process.env.NODE_ENV === 'development') {
+    console.log('📊 GA Event:', eventName, eventData);
   }
 };
 
@@ -37,12 +48,16 @@ export const trackEvent = (eventName, parameters = {}) => {
  * @param {string} pageTitle - 页面标题
  */
 export const trackPageView = (pagePath, pageTitle) => {
-  if (typeof window !== 'undefined' && window.gtag) {
+  if (typeof window === 'undefined') return;
+  
+  // 如果 gtag 已加载，立即发送
+  if (window.gtag && typeof window.gtag === 'function') {
     window.gtag('config', 'G-QK3V12N7GB', {
       page_path: pagePath,
       page_title: pageTitle,
     });
   }
+  // 注意：如果 gtag 未加载，GA4 会在加载时自动追踪初始页面浏览
 };
 
 /**

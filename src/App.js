@@ -1,39 +1,58 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import './App.css';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
-import Services from './components/Services';
-import Team from './components/Team';
-import ParallaxWords from './components/ParallaxWords';
-import ServiceModel from './components/ServiceModel';
-import SwipeTransition from './components/SwipeTransition';
-import ContactForm from './components/ContactForm';
-import Footer from './components/Footer';
-import CustomCursor from './components/CustomCursor';
 import SEOHead from './components/SEOHead';
+import LazyScrollTracking from './components/LazyScrollTracking';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
-import { useScrollTracking } from './hooks/useScrollTracking';
+
+// 懒加载非关键组件（首屏不需要的组件）
+const CustomCursor = lazy(() => import('./components/CustomCursor'));
+const Services = lazy(() => import('./components/Services'));
+const Team = lazy(() => import('./components/Team'));
+const ParallaxWords = lazy(() => import('./components/ParallaxWords'));
+const ServiceModel = lazy(() => import('./components/ServiceModel'));
+const SwipeTransition = lazy(() => import('./components/SwipeTransition'));
+const ContactForm = lazy(() => import('./components/ContactForm'));
+const Footer = lazy(() => import('./components/Footer'));
+
+// 加载占位符组件
+const LoadingPlaceholder = () => null;
 
 const AppContent = () => {
   const { language } = useLanguage();
   
-  // 啟用滾動深度和 Section 視圖追蹤
-  useScrollTracking();
-  
   return (
     <>
       <SEOHead language={language} />
+      <LazyScrollTracking />
       <div className="App">
-        <CustomCursor />
+        <Suspense fallback={null}>
+          <CustomCursor />
+        </Suspense>
         <Header />
         <HeroSection />
-        <Services />
-        <Team />
-        <ParallaxWords />
-        <ServiceModel />
-        <SwipeTransition />
-        <ContactForm />
-        <Footer />
+        <Suspense fallback={<LoadingPlaceholder />}>
+          <Services />
+        </Suspense>
+        <Suspense fallback={<LoadingPlaceholder />}>
+          <Team />
+        </Suspense>
+        <Suspense fallback={<LoadingPlaceholder />}>
+          <ParallaxWords />
+        </Suspense>
+        <Suspense fallback={<LoadingPlaceholder />}>
+          <ServiceModel />
+        </Suspense>
+        <Suspense fallback={<LoadingPlaceholder />}>
+          <SwipeTransition />
+        </Suspense>
+        <Suspense fallback={<LoadingPlaceholder />}>
+          <ContactForm />
+        </Suspense>
+        <Suspense fallback={<LoadingPlaceholder />}>
+          <Footer />
+        </Suspense>
       </div>
     </>
   );
