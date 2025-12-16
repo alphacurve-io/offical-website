@@ -28,6 +28,11 @@ export const contactContent = {
         note: "附件大小不超過10MB"
       },
       submitButton: "提交"
+    },
+    landscapePrompt: {
+      title: "請將裝置橫向瀏覽",
+      description: "為了獲得最佳體驗，請將您的裝置旋轉為橫向模式",
+      button: "我已橫屏"
     }
   },
   en: {
@@ -59,6 +64,11 @@ export const contactContent = {
         note: "Attach file. File size of your documents should not exceed 10MB"
       },
       submitButton: "SUBMIT"
+    },
+    landscapePrompt: {
+      title: "Please Rotate Your Device",
+      description: "For the best experience, please rotate your device to landscape mode",
+      button: "I'm in Landscape"
     }
   }
 };

@@ -21,7 +21,7 @@ import videoSrc from '../assets/map-background-video.mp4';
 
 const ContactForm = () => {
   const { content } = useLanguage();
-  const { contactInfo, form } = content.contact;
+  const { contactInfo, form, landscapePrompt } = content.contact;
   const room2Config = content.room2;
 
   const [formData, setFormData] = useState({
@@ -114,20 +114,92 @@ const ContactForm = () => {
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
                   (window.innerWidth <= 768);
   
-  // 檢測是否為橫屏
+  // 檢測是否為橫屏（針對 iPad 優化，使用多種方法綜合判斷）
   const checkIsLandscape = useCallback(() => {
-    // 優先使用 window.screen.orientation API（更準確）
+    // 收集所有可用的檢測結果
+    const results = [];
+    
+    // 方法1: 使用 visualViewport API（最準確，特別是在 iPad Safari 上）
+    if (window.visualViewport) {
+      const vw = window.visualViewport;
+      if (vw.width && vw.height) {
+        const ratio = vw.width / vw.height;
+        if (ratio > 1.05) results.push(true);
+        else if (ratio < 0.95) results.push(false);
+      }
+    }
+    
+    // 方法2: 使用 window.screen.orientation API
     if (window.screen && window.screen.orientation) {
       const angle = window.screen.orientation.angle;
-      return angle === 90 || angle === -90 || angle === 270;
+      // 標準化角度到 0-360 範圍
+      const normalizedAngle = ((angle % 360) + 360) % 360;
+      if (normalizedAngle === 90 || normalizedAngle === 270) {
+        results.push(true);
+      } else if (normalizedAngle === 0 || normalizedAngle === 180) {
+        results.push(false);
+      }
     }
-    // 備用方案：使用 matchMedia
+    
+    // 方法3: 使用 matchMedia
     if (window.matchMedia) {
-      return window.matchMedia('(orientation: landscape)').matches;
+      const landscapeQuery = window.matchMedia('(orientation: landscape)');
+      const portraitQuery = window.matchMedia('(orientation: portrait)');
+      if (landscapeQuery.matches) {
+        results.push(true);
+      } else if (portraitQuery.matches) {
+        results.push(false);
+      }
     }
-    // 最後備用方案：使用窗口尺寸
-    return window.innerWidth > window.innerHeight || 
-           (window.screen && window.screen.width > window.screen.height);
+    
+    // 方法4: 使用 window.innerWidth/Height（會隨方向變化）
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    if (width && height && width !== height) {
+      const ratio = width / height;
+      // 使用更寬鬆的閾值，避免 iPad 上的邊界情況
+      if (ratio > 1.05) {
+        results.push(true);
+      } else if (ratio < 0.95) {
+        results.push(false);
+      }
+    }
+    
+    // 方法5: 使用 document.documentElement.clientWidth/Height
+    const docWidth = document.documentElement.clientWidth;
+    const docHeight = document.documentElement.clientHeight;
+    if (docWidth && docHeight && docWidth !== docHeight) {
+      const ratio = docWidth / docHeight;
+      if (ratio > 1.05) {
+        results.push(true);
+      } else if (ratio < 0.95) {
+        results.push(false);
+      }
+    }
+    
+    // 統計結果：如果大部分方法都認為是橫屏，則返回 true
+    const trueCount = results.filter(r => r === true).length;
+    const falseCount = results.filter(r => r === false).length;
+    
+    // 如果有明確的結果，使用多數決
+    if (trueCount > falseCount) return true;
+    if (falseCount > trueCount) return false;
+    
+    // 如果結果相等或沒有結果，使用最可靠的方法作為最終判斷
+    // 優先使用 visualViewport，然後是 innerWidth/Height
+    if (window.visualViewport) {
+      const vw = window.visualViewport;
+      if (vw.width && vw.height) {
+        return vw.width > vw.height;
+      }
+    }
+    
+    if (width && height) {
+      return width > height;
+    }
+    
+    // 默认返回 false（保守策略）
+    return false;
   }, []);
 
   // 关闭 header menu 的辅助函数
@@ -233,9 +305,16 @@ const ContactForm = () => {
     // 使用 ref 来避免依赖 showLandscapePrompt，防止不必要的重新绑定
     const handleOrientationChange = () => {
       if (isMobile) {
-        // 使用 setTimeout 确保在方向变化后检查
-        setTimeout(() => {
+        // 在 iPad 上，方向變化後需要更長時間才能正確檢測
+        // 使用多次檢查確保準確性
+        let checkCount = 0;
+        const maxChecks = 5;
+        const checkInterval = 100; // 每 100ms 檢查一次
+        
+        const performCheck = () => {
+          checkCount++;
           const isLandscape = checkIsLandscape();
+          
           // 使用函数式更新来获取最新的状态
           setShowLandscapePrompt(prev => {
             // 如果提示正在顯示且已轉為橫屏，關閉提示並打開 room2
@@ -247,7 +326,15 @@ const ContactForm = () => {
             }
             return prev;
           });
-        }, 200);
+          
+          // 如果還沒達到最大檢查次數，繼續檢查
+          if (checkCount < maxChecks) {
+            setTimeout(performCheck, checkInterval);
+          }
+        };
+        
+        // 第一次檢查延遲更長，讓系統有時間更新
+        setTimeout(performCheck, 300);
       }
     };
     
@@ -488,8 +575,8 @@ const ContactForm = () => {
             </button>
             <div className="landscape-prompt-content">
               <div className="landscape-prompt-icon">📱</div>
-              <h2>請將手機橫向瀏覽</h2>
-              <p>為了獲得最佳體驗，請將您的手機旋轉為橫向模式</p>
+              <h2>{landscapePrompt.title}</h2>
+              <p>{landscapePrompt.description}</p>
               <button
                 type="button"
                 className="landscape-prompt-button"
@@ -503,7 +590,7 @@ const ContactForm = () => {
                   }
                 }}
               >
-                我已橫屏
+                {landscapePrompt.button}
               </button>
             </div>
           </div>
