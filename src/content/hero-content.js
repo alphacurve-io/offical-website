@@ -17,7 +17,7 @@ export const heroContent = {
     },
     footer: "顧問式技術團隊｜降低開發風險｜加速產品落地｜AI 顧問・自動化・企業系統開發・技術諮詢",
     video: {
-      src: "hero-section-background-video.mp4",
+      src: "hero-section-background-video-540p.mp4",
       type: "video/mp4"
     }
   },
@@ -38,7 +38,7 @@ export const heroContent = {
     },
     footer: "Consulting Tech Team | Reduce Risk | Accelerate Landing | AI Consulting · Automation · Enterprise Systems · Tech Advisory",
     video: {
-      src: "hero-section-background-video.mp4",
+      src: "hero-section-background-video-540p.mp4",
       type: "video/mp4"
     }
   }

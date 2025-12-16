@@ -80,6 +80,10 @@ const SEOHead = ({ language = 'zh' }) => {
       <meta name="keywords" content={content.keywords} />
       <meta name="author" content="Alphacurve.io" />
       
+      {/* Google AI Training Control */}
+      {/* 允許用於搜索索引，但不允許用於 AI 訓練 */}
+      <meta name="robots" content="index, follow, noai, noimageai" />
+      
       {/* Canonical URL */}
       <link rel="canonical" href={baseUrl} />
       

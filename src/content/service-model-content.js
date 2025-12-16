@@ -19,7 +19,7 @@ export const serviceModelContent = {
           subtitle: "Consulting",
           slogan: "讓方向先對再開發",
           description: "釐清需求、驗證可行性，並提供技術與商業角度的完整分析。",
-          image: "services/consulting.png", // 圖片路徑：src/assets/services/consulting.png
+          image: "services/consulting.jpg", // 圖片路徑：src/assets/services/consulting.jpg
           benefits: [
             "需求拆解與目標對齊",
             "系統功能可行性分析",
@@ -36,7 +36,7 @@ export const serviceModelContent = {
           subtitle: "Architecture & Planning",
           slogan: "打造可長期維護的技術藍圖",
           description: "在方向明確後，我們會協助您制定完整的系統規劃。",
-          image: "services/planning.png", // 圖片路徑：src/assets/services/planning.jpg
+          image: "services/planning.jpg", // 圖片路徑：src/assets/services/planning.jpg
           benefits: [
             "系統與使用流程圖",
             "資料流與資料結構設計",
@@ -53,7 +53,7 @@ export const serviceModelContent = {
           subtitle: "Development & Integration",
           slogan: "讓系統更完整、更安全、更穩定",
           description: "依據規格書進行系統開發，並確保品質、安全性與擴充性。",
-          image: "services/development.png", // 圖片路徑：src/assets/services/development.png
+          image: "services/development.jpg", // 圖片路徑：src/assets/services/development.jpg
           benefits: [
             "企業應用服務客製化開發",
             "後台管理 / CRM / 會員系統",
@@ -70,7 +70,7 @@ export const serviceModelContent = {
           subtitle: "Maintenance & Optimization",
           slogan: "無需再為技術煩惱，專注核心業務",
           description: "協助企業維持系統穩定運作，並持續根據業務需求進行優化。",
-          image: "services/maintenance.png", // 圖片路徑：src/assets/services/maintenance.png
+          image: "services/maintenance.jpg", // 圖片路徑：src/assets/services/maintenance.jpg
           benefits: [
             "優化建議與技術傾聽",
             "功能巡檢與資安檢查",
@@ -92,7 +92,7 @@ export const serviceModelContent = {
           icon: "❗",
           figcaption: "可用性風險",
           title: "做出來不能用？",
-          image: "reasons/reason1.png",
+          image: "reasons/reason1.jpg",
           subtitle: "要降低開發風險，避免做錯方向，多數專案失敗不是因為技術問題，而是方向問題。",
           buttonText: "這是什麼風險？",
           filters: [
@@ -108,7 +108,7 @@ export const serviceModelContent = {
           icon: "💬",
           figcaption: "預期管理",
           title: "溝通不順利？",
-          image: "reasons/reason2.png",
+          image: "reasons/reason2.jpg",
           subtitle: "減少溝通成本與認知落差，透明流程與清晰輸出＝溝通效率全面提升。",
           buttonText: "為什麼會這樣？",
           filters: [
@@ -124,7 +124,7 @@ export const serviceModelContent = {
           icon: "💰",
           figcaption: "資金風險",
           title: "預算超支？",
-          image: "reasons/reason3.png",
+          image: "reasons/reason3.jpg",
           subtitle: "讓預算與時程更可控，需要充足的資訊（需客製?第三方限制?需額外開發?）",
           buttonText: "如何避免？",
           filters: [
@@ -140,7 +140,7 @@ export const serviceModelContent = {
           icon: "🎯",
           figcaption: "實現性風險",
           title: "怕選錯團隊？",
-          image: "reasons/reason4.png",
+          image: "reasons/reason4.jpg",
           subtitle: "協助企業做出最適合的技術選擇，不是比較價格，而是比較風險、擴充性與可維護性。",
           buttonText: "如何選擇？",
           filters: [
@@ -257,7 +257,7 @@ export const serviceModelContent = {
             slogan: "Get the direction right before development",
             description:
               "Clarify requirements, verify feasibility, and conduct both technical and business analysis.",
-            image: "services/consulting.png", // Image path: src/assets/services/consulting.jpg
+            image: "services/consulting.jpg", // Image path: src/assets/services/consulting.jpg
             benefits: [
               "Requirement breakdown & goal alignment",
               "System feasibility analysis",
@@ -275,7 +275,7 @@ export const serviceModelContent = {
             slogan: "Build a maintainable technical foundation",
             description:
               "Once direction is validated, we create a complete and executable system plan.",
-            image: "services/planning.png", // Image path: src/assets/services/planning.jpg
+            image: "services/planning.jpg", // Image path: src/assets/services/planning.jpg
             benefits: [
               "System & user flow diagrams",
               "Data flow & structure design",
@@ -294,7 +294,7 @@ export const serviceModelContent = {
             slogan: "Build systems that are complete, secure, and scalable",
             description:
               "We develop according to specifications, ensuring quality, security, and long-term maintainability.",
-            image: "services/development.png", // Image path: src/assets/services/development.png
+            image: "services/development.jpg", // Image path: src/assets/services/development.jpg
             benefits: [
               "Custom enterprise application development",
               "Admin panels, CRM, membership systems",
@@ -313,7 +313,7 @@ export const serviceModelContent = {
             slogan: "Reduce technical burden—focus on your core business",
             description:
               "We ensure long-term system stability and continuously optimize based on business needs.",
-            image: "services/maintenance.png", // Image path: src/assets/services/maintenance.png
+            image: "services/maintenance.jpg", // Image path: src/assets/services/maintenance.jpg
             benefits: [
               "Optimization suggestions & technical advisory",
               "Feature inspection & security reviews",
@@ -334,7 +334,7 @@ export const serviceModelContent = {
           icon: "❗",
           figcaption: "Usability Risk",
           title: "Built but unusable?",
-          image: "reasons/reason1.png",
+          image: "reasons/reason1.jpg",
           subtitle: "Most failures come from unclear direction—not technology.",
           buttonText: "What is this risk?",
           problems: [
@@ -350,7 +350,7 @@ export const serviceModelContent = {
           icon: "💬",
           figcaption: "Expectation Mgmt",
           title: "Communication issues?",
-          image: "reasons/reason2.png",
+          image: "reasons/reason2.jpg",
           subtitle: "Reduce misalignment and communication overhead with clear outputs.",
           buttonText: "Why is this happening?",
           problems: [
@@ -366,7 +366,7 @@ export const serviceModelContent = {
           icon: "💰",
           figcaption: "Funding Risk",
           title: "Budget\noverruns?",
-          image: "reasons/reason3.png",
+          image: "reasons/reason3.jpg",
           subtitle: "Predictable budgets require clear information and risk visibility.",
           buttonText: "How to avoid?",
           benefits: [
@@ -382,7 +382,7 @@ export const serviceModelContent = {
           icon: "🎯",
           figcaption: "Feasibility Risk",
           title: "Choosing the right team?",
-          image: "reasons/reason4.png",
+          image: "reasons/reason4.jpg",
           subtitle: "Choose based on risk, scalability, maintainability—not price alone.",
           buttonText: "How to choose?",
           filters: [

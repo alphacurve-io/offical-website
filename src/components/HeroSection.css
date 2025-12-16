@@ -469,5 +469,20 @@
   transform: translate(-50%, -50%);
   object-fit: cover;  /* 讓影片大小自動裁切貼合容器 */
   z-index: 0;        /* 使影片在內容後面 */
-  opacity: 0.1; 
+  opacity: 0;
+  transition: opacity 0.5s ease-in;
+}
+
+.hero-section-video.video-loaded {
+  opacity: 0.1;
+}
+
+.hero-section-video-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #0a0a0a;
+  z-index: 0;
 }

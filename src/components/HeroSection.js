@@ -1,18 +1,57 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './HeroSection.css';
 import { useLanguage } from '../contexts/LanguageContext';
-import videoSrc from '../assets/hero-section-background-video.mp4';
+import videoSrc from '../assets/hero-section-background-video-540p.mp4';
 
 const HeroSection = () => {
   const { content, language } = useLanguage();
   const heroContent = content.hero;
   const videoRef = useRef(null);
+  const videoContainerRef = useRef(null);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
+  // Intersection Observer 延迟加载视频
   useEffect(() => {
-    if (videoRef.current) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !shouldLoadVideo) {
+            setShouldLoadVideo(true);
+          }
+        });
+      },
+      {
+        rootMargin: '50px', // 提前 50px 开始加载
+        threshold: 0.1,
+      }
+    );
+
+    // 复制 ref 值到变量中，用于清理函数
+    const currentContainer = videoContainerRef.current;
+    
+    if (currentContainer) {
+      observer.observe(currentContainer);
+    }
+
+    return () => {
+      if (currentContainer) {
+        observer.unobserve(currentContainer);
+      }
+    };
+  }, [shouldLoadVideo]);
+
+  // 设置视频播放速度
+  useEffect(() => {
+    if (videoRef.current && shouldLoadVideo) {
       videoRef.current.playbackRate = 0.7;
     }
-  }, []);
+  }, [shouldLoadVideo]);
+
+  // 视频加载完成处理
+  const handleVideoLoaded = () => {
+    setIsVideoLoaded(true);
+  };
 
   const handleScrollToWhyConsulting = () => {
     const element = document.getElementById('why-consulting');
@@ -81,17 +120,26 @@ const HeroSection = () => {
           <p className="hero-footer">{heroContent.footer}</p>
         </div>
       </div>
-      <div className="hero-section-video-container">
-        <video
-          ref={videoRef}
-          className="hero-section-video"
-          autoPlay
-          loop
-          muted
-          playsInline
-        >
-          <source src={videoSrc} type="video/mp4" />
-        </video>
+      <div className="hero-section-video-container" ref={videoContainerRef}>
+        {shouldLoadVideo ? (
+          <video
+            ref={videoRef}
+            className={`hero-section-video ${isVideoLoaded ? 'video-loaded' : ''}`}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            onLoadedData={handleVideoLoaded}
+          >
+            <source src={videoSrc} type="video/mp4" />
+          </video>
+        ) : (
+          <div 
+            className="hero-section-video-placeholder"
+            aria-hidden="true"
+          />
+        )}
       </div>
       {/* The script tag was likely intended to be removed or handled differently in a React context. */}
       {/* <script src="./HeroSectionVideo.js"></script> */}
