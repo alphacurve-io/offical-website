@@ -128,6 +128,25 @@
             }
         }
 
+        // 從 URL 讀取音頻配置（由 React 傳入）
+        function getAudioConfig() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const raw = params.get('audioConfig');
+                if (!raw) return null;
+                const decoded = decodeURIComponent(raw);
+                const parsed = JSON.parse(decoded);
+                // 如果 mp3 路徑為空，返回 null
+                if (!parsed.mp3 || parsed.mp3.trim() === '') {
+                    return null;
+                }
+                return parsed;
+            } catch (e) {
+                console.warn('Failed to parse audio config:', e);
+                return null;
+            }
+        }
+
         function hexToColorNumber(hex, fallback) {
             if (!hex || typeof hex !== 'string') return fallback;
             const cleaned = hex.replace('#', '');
@@ -811,6 +830,118 @@
         const walls = createWalls();
         scene.add(walls);
 
+        // 加載聖誕樹模型並放在白板右邊角落
+        let christmasTree = null;
+        async function loadChristmasTree() {
+            try {
+                const loader = new THREE.GLTFLoader();
+                loader.load(
+                    '/assets/3d-models/Meshy_AI_Tree_1216180243_texture.glb',
+                    (gltf) => {
+                        christmasTree = gltf.scene;
+                        
+                        // 啟用陰影
+                        christmasTree.traverse((child) => {
+                            if (child.isMesh) {
+                                child.castShadow = true;
+                                child.receiveShadow = true;
+                            }
+                        });
+                        
+                        // 計算模型的邊界框以進行縮放
+                        const box = new THREE.Box3().setFromObject(christmasTree);
+                        const size = box.getSize(new THREE.Vector3());
+                        const maxDimension = Math.max(size.x, size.y, size.z);
+                        
+                        // 將模型縮放到合適的大小（約 1.5 單位高）
+                        const targetHeight = 7;
+                        const scale = targetHeight / maxDimension;
+                        christmasTree.scale.set(scale, scale, scale);
+                        
+                        // 調整模型位置，使其底部在地面上
+                        const center = box.getCenter(new THREE.Vector3());
+                        const bottomY = box.min.y;
+                        const groundY = -bottomY * scale; // 地面位置（y = 0）
+                        
+                        // 白板位置：board.position.set(0, 3, -5.89)
+                        // 白板尺寸：寬度5，高度2.5
+                        // 白板右邊角落（地面位置）：X = 5.5（白板中心0 + 寬度的一半2.5），Y = 0（地面），Z = -5.8（稍微在白板前面）
+                        christmasTree.position.set(5.5, groundY, -5.8);
+                        
+                        // 讓聖誕樹稍微旋轉，面向房間
+                        christmasTree.rotation.y = Math.PI / 4;
+                        
+                        scene.add(christmasTree);
+                        console.log('✅ 聖誕樹加載成功，位置：白板右邊角落');
+                    },
+                    undefined,
+                    (error) => {
+                        console.warn('⚠️ 聖誕樹模型加載失敗:', error);
+                    }
+                );
+            } catch (error) {
+                console.warn('⚠️ 聖誕樹加載失敗:', error);
+            }
+        }
+        
+        // 開始加載聖誕樹
+        loadChristmasTree();
+
+        // 加載貓咪模型並放在聖誕樹右邊
+        let gingerCat = null;
+        async function loadGingerCat() {
+            try {
+                const loader = new THREE.GLTFLoader();
+                loader.load(
+                    '/assets/3d-models/Meshy_AI_Chubby_Ginger_Cat_1216181015_texture.glb',
+                    (gltf) => {
+                        gingerCat = gltf.scene;
+                        
+                        // 啟用陰影
+                        gingerCat.traverse((child) => {
+                            if (child.isMesh) {
+                                child.castShadow = true;
+                                child.receiveShadow = true;
+                            }
+                        });
+                        
+                        // 計算模型的邊界框以進行縮放
+                        const box = new THREE.Box3().setFromObject(gingerCat);
+                        const size = box.getSize(new THREE.Vector3());
+                        const maxDimension = Math.max(size.x, size.y, size.z);
+                        
+                        // 將模型縮放到合適的大小（約 0.5 單位高，比聖誕樹小）
+                        const targetHeight = 2;
+                        const scale = targetHeight / maxDimension;
+                        gingerCat.scale.set(scale, scale, scale);
+                        
+                        // 調整模型位置，使其底部在地面上
+                        const center = box.getCenter(new THREE.Vector3());
+                        const bottomY = box.min.y;
+                        const groundY = -bottomY * scale; // 地面位置（y = 0）
+                        
+                        // 聖誕樹位置：X = 5.5，貓咪放在右邊，X = 7.5
+                        gingerCat.position.set(7.5, groundY, -5.8);
+                        
+                        // 讓貓咪面向房間（順時針旋轉90度，從 Math.PI/4 變成 3*Math.PI/4）
+                        gingerCat.rotation.y = Math.PI / 4 - Math.PI / 2;
+                        
+                        scene.add(gingerCat);
+                        console.log('✅ 貓咪加載成功，位置：聖誕樹右邊');
+                    },
+                    undefined,
+                    (error) => {
+                        console.warn('⚠️ 貓咪模型加載失敗:', error);
+                    }
+                );
+            } catch (error) {
+                console.warn('⚠️ 貓咪加載失敗:', error);
+            }
+        }
+        
+        // 開始加載貓咪
+        loadGingerCat();
+
         // 對話氣泡（HTML overlay，移動端優化）
         const bubble = document.createElement('div');
         bubble.className = 'room2-speech-bubble';
@@ -837,6 +968,41 @@
         // 更新 kid1 的對話消息（如果已經加載）
         if (kid1 && textContent?.kid1Message) {
             kid1.userData.messages = [textContent.kid1Message];
+        }
+        
+        // 讀取音頻配置並播放音頻
+        const audioConfig = getAudioConfig();
+        let backgroundAudio = null;
+        if (audioConfig && audioConfig.mp3) {
+            try {
+                backgroundAudio = new Audio(audioConfig.mp3);
+                backgroundAudio.loop = audioConfig.loop === true;
+                backgroundAudio.volume = 0.5; // 設置音量為 50%
+                
+                // 嘗試自動播放（可能需要用戶交互）
+                backgroundAudio.play().then(() => {
+                    console.log('✅ 背景音樂開始播放:', audioConfig.mp3);
+                }).catch((error) => {
+                    console.warn('⚠️ 自動播放失敗，需要用戶交互:', error);
+                    // 如果自動播放失敗，在用戶第一次點擊時播放
+                    const playOnInteraction = () => {
+                        if (backgroundAudio && backgroundAudio.paused) {
+                            backgroundAudio.play().then(() => {
+                                console.log('✅ 背景音樂開始播放（用戶交互後）');
+                            }).catch((err) => {
+                                console.warn('⚠️ 播放失敗:', err);
+                            });
+                            // 移除事件監聽器，只播放一次
+                            document.removeEventListener('click', playOnInteraction);
+                            document.removeEventListener('touchstart', playOnInteraction);
+                        }
+                    };
+                    document.addEventListener('click', playOnInteraction, { once: true });
+                    document.addEventListener('touchstart', playOnInteraction, { once: true });
+                });
+            } catch (error) {
+                console.warn('⚠️ 音頻加載失敗:', error);
+            }
         }
         
         // 聊天提示對話框（移動端優化）

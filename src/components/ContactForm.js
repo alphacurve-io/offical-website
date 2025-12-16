@@ -441,6 +441,13 @@ const ContactForm = () => {
       const textContentEncoded = encodeURIComponent(JSON.stringify(textContent));
       base = `${base}&textContent=${textContentEncoded}`;
       
+      // 添加音頻配置
+      const audioConfig = room2Config?.audioConfig || {};
+      if (audioConfig.mp3) {
+        const audioConfigEncoded = encodeURIComponent(JSON.stringify(audioConfig));
+        base = `${base}&audioConfig=${audioConfigEncoded}`;
+      }
+      
       return base;
     } catch (e) {
       console.warn('Failed to encode room2 config', e);

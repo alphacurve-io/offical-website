@@ -16,6 +16,12 @@ export const room2Content = {
     loadingText: '思考中...',
     errorText: '抱歉，發生錯誤，請稍後再試。',
     kid1Message: '安靜！我快要想出解決辦法了...',
+    // 音頻配置：mp3 文件路徑（相對於 public 目錄），留空則不播放
+    // loop: true 表示重複播放，false 表示只播放一次
+    audioConfig: {
+      mp3: 'assets/audio/chrismas.MP3', // 例如：'/assets/audio/background.mp3'
+      loop: false, // 是否重複播放
+    },
     people: [
       { 
         bodyColor: '#2c5f2d',
@@ -76,6 +82,12 @@ export const room2Content = {
     loadingText: 'Thinking...',
     errorText: 'Sorry, an error occurred. Please try again later.',
     kid1Message: 'Quiet! I\'m about to figure out the solution...',
+    // Audio config: mp3 file path (relative to public directory), leave empty to disable
+    // loop: true for repeat, false for play once
+    audioConfig: {
+      mp3: 'assets/audio/chrismas.mp3', // e.g., '/assets/audio/background.mp3'
+      loop: false, // whether to loop
+    },
     people: [
       { 
         bodyColor: '#2c5f2d',
