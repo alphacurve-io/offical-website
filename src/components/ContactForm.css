@@ -285,6 +285,10 @@
   }
   
   .map-pin-wrapper {
+    /* 防止图片相关的上下文菜单 */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
     position: absolute;
     /* 以原本 pin 的位置為基準 */
     top: 335.695px;
@@ -302,6 +306,30 @@
     position: relative;
     z-index: 1;
     transition: transform 0.3s ease-in-out;
+    /* 防止移动端长按触发右键菜单 */
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    /* 完全阻止图片相关的上下文菜单和拖拽 */
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    pointer-events: auto;
+  }
+  
+  /* 针对 SVG 内部的元素也应用这些样式 */
+  .map-pin-icon svg,
+  .map-pin-icon svg * {
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
   }
   
   .map-pin-icon:hover {
@@ -419,15 +447,122 @@
 }
 
 /* 3D 會議室浮動視窗 */
-.room2-modal-overlay {
+  /* 橫屏提示樣式 */
+  .landscape-prompt-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001; /* 确保在 header (z-index: 1000) 上方 */
+  }
+
+  .landscape-prompt-modal {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 40px 30px;
+    max-width: 90%;
+    width: 400px;
+    position: relative;
+    color: white;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .landscape-prompt-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 28px;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: background 0.2s;
+  }
+
+  .landscape-prompt-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .landscape-prompt-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .landscape-prompt-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: rotate 2s ease-in-out infinite;
+  }
+
+  @keyframes rotate {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(90deg); }
+  }
+
+  .landscape-prompt-content h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+
+  .landscape-prompt-content p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    opacity: 0.9;
+  }
+
+  .landscape-prompt-button {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid white;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .landscape-prompt-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+  }
+
+  .room2-modal-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.55);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    z-index: 10001; /* 确保在 header (z-index: 1000) 上方 */
     backdrop-filter: blur(4px);
+}
+
+/* 当 room2 打开时，强制隐藏 header 和 menu */
+body.room2-open .header {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+body.room2-open .header-nav {
+    display: none !important;
+    visibility: hidden !important;
 }
 
 .room2-modal {
@@ -449,9 +584,9 @@
 
 .room2-modal-close {
     position: absolute;
-    top: 10px;
+    bottom: 45px; /* 从 10px 改为 20px，避免超出上方可视区域 */
     right: 14px;
-    z-index: 2;
+    z-index: 10002; /* 确保关闭按钮在最上层 */
     width: 32px;
     height: 32px;
     border-radius: 999px;

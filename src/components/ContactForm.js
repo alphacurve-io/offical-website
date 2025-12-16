@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 import './ContactForm.css';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -107,9 +107,50 @@ const ContactForm = () => {
   const [isPressing, setIsPressing] = useState(false);
   const [pressProgress, setPressProgress] = useState(0);
   const [showRoom, setShowRoom] = useState(false);
+  const [showLandscapePrompt, setShowLandscapePrompt] = useState(false);
   const pressTimerRef = useRef(null);
+  
+  // 檢測是否為移動設備
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
+                  (window.innerWidth <= 768);
+  
+  // 檢測是否為橫屏
+  const checkIsLandscape = useCallback(() => {
+    // 優先使用 window.screen.orientation API（更準確）
+    if (window.screen && window.screen.orientation) {
+      const angle = window.screen.orientation.angle;
+      return angle === 90 || angle === -90 || angle === 270;
+    }
+    // 備用方案：使用 matchMedia
+    if (window.matchMedia) {
+      return window.matchMedia('(orientation: landscape)').matches;
+    }
+    // 最後備用方案：使用窗口尺寸
+    return window.innerWidth > window.innerHeight || 
+           (window.screen && window.screen.width > window.screen.height);
+  }, []);
 
-  const startLongPress = () => {
+  // 关闭 header menu 的辅助函数
+  const closeHeaderMenu = useCallback(() => {
+    const headerNav = document.querySelector('.header-nav');
+    
+    // 移除 open class
+    if (headerNav) {
+      headerNav.classList.remove('open');
+      // 强制隐藏 menu（使用 !important 级别的样式）
+      headerNav.style.display = 'none';
+    }
+    
+    // 注意：这里不能直接修改 Header 组件的状态，但可以通过移除 class 来关闭 menu
+  }, []);
+
+  const startLongPress = (e) => {
+    // 阻止默认行为（防止触发右键菜单）
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     // 僅在桌機上顯示 tooltip 的邏輯保留，長按另行處理
     if (pressTimerRef.current) {
       clearInterval(pressTimerRef.current);
@@ -117,7 +158,9 @@ const ContactForm = () => {
     setIsPressing(true);
     setPressProgress(0);
 
-    const duration = 1500; // 長按 1.5 秒到 100%
+    // 手機版使用更短的長按時間（0.8秒），避免觸發系統菜單（通常約1秒）
+    // 桌面版保持較長的時間（1.5秒）以提供更好的用戶體驗
+    const duration = isMobile ? 300 : 1000;
     const startTime = Date.now();
 
     pressTimerRef.current = setInterval(() => {
@@ -130,12 +173,30 @@ const ContactForm = () => {
         pressTimerRef.current = null;
         setIsPressing(false);
         trackRoom2Enter('long_press_logo', elapsed);
-        setShowRoom(true);
+        
+        // 先关闭 header menu（避免横屏时冲突）
+        closeHeaderMenu();
+        
+        // 在移動設備上，檢查是否為橫屏
+        if (isMobile && !checkIsLandscape()) {
+          // 顯示橫屏提示，不打開 room2
+          setShowLandscapePrompt(true);
+        } else {
+          // 橫屏或非移動設備，直接打開 room2
+          // 手機版：立即顯示，不等待 iframe 加載完成
+          setShowRoom(true);
+        }
       }
-    }, 30);
+    }, isMobile ? 20 : 30); // 手機版更頻繁更新進度條（每 20ms），讓進度更流暢
   };
 
-  const cancelLongPress = () => {
+  const cancelLongPress = (e) => {
+    // 阻止默认行为
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (pressTimerRef.current) {
       clearInterval(pressTimerRef.current);
       pressTimerRef.current = null;
@@ -143,14 +204,132 @@ const ContactForm = () => {
     setIsPressing(false);
     setPressProgress(0);
   };
+  
+  // 阻止右键菜单和图片相关的上下文菜单
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  };
+  
+  // 阻止拖拽（拖拽图片也可能触发上下文菜单）
+  const handleDragStart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  };
 
   useEffect(() => {
+    // 清理函数：清除长按计时器
     return () => {
       if (pressTimerRef.current) {
         clearInterval(pressTimerRef.current);
       }
     };
   }, []);
+
+  useEffect(() => {
+    // 監聽屏幕方向變化（在父窗口中）
+    // 使用 ref 来避免依赖 showLandscapePrompt，防止不必要的重新绑定
+    const handleOrientationChange = () => {
+      if (isMobile) {
+        // 使用 setTimeout 确保在方向变化后检查
+        setTimeout(() => {
+          const isLandscape = checkIsLandscape();
+          // 使用函数式更新来获取最新的状态
+          setShowLandscapePrompt(prev => {
+            // 如果提示正在顯示且已轉為橫屏，關閉提示並打開 room2
+            if (prev && isLandscape) {
+              // 先关闭 header menu（避免横屏时冲突）
+              closeHeaderMenu();
+              setShowRoom(true);
+              return false;
+            }
+            return prev;
+          });
+        }, 200);
+      }
+    };
+    
+    // 監聽多種方向變化事件
+    if (window.screen && window.screen.orientation) {
+      window.screen.orientation.addEventListener('change', handleOrientationChange);
+    }
+    window.addEventListener('orientationchange', handleOrientationChange);
+    // 移除 resize 监听，避免频繁触发（orientationchange 已经足够）
+    // window.addEventListener('resize', handleOrientationChange);
+    
+    if (window.matchMedia) {
+      const mediaQuery = window.matchMedia('(orientation: landscape)');
+      mediaQuery.addEventListener('change', handleOrientationChange);
+    }
+    
+    return () => {
+      if (window.screen && window.screen.orientation) {
+        window.screen.orientation.removeEventListener('change', handleOrientationChange);
+      }
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      // window.removeEventListener('resize', handleOrientationChange);
+      if (window.matchMedia) {
+        const mediaQuery = window.matchMedia('(orientation: landscape)');
+        mediaQuery.removeEventListener('change', handleOrientationChange);
+      }
+    };
+  }, [isMobile, checkIsLandscape, closeHeaderMenu]); // 添加 closeHeaderMenu 到依赖数组
+
+  // 当 room2 打开时隐藏 header（包括展开的菜单）
+  useEffect(() => {
+    const header = document.querySelector('.header');
+    const headerNav = document.querySelector('.header-nav');
+    const body = document.body;
+    
+    if (showRoom) {
+      // 先关闭 menu
+      closeHeaderMenu();
+      
+      // 在 body 上添加 class，用于 CSS 强制隐藏
+      body.classList.add('room2-open');
+      
+      // 隐藏 header
+      if (header) {
+        header.style.display = 'none';
+        header.style.visibility = 'hidden';
+      }
+      // 强制隐藏移动端菜单
+      if (headerNav) {
+        headerNav.classList.remove('open');
+        headerNav.style.display = 'none';
+        headerNav.style.visibility = 'hidden';
+      }
+    } else {
+      // 移除 body class
+      body.classList.remove('room2-open');
+      
+      // 恢复 header
+      if (header) {
+        header.style.display = '';
+        header.style.visibility = '';
+      }
+      // 恢复 menu（但不自动打开）
+      if (headerNav) {
+        headerNav.style.display = '';
+        headerNav.style.visibility = '';
+      }
+    }
+
+    // 清理函数：确保在组件卸载时恢复 header
+    return () => {
+      body.classList.remove('room2-open');
+      if (header) {
+        header.style.display = '';
+        header.style.visibility = '';
+      }
+      if (headerNav) {
+        headerNav.style.display = '';
+        headerNav.style.visibility = '';
+      }
+    };
+  }, [showRoom, closeHeaderMenu]); // 添加 closeHeaderMenu 到依赖数组
 
   const room2Url = React.useMemo(() => {
     try {
@@ -242,7 +421,12 @@ const ContactForm = () => {
         
         <div className="contact-map-container">
           <div className="map">
-            <div className="map-pin-wrapper">
+            <div 
+              className="map-pin-wrapper" 
+              id="map-pin"
+              onContextMenu={handleContextMenu}
+              onDragStart={handleDragStart}
+            >
               <MapPinIcon
                 className="map-pin-icon"
                 onClick={handleMapPinClick}
@@ -253,6 +437,9 @@ const ContactForm = () => {
                 onTouchStart={startLongPress}
                 onTouchEnd={cancelLongPress}
                 onTouchCancel={cancelLongPress}
+                onContextMenu={handleContextMenu}
+                onDragStart={handleDragStart}
+                draggable="false"
               />
               {isPressing && (
                 <div className="map-press-progress">
@@ -288,6 +475,41 @@ const ContactForm = () => {
       </div>
       <script src="./MapSectionVideo.js"></script>
       {/* video section end */}
+      {/* 橫屏提示（在打開 room2 之前顯示） */}
+      {showLandscapePrompt && (
+        <div className="landscape-prompt-overlay" onClick={() => setShowLandscapePrompt(false)}>
+          <div className="landscape-prompt-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="landscape-prompt-close"
+              onClick={() => setShowLandscapePrompt(false)}
+            >
+              ×
+            </button>
+            <div className="landscape-prompt-content">
+              <div className="landscape-prompt-icon">📱</div>
+              <h2>請將手機橫向瀏覽</h2>
+              <p>為了獲得最佳體驗，請將您的手機旋轉為橫向模式</p>
+              <button
+                type="button"
+                className="landscape-prompt-button"
+                onClick={() => {
+                  setShowLandscapePrompt(false);
+                  // 先关闭 header menu（避免横屏时冲突）
+                  closeHeaderMenu();
+                  // 再次檢查，如果已經橫屏則打開 room2
+                  if (checkIsLandscape()) {
+                    setShowRoom(true);
+                  }
+                }}
+              >
+                我已橫屏
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {showRoom && (
         <div className="room2-modal-overlay" onClick={() => setShowRoom(false)}>
           <div className="room2-modal" onClick={(e) => e.stopPropagation()}>
@@ -299,9 +521,12 @@ const ContactForm = () => {
               ×
             </button>
             <iframe
+              key={room2Url} // 使用 key 确保只有在 URL 改变时才重新加载 iframe
               title="3D Meeting Room"
               src={room2Url}
               className="room2-iframe"
+              loading="eager"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             />
           </div>
         </div>

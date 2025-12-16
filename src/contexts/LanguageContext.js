@@ -9,6 +9,7 @@ import { contactContent } from '../content/contact-content';
 import { room2Content } from '../content/room2-content';
 import { footerContent } from '../content/footer-content';
 import { swipeTransitionContent } from '../content/swipe-transition-content';
+import { kid1FollowerContent } from '../content/kid1-follower-content';
 
 const LanguageContext = createContext();
 
@@ -60,6 +61,7 @@ export const LanguageProvider = ({ children }) => {
     contact: contactContent[language],
     footer: footerContent[language],
     room2: room2Content[language],
+    kid1Follower: kid1FollowerContent[language],
   };
 
   return (

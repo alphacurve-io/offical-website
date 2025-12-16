@@ -40,9 +40,60 @@
             margin: 0 0 10px 0;
             color: #1a73e8;
         }
+
+        /* 橫屏提示界面 */
+        #landscape-prompt {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #landscape-prompt.show {
+            display: flex;
+        }
+
+        #landscape-prompt .icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            animation: rotate 2s ease-in-out infinite;
+        }
+
+        @keyframes rotate {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+
+        #landscape-prompt h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        #landscape-prompt p {
+            font-size: 16px;
+            line-height: 1.6;
+            max-width: 300px;
+        }
     </style>
 </head>
 <body>
+    <!-- 橫屏提示界面 -->
+    <div id="landscape-prompt">
+        <div class="icon">📱</div>
+        <h2>請將手機橫向瀏覽</h2>
+        <p>為了獲得最佳體驗，請將您的手機旋轉為橫向模式</p>
+    </div>
     <!-- <div id="info">
         <h3>🧱 Alphacurve.io Meeting Room</h3>
         <p>Drag mouse to rotate view</p>
@@ -55,6 +106,79 @@
         // 檢測移動設備（在文件開頭定義，供全局使用）
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
                         (window.innerWidth <= 768);
+        
+        // 檢測是否為橫屏（支持 iframe 環境）
+        function isLandscape() {
+            // 優先使用 screen.orientation API（更準確，特別是在 iframe 中）
+            if (screen.orientation) {
+                const angle = screen.orientation.angle;
+                return angle === 90 || angle === -90 || angle === 270;
+            }
+            // 備用方案：使用 matchMedia
+            if (window.matchMedia) {
+                return window.matchMedia('(orientation: landscape)').matches;
+            }
+            // 最後備用方案：使用窗口尺寸（在 iframe 中可能不準確）
+            return window.innerWidth > window.innerHeight || 
+                   window.screen.width > window.screen.height;
+        }
+        
+        // 顯示/隱藏橫屏提示
+        function checkOrientation() {
+            const prompt = document.getElementById('landscape-prompt');
+            if (isMobile && !isLandscape()) {
+                prompt.classList.add('show');
+                // 隱藏 body 內容
+                document.body.style.overflow = 'hidden';
+            } else {
+                prompt.classList.remove('show');
+                // 恢復 body 內容
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // 頁面加載時立即檢查（在 iframe 中也能工作）
+        checkOrientation();
+        
+        // 監聽屏幕方向變化（支持多種方式）
+        if (screen.orientation) {
+            // 使用 screen.orientation API（推薦，在 iframe 中也能工作）
+            screen.orientation.addEventListener('change', function() {
+                setTimeout(checkOrientation, 100);
+            });
+        }
+        
+        // 監聽 orientationchange 事件（備用）
+        // 注意：某些瀏覽器在 orientationchange 時可能會重新加載頁面
+        // 我們只更新 UI，不觸發任何可能導致重新加載的操作
+        window.addEventListener('orientationchange', function(e) {
+            // 阻止可能的默認行為
+            e.preventDefault();
+            // 延遲一下再檢查，因為 orientationchange 事件觸發時尺寸可能還沒更新
+            setTimeout(checkOrientation, 200);
+        }, { passive: false });
+        
+        // 監聽窗口大小變化（作為備用方案）
+        // 使用防抖來避免頻繁觸發
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            if (isMobile) {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(function() {
+                    checkOrientation();
+                }, 100);
+            }
+        });
+        
+        // 使用 matchMedia 監聽方向變化（最可靠的方式）
+        if (window.matchMedia) {
+            const mediaQuery = window.matchMedia('(orientation: landscape)');
+            mediaQuery.addEventListener('change', function(e) {
+                if (isMobile) {
+                    checkOrientation();
+                }
+            });
+        }
         
         // 立即定義全局函數，確保在任何時候都可以使用
         window.getCameraAngles = function() {
@@ -992,40 +1116,11 @@
 
         // 移動端專用控制按鈕
         if (isMobile) {
-            // 重置相機按鈕
-            const resetCameraBtn = document.createElement('button');
-            resetCameraBtn.textContent = '🔄';
-            resetCameraBtn.style.position = 'fixed';
-            resetCameraBtn.style.top = '20px';
-            resetCameraBtn.style.right = '20px';
-            resetCameraBtn.style.width = '44px';
-            resetCameraBtn.style.height = '44px';
-            resetCameraBtn.style.borderRadius = '50%';
-            resetCameraBtn.style.background = 'rgba(255, 255, 255, 0.9)';
-            resetCameraBtn.style.border = '2px solid #156697';
-            resetCameraBtn.style.color = '#156697';
-            resetCameraBtn.style.fontSize = '20px';
-            resetCameraBtn.style.cursor = 'pointer';
-            resetCameraBtn.style.zIndex = '999';
-            resetCameraBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-            resetCameraBtn.style.touchAction = 'manipulation';
-            resetCameraBtn.title = '重置視角';
-            
-            resetCameraBtn.addEventListener('click', () => {
-                cameraTarget.radius = 15;
-                cameraTarget.rotationX = 0;
-                cameraTarget.rotationY = 0;
-                cameraTarget.lookAtY = 1;
-                isCameraMoving = true;
-            });
-            
-            document.body.appendChild(resetCameraBtn);
-
             // 縮放控制按鈕組
             const zoomControls = document.createElement('div');
             zoomControls.style.position = 'fixed';
-            zoomControls.style.right = '20px';
-            zoomControls.style.bottom = isMobile ? '100px' : '120px';
+            zoomControls.style.left = '20px';
+            zoomControls.style.top = isMobile ? '80px' : '100px';
             zoomControls.style.zIndex = '999';
             zoomControls.style.display = 'flex';
             zoomControls.style.flexDirection = 'column';
@@ -1071,8 +1166,32 @@
                 cameraTarget.radius = cameraRadius;
             });
 
+            // 重置相機按鈕（移動到 +/- 按鈕下方）
+            const resetCameraBtn = document.createElement('button');
+            resetCameraBtn.textContent = '🔄';
+            resetCameraBtn.style.width = '44px';
+            resetCameraBtn.style.height = '44px';
+            resetCameraBtn.style.borderRadius = '50%';
+            resetCameraBtn.style.background = 'rgba(255, 255, 255, 0.9)';
+            resetCameraBtn.style.border = '2px solid #156697';
+            resetCameraBtn.style.color = '#156697';
+            resetCameraBtn.style.fontSize = '20px';
+            resetCameraBtn.style.cursor = 'pointer';
+            resetCameraBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+            resetCameraBtn.style.touchAction = 'manipulation';
+            resetCameraBtn.title = '重置視角';
+            
+            resetCameraBtn.addEventListener('click', () => {
+                cameraTarget.radius = 15;
+                cameraTarget.rotationX = 0;
+                cameraTarget.rotationY = 0;
+                cameraTarget.lookAtY = 1;
+                isCameraMoving = true;
+            });
+
             zoomControls.appendChild(zoomInBtn);
             zoomControls.appendChild(zoomOutBtn);
+            zoomControls.appendChild(resetCameraBtn); // 將復位按鈕添加到縮放按鈕組下方
             document.body.appendChild(zoomControls);
         }
 

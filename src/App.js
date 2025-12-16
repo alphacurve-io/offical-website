@@ -8,6 +8,7 @@ import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 
 // 懒加载非关键组件（首屏不需要的组件）
 const CustomCursor = lazy(() => import('./components/CustomCursor'));
+const Kid1Follower = lazy(() => import('./components/Kid1Follower'));
 const Services = lazy(() => import('./components/Services'));
 const Team = lazy(() => import('./components/Team'));
 const ParallaxWords = lazy(() => import('./components/ParallaxWords'));
@@ -29,6 +30,9 @@ const AppContent = () => {
       <div className="App">
         <Suspense fallback={null}>
           <CustomCursor />
+        </Suspense>
+        <Suspense fallback={null}>
+          <Kid1Follower />
         </Suspense>
         <Header />
         <HeroSection />
