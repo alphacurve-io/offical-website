@@ -2,7 +2,10 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Alphacurve.io Meeting Room</title>
     <style>
         * {
@@ -49,6 +52,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script>
+        // 檢測移動設備（在文件開頭定義，供全局使用）
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
+                        (window.innerWidth <= 768);
+        
         // 立即定義全局函數，確保在任何時候都可以使用
         window.getCameraAngles = function() {
             // 這個函數會在後面的代碼中重新定義，這裡先定義一個占位符
@@ -143,11 +150,22 @@
         camera.position.set(0, 8, 15);
         camera.lookAt(0, 0, 0);
 
-        // 渲染器
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        // 渲染器（移動端性能優化）
+        // 移動端降低渲染質量以提高性能
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: !isMobile, // 移動端關閉抗鋸齒
+            powerPreference: 'high-performance',
+            stencil: false,
+            depth: true
+        });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.enabled = !isMobile; // 移動端可選關閉陰影
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        
+        // 移動端降低像素比以提高性能
+        const pixelRatio = isMobile ? Math.min(window.devicePixelRatio, 1.5) : window.devicePixelRatio;
+        renderer.setPixelRatio(pixelRatio);
+        
         document.body.appendChild(renderer.domElement);
 
         // 光源
@@ -793,22 +811,24 @@
         const walls = createWalls();
         scene.add(walls);
 
-        // 對話氣泡（HTML overlay）
+        // 對話氣泡（HTML overlay，移動端優化）
         const bubble = document.createElement('div');
         bubble.className = 'room2-speech-bubble';
         bubble.style.position = 'fixed';
         bubble.style.zIndex = '10';
-        bubble.style.padding = '6px 10px';
+        bubble.style.padding = isMobile ? '8px 12px' : '6px 10px';
         bubble.style.borderRadius = '12px';
-        bubble.style.background = 'rgba(0, 0, 0, 0.7)';
+        bubble.style.background = 'rgba(0, 0, 0, 0.85)'; // 移動端更不透明，提高可讀性
         bubble.style.color = '#fff';
-        bubble.style.fontSize = '11px';
+        bubble.style.fontSize = isMobile ? '14px' : '11px'; // 移動端更大的字體
         bubble.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
-        bubble.style.maxWidth = '180px';
+        bubble.style.maxWidth = isMobile ? '85%' : '180px'; // 移動端更寬
+        bubble.style.lineHeight = isMobile ? '1.5' : '1.4'; // 移動端更好的行高
         bubble.style.pointerEvents = 'none';
         bubble.style.boxShadow = '0 2px 8px rgba(0,0,0,0.35)';
         bubble.style.opacity = '0';
         bubble.style.transition = 'opacity 0.3s ease';
+        bubble.style.wordWrap = 'break-word'; // 移動端自動換行
         document.body.appendChild(bubble);
 
         // 讀取文本內容
@@ -819,40 +839,73 @@
             kid1.userData.messages = [textContent.kid1Message];
         }
         
-        // 聊天提示對話框
+        // 聊天提示對話框（移動端優化）
         const chatPromptDialog = document.createElement('div');
+        chatPromptDialog.className = 'room2-chat-prompt';
         chatPromptDialog.style.position = 'fixed';
         chatPromptDialog.style.top = '50%';
         chatPromptDialog.style.left = '50%';
         chatPromptDialog.style.transform = 'translate(-50%, -50%)';
         chatPromptDialog.style.zIndex = '1000';
-        chatPromptDialog.style.background = 'rgba(255, 255, 255, 0.95)';
-        chatPromptDialog.style.padding = '20px 30px';
+        chatPromptDialog.style.background = 'rgba(255, 255, 255, 0.98)';
+        chatPromptDialog.style.padding = isMobile ? '24px 20px' : '20px 30px';
         chatPromptDialog.style.borderRadius = '16px';
         chatPromptDialog.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
         chatPromptDialog.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
-        chatPromptDialog.style.fontSize = '18px';
+        chatPromptDialog.style.fontSize = isMobile ? '16px' : '18px';
         chatPromptDialog.style.color = '#333';
         chatPromptDialog.style.textAlign = 'center';
         chatPromptDialog.style.display = 'none';
+        chatPromptDialog.style.width = isMobile ? '85%' : 'auto';
+        chatPromptDialog.style.maxWidth = '400px';
+        chatPromptDialog.style.lineHeight = '1.5';
         chatPromptDialog.textContent = textContent.chatPrompt;
         document.body.appendChild(chatPromptDialog);
 
-        // 輸入框容器
+        // 輸入框容器（移動端優化）
         const inputContainer = document.createElement('div');
+        inputContainer.className = 'room2-input-container';
         inputContainer.style.position = 'fixed';
-        inputContainer.style.bottom = '30px';
+        inputContainer.style.bottom = isMobile ? '20px' : '30px';
         inputContainer.style.left = '50%';
         inputContainer.style.transform = 'translateX(-50%)';
         inputContainer.style.zIndex = '1000';
-        inputContainer.style.background = 'rgba(255, 255, 255, 0.95)';
-        inputContainer.style.padding = '15px 20px';
+        inputContainer.style.background = 'rgba(255, 255, 255, 0.98)';
+        inputContainer.style.padding = isMobile ? '12px 16px' : '15px 20px';
         inputContainer.style.borderRadius = '12px';
         inputContainer.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
         inputContainer.style.display = 'none';
-        inputContainer.style.width = '90%';
+        inputContainer.style.width = isMobile ? '95%' : '90%';
         inputContainer.style.maxWidth = '500px';
         inputContainer.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
+        
+        // 移動端：防止輸入框被鍵盤遮擋
+        if (isMobile) {
+            // 監聽虛擬鍵盤顯示/隱藏
+            const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+            let lastViewportHeight = viewportHeight;
+            
+            function handleViewportResize() {
+                const currentHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                const heightDiff = lastViewportHeight - currentHeight;
+                
+                if (heightDiff > 150) {
+                    // 鍵盤顯示，調整輸入框位置
+                    inputContainer.style.bottom = `${heightDiff + 20}px`;
+                } else {
+                    // 鍵盤隱藏，恢復原位置
+                    inputContainer.style.bottom = '20px';
+                }
+                
+                lastViewportHeight = currentHeight;
+            }
+            
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', handleViewportResize);
+            } else {
+                window.addEventListener('resize', handleViewportResize);
+            }
+        }
 
         const inputWrapper = document.createElement('div');
         inputWrapper.style.display = 'flex';
@@ -863,42 +916,165 @@
         questionInput.type = 'text';
         questionInput.placeholder = textContent.inputPlaceholder;
         questionInput.style.flex = '1';
-        questionInput.style.padding = '10px 15px';
+        questionInput.style.padding = isMobile ? '12px 16px' : '10px 15px';
         questionInput.style.border = '2px solid #e0e0e0';
         questionInput.style.borderRadius = '8px';
-        questionInput.style.fontSize = '14px';
+        questionInput.style.fontSize = isMobile ? '16px' : '14px'; // 移動端至少 16px 防止自動縮放
         questionInput.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
         questionInput.style.outline = 'none';
         questionInput.style.transition = 'border-color 0.3s';
-        questionInput.addEventListener('focus', () => {
-            questionInput.style.borderColor = '#156697';
-        });
-        questionInput.addEventListener('blur', () => {
-            questionInput.style.borderColor = '#e0e0e0';
-        });
+        questionInput.style.webkitAppearance = 'none'; // 移除 iOS 默認樣式
+        questionInput.style.appearance = 'none';
+        
+        // 移動端：防止輸入時頁面縮放
+        if (isMobile) {
+            questionInput.addEventListener('focus', () => {
+                questionInput.style.borderColor = '#156697';
+                // 防止 iOS 自動縮放
+                const viewport = document.querySelector('meta[name="viewport"]');
+                if (viewport) {
+                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+                }
+            });
+            
+            questionInput.addEventListener('blur', () => {
+                questionInput.style.borderColor = '#e0e0e0';
+                // 恢復允許縮放
+                const viewport = document.querySelector('meta[name="viewport"]');
+                if (viewport) {
+                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+                }
+            });
+        } else {
+            questionInput.addEventListener('focus', () => {
+                questionInput.style.borderColor = '#156697';
+            });
+            questionInput.addEventListener('blur', () => {
+                questionInput.style.borderColor = '#e0e0e0';
+            });
+        }
 
         const sendButton = document.createElement('button');
         sendButton.textContent = textContent.sendButton;
-        sendButton.style.padding = '10px 20px';
+        sendButton.style.padding = isMobile ? '12px 24px' : '10px 20px'; // 移動端更大的點擊區域
         sendButton.style.background = '#156697';
         sendButton.style.color = '#fff';
         sendButton.style.border = 'none';
         sendButton.style.borderRadius = '8px';
-        sendButton.style.fontSize = '14px';
+        sendButton.style.fontSize = isMobile ? '16px' : '14px';
         sendButton.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
         sendButton.style.cursor = 'pointer';
         sendButton.style.transition = 'background 0.3s';
-        sendButton.addEventListener('mouseenter', () => {
-            sendButton.style.background = '#0f4d6e';
-        });
-        sendButton.addEventListener('mouseleave', () => {
-            sendButton.style.background = '#156697';
-        });
+        sendButton.style.minWidth = isMobile ? '60px' : 'auto'; // 移動端最小寬度
+        sendButton.style.touchAction = 'manipulation'; // 優化觸摸響應
+        
+        // 移動端：使用 touch 事件而不是 hover
+        if (isMobile) {
+            sendButton.addEventListener('touchstart', () => {
+                sendButton.style.background = '#0f4d6e';
+            });
+            sendButton.addEventListener('touchend', () => {
+                sendButton.style.background = '#156697';
+            });
+        } else {
+            sendButton.addEventListener('mouseenter', () => {
+                sendButton.style.background = '#0f4d6e';
+            });
+            sendButton.addEventListener('mouseleave', () => {
+                sendButton.style.background = '#156697';
+            });
+        }
 
         inputWrapper.appendChild(questionInput);
         inputWrapper.appendChild(sendButton);
         inputContainer.appendChild(inputWrapper);
         document.body.appendChild(inputContainer);
+
+        // 移動端專用控制按鈕
+        if (isMobile) {
+            // 重置相機按鈕
+            const resetCameraBtn = document.createElement('button');
+            resetCameraBtn.textContent = '🔄';
+            resetCameraBtn.style.position = 'fixed';
+            resetCameraBtn.style.top = '20px';
+            resetCameraBtn.style.right = '20px';
+            resetCameraBtn.style.width = '44px';
+            resetCameraBtn.style.height = '44px';
+            resetCameraBtn.style.borderRadius = '50%';
+            resetCameraBtn.style.background = 'rgba(255, 255, 255, 0.9)';
+            resetCameraBtn.style.border = '2px solid #156697';
+            resetCameraBtn.style.color = '#156697';
+            resetCameraBtn.style.fontSize = '20px';
+            resetCameraBtn.style.cursor = 'pointer';
+            resetCameraBtn.style.zIndex = '999';
+            resetCameraBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+            resetCameraBtn.style.touchAction = 'manipulation';
+            resetCameraBtn.title = '重置視角';
+            
+            resetCameraBtn.addEventListener('click', () => {
+                cameraTarget.radius = 15;
+                cameraTarget.rotationX = 0;
+                cameraTarget.rotationY = 0;
+                cameraTarget.lookAtY = 1;
+                isCameraMoving = true;
+            });
+            
+            document.body.appendChild(resetCameraBtn);
+
+            // 縮放控制按鈕組
+            const zoomControls = document.createElement('div');
+            zoomControls.style.position = 'fixed';
+            zoomControls.style.right = '20px';
+            zoomControls.style.bottom = isMobile ? '100px' : '120px';
+            zoomControls.style.zIndex = '999';
+            zoomControls.style.display = 'flex';
+            zoomControls.style.flexDirection = 'column';
+            zoomControls.style.gap = '10px';
+
+            const zoomInBtn = document.createElement('button');
+            zoomInBtn.textContent = '+';
+            zoomInBtn.style.width = '44px';
+            zoomInBtn.style.height = '44px';
+            zoomInBtn.style.borderRadius = '50%';
+            zoomInBtn.style.background = 'rgba(255, 255, 255, 0.9)';
+            zoomInBtn.style.border = '2px solid #156697';
+            zoomInBtn.style.color = '#156697';
+            zoomInBtn.style.fontSize = '24px';
+            zoomInBtn.style.fontWeight = 'bold';
+            zoomInBtn.style.cursor = 'pointer';
+            zoomInBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+            zoomInBtn.style.touchAction = 'manipulation';
+            zoomInBtn.title = '放大';
+
+            const zoomOutBtn = document.createElement('button');
+            zoomOutBtn.textContent = '−';
+            zoomOutBtn.style.width = '44px';
+            zoomOutBtn.style.height = '44px';
+            zoomOutBtn.style.borderRadius = '50%';
+            zoomOutBtn.style.background = 'rgba(255, 255, 255, 0.9)';
+            zoomOutBtn.style.border = '2px solid #156697';
+            zoomOutBtn.style.color = '#156697';
+            zoomOutBtn.style.fontSize = '24px';
+            zoomOutBtn.style.fontWeight = 'bold';
+            zoomOutBtn.style.cursor = 'pointer';
+            zoomOutBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+            zoomOutBtn.style.touchAction = 'manipulation';
+            zoomOutBtn.title = '縮小';
+
+            zoomInBtn.addEventListener('click', () => {
+                cameraRadius = Math.max(minRadius, cameraRadius - 2);
+                cameraTarget.radius = cameraRadius;
+            });
+
+            zoomOutBtn.addEventListener('click', () => {
+                cameraRadius = Math.min(maxRadius, cameraRadius + 2);
+                cameraTarget.radius = cameraRadius;
+            });
+
+            zoomControls.appendChild(zoomInBtn);
+            zoomControls.appendChild(zoomOutBtn);
+            document.body.appendChild(zoomControls);
+        }
 
         // 顯示提示對話框，然後顯示輸入框
         let promptShown = false;
@@ -1527,29 +1703,88 @@
             cameraRadius = Math.max(minRadius, Math.min(maxRadius, cameraRadius));
         }, { passive: false });
 
-        // 觸控支援
+        // 觸控支援（移動端優化）
         let touchStartX = 0;
         let touchStartY = 0;
+        let touchStartDistance = 0;
+        let touchStartRadius = cameraRadius;
+        let isRotating = false;
+        let isZooming = false;
+        let lastTouchTime = 0;
+
+        // 計算兩點之間的距離
+        function getTouchDistance(touches) {
+            if (touches.length < 2) return 0;
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
 
         document.addEventListener('touchstart', (event) => {
-            touchStartX = event.touches[0].clientX;
-            touchStartY = event.touches[0].clientY;
-        });
+            // 如果點擊在輸入框或按鈕上，不處理
+            const target = event.target;
+            if (target.tagName === 'INPUT' || target.tagName === 'BUTTON' || 
+                target.closest('.room2-input-container') || 
+                target.closest('.room2-chat-prompt')) {
+                return;
+            }
+
+            const touches = event.touches;
+            
+            if (touches.length === 1) {
+                // 單指：旋轉相機
+                touchStartX = touches[0].clientX;
+                touchStartY = touches[0].clientY;
+                isRotating = true;
+                isZooming = false;
+            } else if (touches.length === 2) {
+                // 雙指：縮放相機
+                touchStartDistance = getTouchDistance(touches);
+                touchStartRadius = cameraRadius;
+                isZooming = true;
+                isRotating = false;
+                event.preventDefault(); // 防止雙指縮放頁面
+            }
+        }, { passive: false });
 
         document.addEventListener('touchmove', (event) => {
-            const touch = event.touches[0];
-            mouseX = (touch.clientX / window.innerWidth) * 2 - 1;
-            mouseY = -(touch.clientY / window.innerHeight) * 2 + 1;
+            const touches = event.touches;
+            
+            if (touches.length === 1 && isRotating) {
+                // 單指旋轉
+                const touch = touches[0];
+                mouseX = (touch.clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(touch.clientY / window.innerHeight) * 2 + 1;
 
-            const deltaX = touch.clientX - touchStartX;
-            const deltaY = touch.clientY - touchStartY;
+                const deltaX = touch.clientX - touchStartX;
+                const deltaY = touch.clientY - touchStartY;
 
-            targetRotationY += deltaX * 0.005;
-            targetRotationX += deltaY * 0.005;
-            targetRotationX = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, targetRotationX));
+                // 移動端旋轉速度稍微加快
+                const rotationSpeed = isMobile ? 0.008 : 0.005;
+                targetRotationY += deltaX * rotationSpeed;
+                targetRotationX += deltaY * rotationSpeed;
+                targetRotationX = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, targetRotationX));
 
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                
+                event.preventDefault(); // 防止頁面滾動
+            } else if (touches.length === 2 && isZooming) {
+                // 雙指縮放
+                const currentDistance = getTouchDistance(touches);
+                const scale = currentDistance / touchStartDistance;
+                const newRadius = touchStartRadius / scale;
+                cameraRadius = Math.max(minRadius, Math.min(maxRadius, newRadius));
+                
+                event.preventDefault(); // 防止雙指縮放頁面
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchend', (event) => {
+            if (event.touches.length === 0) {
+                isRotating = false;
+                isZooming = false;
+            }
         });
 
         // 響應式
@@ -1773,9 +2008,20 @@
             }
         }
 
-        // 動畫循環
-        function animate() {
+        // 動畫循環（移動端性能優化）
+        let lastFrameTime = performance.now();
+        const targetFPS = isMobile ? 30 : 60; // 移動端降低到 30 FPS
+        const frameInterval = 1000 / targetFPS;
+        
+        function animate(currentTime) {
             requestAnimationFrame(animate);
+
+            // 移動端：限制幀率以提高性能
+            const elapsed = currentTime - lastFrameTime;
+            if (isMobile && elapsed < frameInterval) {
+                return; // 跳過這一幀
+            }
+            lastFrameTime = currentTime - (elapsed % frameInterval);
 
             // 平滑移動相機到目標位置（使用緩動函數減少卡頓）
             if (isCameraMoving) {
@@ -1836,8 +2082,10 @@
             // 更新手臂动画
             updateArmAnimations();
 
-            // 更新眼睛
-            updateEyes();
+            // 更新眼睛（移動端可選降低更新頻率）
+            if (!isMobile || Math.random() > 0.5) {
+                updateEyes();
+            }
 
             // 更新對話氣泡
             updateSpeechBubble();
@@ -1845,7 +2093,7 @@
             renderer.render(scene, camera);
         }
 
-        animate();
+        animate(performance.now());
     </script>
 </body>
 </html>
