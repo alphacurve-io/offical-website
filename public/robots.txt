@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /room2.html
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://alphacurve.io/sitemap.xml
+

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import './ServiceModel.css';
 
 const FAQ = ({ faq }) => {
@@ -8,8 +9,27 @@ const FAQ = ({ faq }) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
 
+  // FAQPage Schema 結構化數據
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.questions.map((q) => ({
+      '@type': 'Question',
+      name: q.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: q.answer,
+      },
+    })),
+  };
+
   return (
     <div className="faq-section">
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify(faqSchema)}
+        </script>
+      </Helmet>
       <h3 className="section-title">{faq.title}</h3>
       <p className="section-title-en">{faq.subtitle}</p>
       <div className="faq-list">

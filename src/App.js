@@ -10,11 +10,15 @@ import SwipeTransition from './components/SwipeTransition';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import CustomCursor from './components/CustomCursor';
-import { LanguageProvider } from './contexts/LanguageContext';
+import SEOHead from './components/SEOHead';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 
-const App = () => {
+const AppContent = () => {
+  const { language } = useLanguage();
+  
   return (
-    <LanguageProvider>
+    <>
+      <SEOHead language={language} />
       <div className="App">
         <CustomCursor />
         <Header />
@@ -27,6 +31,14 @@ const App = () => {
         <ContactForm />
         <Footer />
       </div>
+    </>
+  );
+};
+
+const App = () => {
+  return (
+    <LanguageProvider>
+      <AppContent />
     </LanguageProvider>
   );
 };
