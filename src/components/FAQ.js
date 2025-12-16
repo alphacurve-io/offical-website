@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import './ServiceModel.css';
+import { trackFAQExpand } from '../utils/analytics';
 
 const FAQ = ({ faq }) => {
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   const toggleFaq = (index) => {
+    if (openFaqIndex !== index) {
+      // 只有展开时才追踪（避免重复追踪关闭操作）
+      trackFAQExpand(index, faq.questions[index].question, 'service_model');
+    }
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
 

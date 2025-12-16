@@ -12,9 +12,13 @@ import Footer from './components/Footer';
 import CustomCursor from './components/CustomCursor';
 import SEOHead from './components/SEOHead';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
+import { useScrollTracking } from './hooks/useScrollTracking';
 
 const AppContent = () => {
   const { language } = useLanguage();
+  
+  // 啟用滾動深度和 Section 視圖追蹤
+  useScrollTracking();
   
   return (
     <>

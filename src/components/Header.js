@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Header.css';
 import { useLanguage } from '../contexts/LanguageContext';
+import { trackNavClick, trackLanguageToggle } from '../utils/analytics';
 import { ReactComponent as HeaderIcon } from '../assets/header-icon.svg';
 import { ReactComponent as HeaderIconWhite } from '../assets/header-icon-white.svg';
 import { ReactComponent as MenuOpenIcon } from '../assets/menu-open-icon.svg';
@@ -45,11 +46,19 @@ const Header = () => {
     }
   };
 
-  const handleNavLinkClick = (targetId) => {
+  const handleNavLinkClick = (targetId, index) => {
+    trackNavClick(targetId, index, language);
     const targetSection = document.getElementById(targetId);
     if (targetSection) {
       targetSection.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  const handleLanguageToggle = () => {
+    const fromLang = language;
+    const toLang = language === 'zh' ? 'en' : 'zh';
+    trackLanguageToggle(fromLang, toLang, 'header');
+    toggleLanguage();
   };
 
   return (
@@ -70,7 +79,7 @@ const Header = () => {
           <ul className="nav-links">
             {nav.map((item, index) => (
               <li key={index}>
-                <div onClick={() => handleNavLinkClick(item.id)} className="nav-link-container">
+                <div onClick={() => handleNavLinkClick(item.id, index)} className="nav-link-container">
                   <div className="nav-title" data-text={item.subtitle}>{item.title}</div>
                   <div className="nav-subtitle">{item.subtitle}</div>
                 </div>
@@ -79,7 +88,7 @@ const Header = () => {
           </ul>
         </nav>
         <div className="header-actions">
-            <button className="lang-toggle" onClick={toggleLanguage}>
+            <button className="lang-toggle" onClick={handleLanguageToggle}>
                 {language === 'zh' ? 'EN' : 'ZH'}
             </button>
             <button className="menu-toggle" onClick={toggleMenu}>

@@ -2,6 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import './ContactForm.css';
 import { useLanguage } from '../contexts/LanguageContext';
+import {
+  trackFormStart,
+  trackFormFieldFocus,
+  trackFormSubmit,
+  trackFormSubmitSuccess,
+  trackFormSubmitError,
+  trackRoom2Enter,
+  trackExternalLinkClick,
+} from '../utils/analytics';
 
 import { ReactComponent as UploadIcon } from '../assets/upload-icon.svg';
 // import { ReactComponent as PhoneIcon } from '../assets/phone-icon.svg';
@@ -15,23 +24,35 @@ const ContactForm = () => {
   const { contactInfo, form } = content.contact;
   const room2Config = content.room2;
 
-    const [formData, setFormData] = useState({
-        name: '',
-        street: '',
-        city: '',
-        postcode: '',
-        phone: '',
-        email: '',
-        message: '',
-        file: null,
-        });
+  const [formData, setFormData] = useState({
+    name: '',
+    street: '',
+    city: '',
+    postcode: '',
+    phone: '',
+    email: '',
+    message: '',
+    file: null,
+  });
+  const [formStartTime, setFormStartTime] = useState(null);
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+
+    if (!formStartTime && (value || (files && files.length))) {
+      setFormStartTime(Date.now());
+      trackFormStart('contact_form', 'contact_section');
+    }
+
     if (name === 'file') {
       setFormData({ ...formData, file: files[0] });
     } else {
       setFormData({ ...formData, [name]: value });
     }
+  };
+
+  const handleFieldFocus = (fieldName, fieldType) => {
+    trackFormFieldFocus('contact_form', fieldName, fieldType);
   };
 
   const handleSubmit = async (e) => {
@@ -51,17 +72,24 @@ const ContactForm = () => {
     console.log('API URL:', apiUrl);
     try {
       console.log('Form Data:', formData);
+      const completionTime = formStartTime ? Math.floor((Date.now() - formStartTime) / 1000) : 0;
+      trackFormSubmit('contact_form', formData, completionTime);
+
+      const submitStart = Date.now();
       const response = await fetch(apiUrl, {
         method: 'POST',
         body: data,
       });
       if (response.ok) {
+        trackFormSubmitSuccess('contact_form', Date.now() - submitStart);
         alert('Message sent!');
       } else {
+        trackFormSubmitError('contact_form', 'server_error', response.statusText);
         alert('Failed to send message.');
       }
     } catch (error) {
       console.error('Error:', error);
+      trackFormSubmitError('contact_form', 'network_error', error.message);
       alert('An error occurred.');
     }
   };
@@ -101,6 +129,7 @@ const ContactForm = () => {
         clearInterval(pressTimerRef.current);
         pressTimerRef.current = null;
         setIsPressing(false);
+        trackRoom2Enter('long_press_logo', elapsed);
         setShowRoom(true);
       }
     }, 30);
@@ -176,19 +205,19 @@ const ContactForm = () => {
           <h2 className="contact-title">{form.title} <span className="highlight">{form.titleHighlight}</span></h2>
           <p className="contact-subtitle">{form.subtitle}</p>
           <form className="contact-form" onSubmit={handleSubmit}>
-            <input type="text" placeholder={form.placeholders.name} name="name" onChange={handleChange} />
-            <input type="text" placeholder={form.placeholders.street} name="street" onChange={handleChange} />
-            <input type="text" placeholder={form.placeholders.city} name="city" onChange={handleChange} />
-            <input type="text" placeholder={form.placeholders.postcode} name="postcode" onChange={handleChange} />
-            <input type="text" placeholder={form.placeholders.phone} name="phone" onChange={handleChange} />
-            <input type="email" placeholder={form.placeholders.email} name="email" onChange={handleChange} />
-            <textarea placeholder={form.placeholders.message} name="message" onChange={handleChange}></textarea>
+            <input type="text" placeholder={form.placeholders.name} name="name" onChange={handleChange} onFocus={() => handleFieldFocus('name', 'text')} />
+            <input type="text" placeholder={form.placeholders.street} name="street" onChange={handleChange} onFocus={() => handleFieldFocus('street', 'text')} />
+            <input type="text" placeholder={form.placeholders.city} name="city" onChange={handleChange} onFocus={() => handleFieldFocus('city', 'text')} />
+            <input type="text" placeholder={form.placeholders.postcode} name="postcode" onChange={handleChange} onFocus={() => handleFieldFocus('postcode', 'text')} />
+            <input type="text" placeholder={form.placeholders.phone} name="phone" onChange={handleChange} onFocus={() => handleFieldFocus('phone', 'text')} />
+            <input type="email" placeholder={form.placeholders.email} name="email" onChange={handleChange} onFocus={() => handleFieldFocus('email', 'email')} />
+            <textarea placeholder={form.placeholders.message} name="message" onChange={handleChange} onFocus={() => handleFieldFocus('message', 'textarea')}></textarea>
             <div className="file-upload">
                 <label htmlFor="file-upload" className="file-label">
                     <UploadIcon className="upload-icon" />
                     {form.upload.label}
                 </label>
-                <input type="file" id="file-upload" name="file" onChange={handleChange} />
+                <input type="file" id="file-upload" name="file" onChange={handleChange} onFocus={() => handleFieldFocus('file', 'file')} />
                 <small>{form.upload.note}</small>
             </div>
             <button type="submit" className="submit-button">{form.submitButton}</button>
@@ -197,7 +226,7 @@ const ContactForm = () => {
                 <LineIcon className="contact-icon" />
                 <div className="contact-item-text">
                     <strong>Line</strong>
-                    <p><a href={contactInfo.line_link} target="_blank" rel="noopener noreferrer">{contactInfo.line_id}</a></p>
+                    <p><a href={contactInfo.line_link} target="_blank" rel="noopener noreferrer" onClick={() => trackExternalLinkClick(contactInfo.line_link, 'line_link', 'contact_line')}>{contactInfo.line_id}</a></p>
                 </div>
                 </div>
                 <div className="contact-item">

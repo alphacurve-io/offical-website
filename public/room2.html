@@ -657,6 +657,7 @@
         // 加載 kid1.glb 並設置在白板前
         let kid1 = null;
         async function loadKid1() {
+            const loadStartTime = Date.now();
             try {
                 kid1 = await createPersonFromGLB('/assets/3d-models/kid1.glb');
                 // 設置初始位置：在白板前（z = -5.5，稍微在白板前面）
@@ -673,6 +674,14 @@
                 kid1.userData.messages = [kid1Message];
                 
                 console.log('✅ kid1.glb 加載成功，對話:', kid1Message);
+                
+                // 追踪 3D 會議室加載
+                await loadAnalytics();
+                trackEvent('room2_load', {
+                    load_time: Date.now() - loadStartTime,
+                    models_loaded: 1,
+                    language: textContent ? detectLanguage(textContent.chatPrompt || '') : 'en',
+                });
             } catch (error) {
                 console.warn('⚠️ kid1.glb 加載失敗:', error);
             }
@@ -928,6 +937,37 @@
         // 延遲顯示提示（進入房間後2秒）
         setTimeout(showChatPrompt, 2000);
 
+        // 加載 GA4 追踪函數
+        function loadAnalytics() {
+            return new Promise((resolve) => {
+                if (window.gtag) {
+                    resolve();
+                } else {
+                    // 如果 gtag 未加載，等待加載
+                    const checkGtag = setInterval(() => {
+                        if (window.gtag) {
+                            clearInterval(checkGtag);
+                            resolve();
+                        }
+                    }, 100);
+                }
+            });
+        }
+
+        // 追踪函數
+        function trackEvent(eventName, parameters) {
+            if (window.gtag) {
+                window.gtag('event', eventName, parameters);
+                console.log('📊 GA Event:', eventName, parameters);
+            }
+        }
+
+        // 簡單的語言檢測函數
+        function detectLanguage(text) {
+            const chineseRegex = /[\u4e00-\u9fa5]/;
+            return chineseRegex.test(text) ? 'zh' : 'en';
+        }
+
         // 發送問題到 API
         async function sendQuestion(question) {
             if (!question.trim()) return;
@@ -937,6 +977,15 @@
             sendButton.textContent = textContent.loadingText;
             sendButton.style.background = '#999';
 
+            // 追踪問題提交
+            await loadAnalytics();
+            trackEvent('room2_chat_question', {
+                question_length: question.length,
+                question_language: detectLanguage(question),
+                has_question_mark: question.includes('?'),
+            });
+
+            const startTime = Date.now();
             try {
                 // 確定 API URL（與 submit 表單保持一致）
                 // 如果是 localhost，使用本地 API；否則使用生產環境的 API 路徑
@@ -966,6 +1015,13 @@
 
                 const data = await response.json();
                 
+                // 追踪回答顯示
+                trackEvent('room2_chat_answer', {
+                    answer_length: data.answer.length,
+                    response_time: Date.now() - startTime,
+                    answer_language: detectLanguage(data.answer),
+                });
+                
                 // 顯示回答（使用第一個小人）
                 if (people.length > 0) {
                     showAnswerBubble(people[0], data.answer);
@@ -975,6 +1031,11 @@
                 questionInput.value = '';
             } catch (error) {
                 console.error('Error sending question:', error);
+                // 追踪錯誤
+                trackEvent('room2_chat_error', {
+                    error_type: 'network_error',
+                    error_message: error.message,
+                });
                 // 顯示錯誤訊息
                 if (people.length > 0) {
                     showAnswerBubble(people[0], textContent.errorText);

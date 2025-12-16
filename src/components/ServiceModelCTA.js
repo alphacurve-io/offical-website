@@ -1,5 +1,6 @@
 import React from 'react';
 import './ServiceModel.css';
+import { trackCTAClick, trackExternalLinkClick } from '../utils/analytics';
 
 // 获取图片路径的工具函数
 const getImageSrc = (imagePath) => {
@@ -20,6 +21,16 @@ const getImageSrc = (imagePath) => {
 
 const ServiceModelCTA = ({ cta }) => {
   const handleClick = (e, link) => {
+    // 追踪 CTA 点击
+    const ctaType = link && link.includes('line') ? 'line' : 
+                    link && link.startsWith('#') ? 'contact' : 'service';
+    trackCTAClick(ctaType, cta.buttonText || cta.title, 'service_model_cta', link);
+    
+    // 如果是外部链接，追踪外部链接点击
+    if (link && !link.startsWith('#') && (link.startsWith('http') || link.startsWith('//'))) {
+      trackExternalLinkClick(link, cta.buttonText || cta.title, 'service_model_cta');
+    }
+    
     // 如果是 anchor (以 # 开头)，使用平滑滚动
     if (link && link.startsWith('#')) {
       e.preventDefault();
