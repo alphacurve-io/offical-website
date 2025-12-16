@@ -474,7 +474,7 @@
 }
 
 .hero-section-video.video-loaded {
-  opacity: 0.1;
+  opacity: 0.1; 
 }
 
 .hero-section-video-placeholder {

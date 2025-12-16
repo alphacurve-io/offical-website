@@ -937,29 +937,52 @@
         // 延遲顯示提示（進入房間後2秒）
         setTimeout(showChatPrompt, 2000);
 
-        // 加載 GA4 追踪函數
+        // 加載 GA4 追踪函數（不阻塞，最多等待 2 秒）
         function loadAnalytics() {
             return new Promise((resolve) => {
                 if (window.gtag) {
                     resolve();
-                } else {
-                    // 如果 gtag 未加載，等待加載
-                    const checkGtag = setInterval(() => {
-                        if (window.gtag) {
-                            clearInterval(checkGtag);
-                            resolve();
-                        }
-                    }, 100);
+                    return;
                 }
+                
+                // 如果 gtag 未加載，等待加載（最多等待 2 秒）
+                let attempts = 0;
+                const maxAttempts = 20; // 20 * 100ms = 2 秒
+                const checkGtag = setInterval(() => {
+                    attempts++;
+                    if (window.gtag) {
+                        clearInterval(checkGtag);
+                        resolve();
+                    } else if (attempts >= maxAttempts) {
+                        // 超时后继续执行，不阻塞
+                        clearInterval(checkGtag);
+                        console.warn('GA4 gtag not loaded, continuing without tracking');
+                        resolve();
+                    }
+                }, 100);
             });
         }
 
-        // 追踪函數
+        // 追踪函數（不阻塞执行）
         function trackEvent(eventName, parameters) {
-            if (window.gtag) {
-                window.gtag('event', eventName, parameters);
-                console.log('📊 GA Event:', eventName, parameters);
-            }
+            // 异步追踪，不阻塞主流程
+            loadAnalytics().then(() => {
+                if (window.gtag) {
+                    window.gtag('event', eventName, parameters);
+                    console.log('📊 GA Event:', eventName, parameters);
+                } else {
+                    // 如果 gtag 仍未加载，将事件推入 dataLayer
+                    if (window.dataLayer) {
+                        window.dataLayer.push({
+                            event: eventName,
+                            ...parameters
+                        });
+                    }
+                }
+            }).catch(() => {
+                // 追踪失败不影响主流程
+                console.warn('Failed to track event:', eventName);
+            });
         }
 
         // 簡單的語言檢測函數
@@ -977,8 +1000,7 @@
             sendButton.textContent = textContent.loadingText;
             sendButton.style.background = '#999';
 
-            // 追踪問題提交
-            await loadAnalytics();
+            // 追踪問題提交（不阻塞 API 调用）
             trackEvent('room2_chat_question', {
                 question_length: question.length,
                 question_language: detectLanguage(question),
