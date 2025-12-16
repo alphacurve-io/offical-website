@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { headerContent } from '../content/header-content';
 import { heroContent } from '../content/hero-content';
 import { servicesContent } from '../content/services-content';
@@ -14,11 +14,39 @@ const LanguageContext = createContext();
 
 export const useLanguage = () => useContext(LanguageContext);
 
+// Helper function to get language from URL
+const getLanguageFromURL = () => {
+  const params = new URLSearchParams(window.location.search);
+  const lang = params.get('lang');
+  return (lang === 'en' || lang === 'zh') ? lang : 'zh';
+};
+
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState('zh'); // Default to Chinese
+  const [language, setLanguage] = useState(() => getLanguageFromURL());
+
+  // Update language when URL changes (e.g., back/forward navigation)
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const newLang = getLanguageFromURL();
+      setLanguage(newLang);
+    };
+
+    // Listen for browser back/forward navigation
+    window.addEventListener('popstate', handleLocationChange);
+
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+    };
+  }, []);
 
   const toggleLanguage = () => {
-    setLanguage((prevLang) => (prevLang === 'zh' ? 'en' : 'zh'));
+    const newLang = language === 'zh' ? 'en' : 'zh';
+    setLanguage(newLang);
+    
+    // Update URL without page reload
+    const url = new URL(window.location);
+    url.searchParams.set('lang', newLang);
+    window.history.pushState({}, '', url);
   };
 
   const content = {
