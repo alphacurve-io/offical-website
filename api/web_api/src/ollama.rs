@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde::de::DeserializeOwned;
 use std::env;
 
 #[derive(Debug, Serialize)]
@@ -15,8 +16,8 @@ struct OllamaResponse {
     done: bool,
 }
 
-/// 调用 Ollama API 生成回答
-pub async fn generate_response(prompt: &str) -> Result<String, Box<dyn std::error::Error>> {
+/// Internal helper to call Ollama API and return the full raw response text
+async fn call_ollama(prompt: &str) -> Result<String, Box<dyn std::error::Error>> {
     let base_url = env::var("OLLAMA_BASE_URL")
         .unwrap_or_else(|_| "http://localhost:11434".to_string());
     let api_key = env::var("OLLAMA_API_KEY").ok();
@@ -47,16 +48,37 @@ pub async fn generate_response(prompt: &str) -> Result<String, Box<dyn std::erro
     }
 
     let ollama_response: OllamaResponse = response.json().await?;
-    
-    // 限制回答长度不超过 100 个字（中文字符）
-    let mut answer = ollama_response.response.trim().to_string();
-    
-    // 如果超过 100 个字符，截断并在末尾添加省略号
+    Ok(ollama_response.response.trim().to_string())
+}
+
+/// 调用 Ollama API 生成回答（向下兼容：默认限制为 100 个字符）
+pub async fn generate_response(prompt: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let mut answer = call_ollama(prompt).await?;
+
+    // 保持原有行为：限制回答长度不超过 100 个字符（中文字符）
     if answer.chars().count() > 100 {
         let truncated: String = answer.chars().take(97).collect();
         answer = format!("{}...", truncated);
     }
-    
+
     Ok(answer)
+}
+
+/// 调用 Ollama API，回傳完整文字（不做長度截斷）
+pub async fn generate_response_full(prompt: &str) -> Result<String, Box<dyn std::error::Error>> {
+    call_ollama(prompt).await
+}
+
+/// 调用 Ollama API，並將回應解析為 JSON 結構
+///
+/// - 呼叫端需要保證 prompt 明確要求模型輸出合法 JSON
+/// - 不會做任何長度截斷，避免破壞 JSON 格式
+pub async fn generate_json<T>(prompt: &str) -> Result<T, Box<dyn std::error::Error>>
+where
+    T: DeserializeOwned,
+{
+    let answer = call_ollama(prompt).await?;
+    let parsed = serde_json::from_str::<T>(&answer)?;
+    Ok(parsed)
 }
 

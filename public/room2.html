@@ -1328,7 +1328,13 @@
             return chineseRegex.test(text) ? 'zh' : 'en';
         }
 
-        // 發送問題到 API
+        // Emotion 分析相關設定
+        const NEGATIVE_EMOTIONS = new Set(['angry', 'frustrated', 'sad', 'worried', 'confused']);
+        const EMOTION_CONFIDENCE_THRESHOLD = 0.8;
+        let lastChatAnswer = null;   // 上一次 /api/chat 的回答
+        let lastChatQuestion = null; // 上一次 /api/chat 的問題
+
+        // 發送問題到 API（先嘗試情緒檢測與情緒回應，再 fallback 到一般 /api/chat）
         async function sendQuestion(question) {
             if (!question.trim()) return;
 
@@ -1346,33 +1352,126 @@
 
             const startTime = Date.now();
             try {
-                // 確定 API URL（與 submit 表單保持一致）
+                // 確定 API Base URL（與 submit 表單保持一致）
                 // 如果是 localhost，使用本地 API；否則使用生產環境的 API 路徑
-                let apiUrl;
+                let apiBaseUrl;
                 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                    apiUrl = 'http://localhost:8080/api/chat';
+                    apiBaseUrl = 'http://localhost:8080';
                 } else {
                     // 生產環境：使用與 submit 表單相同的 API 路徑
                     // submit 表單使用：https://alphacurve.io/website/api/submit
                     // chat API 使用：https://alphacurve.io/api/chat
                     const protocol = window.location.protocol;
                     const hostname = window.location.hostname;
-                    apiUrl = `${protocol}//${hostname}/api/chat`;
+                    apiBaseUrl = `${protocol}//${hostname}`;
                 }
 
-                const response = await fetch(apiUrl, {
+                const trimmedQuestion = question.trim();
+
+                // 如果已有前一個 /api/chat 回答，先嘗試情緒分析 + 情緒回應
+                if (lastChatAnswer) {
+                    try {
+                        const emotionResponse = await fetch(`${apiBaseUrl}/api/emotion`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                user_request: trimmedQuestion,
+                                chat_answer: lastChatAnswer,
+                            })
+                        });
+
+                        if (emotionResponse.ok) {
+                            const emotionData = await emotionResponse.json();
+                            const emotionLabel = emotionData.emotion;
+                            const emotionConfidence = emotionData.confidence;
+
+                            // 追踪 emotion 結果
+                            trackEvent('room2_emotion_analysis', {
+                                emotion: emotionLabel,
+                                confidence: emotionConfidence,
+                                is_negative: NEGATIVE_EMOTIONS.has(emotionLabel),
+                                question_length: trimmedQuestion.length,
+                            });
+
+                            const isNegative = NEGATIVE_EMOTIONS.has(emotionLabel);
+                            const isConfident = emotionConfidence >= EMOTION_CONFIDENCE_THRESHOLD;
+
+                            // 若為負面情緒且信心度 > 0.8，呼叫 /api/emotion_reply，讓 women2.glb 來回應
+                            if (isNegative && isConfident) {
+                                try {
+                                    const language = detectLanguage(trimmedQuestion);
+                                    const languageHint = language === 'zh' ? 'zh-TW' : 'en';
+
+                                    const replyResponse = await fetch(`${apiBaseUrl}/api/emotion_reply`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            persona: 'customer_assistant',
+                                            user_request: trimmedQuestion,
+                                            previous_answer: lastChatAnswer,
+                                            emotion_label: emotionLabel,
+                                            emotion_confidence: emotionConfidence,
+                                            language_hint: languageHint,
+                                        })
+                                    });
+
+                                    if (!replyResponse.ok) {
+                                        throw new Error(`emotion_reply HTTP error! status: ${replyResponse.status}`);
+                                    }
+
+                                    const replyData = await replyResponse.json();
+
+                                    // 追踪 emotion_reply
+                                    trackEvent('room2_emotion_reply', {
+                                        answer_length: replyData.answer.length,
+                                        response_time: Date.now() - startTime,
+                                        emotion: emotionLabel,
+                                        confidence: emotionConfidence,
+                                    });
+
+                                    // 使用 women2.glb（index 3）顯示對話，若不存在則 fallback 到第一個人物
+                                    const women2Index = 3;
+                                    if (people.length > women2Index) {
+                                        showAnswerBubble(people[women2Index], replyData.answer);
+                                    } else if (people.length > 0) {
+                                        showAnswerBubble(people[0], replyData.answer);
+                                    }
+
+                                    // 不更新 lastChatAnswer，保留原本的 "硬" 回答作為上下文
+                                    questionInput.value = '';
+                                    return; // 已經處理完這次問題，不再呼叫 /api/chat
+                                } catch (emotionReplyError) {
+                                    console.warn('Error calling /api/emotion_reply, fallback to /api/chat:', emotionReplyError);
+                                    // 繼續 fallback 到 /api/chat
+                                }
+                            }
+                        } else {
+                            console.warn('Emotion API error, status:', emotionResponse.status);
+                        }
+                    } catch (emotionError) {
+                        console.warn('Error calling /api/emotion, fallback to /api/chat:', emotionError);
+                        // 繼續 fallback 到 /api/chat
+                    }
+                }
+
+                // 預設流程：呼叫 /api/chat
+                const chatResponse = await fetch(`${apiBaseUrl}/api/chat`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ question: question.trim() })
+                    body: JSON.stringify({ question: trimmedQuestion })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                if (!chatResponse.ok) {
+                    throw new Error(`HTTP error! status: ${chatResponse.status}`);
                 }
 
-                const data = await response.json();
+                const data = await chatResponse.json();
                 
                 // 追踪回答顯示
                 trackEvent('room2_chat_answer', {
@@ -1385,6 +1484,10 @@
                 if (people.length > 0) {
                     showAnswerBubble(people[0], data.answer);
                 }
+
+                // 記錄這次的 "硬" 回答，供下一輪情緒分析使用
+                lastChatAnswer = data.answer;
+                lastChatQuestion = trimmedQuestion;
 
                 // 清空輸入框
                 questionInput.value = '';
@@ -1458,26 +1561,31 @@
             const personPos = new THREE.Vector3();
             person.getWorldPosition(personPos);
             
-            // 計算相機應該移動到的位置（從側面角度拍攝，避免被牆壁遮擋）
+            // 計算相機應該移動到的位置
             // 牆壁在 z = -6 的位置，小人在 z = -3（正面）或 z = 3（背面）
-            // 改為從側面（右側）和稍微偏上的角度拍攝，確保不會被牆壁遮擋
             const personRotation = person.rotation.y;
             
             // 相機應該在小人的側面，稍微偏上，距離適中（zoom in）
             const distance = 6; // 相機到小人的距離（zoom in）
             const height = 2.5; // 相機高度偏移（相對於小人，稍微向上看，避免牆壁）
             
-            // 判斷小人的位置，選擇合適的拍攝角度
-            // 如果小人在正面（z < 0），從右側拍攝；如果在背面，從左側拍攝
-            const isFrontSide = personPos.z < 0;
-            const sideOffset = isFrontSide ? Math.PI / 3 : -Math.PI / 3; // 60度角，從側面拍攝
-            
-            // 計算側面角度（從側面60度角拍攝，避免牆壁）
-            const sideAngle = personRotation + sideOffset;
-            
-            // 計算相機目標位置（在小人的側前方，避免牆壁）
-            const targetX = personPos.x + Math.sin(sideAngle) * distance;
-            const targetZ = personPos.z + Math.cos(sideAngle) * distance;
+            // 根據人物所在位置選擇拍攝角度：
+            // - 如果在房間前側 (z < 0)：仍然從側面拍攝，避免被牆壁遮擋
+            // - 如果在房間後側 (z > 0，例如 women2.glb)：相機移到她「正面」偏前方，讓鏡頭更正對她
+            let targetX;
+            let targetZ;
+            if (personPos.z > 0) {
+                // 後排人物（包含 women2.glb）：相機放在她前方，面向她
+                targetX = personPos.x;
+                targetZ = personPos.z + distance;
+            } else {
+                // 前排人物：保持原來的側面角度，避免被牆壁擋住
+                const isFrontSide = personPos.z < 0;
+                const sideOffset = isFrontSide ? Math.PI / 3 : -Math.PI / 3; // 60度角，從側面拍攝
+                const sideAngle = personRotation + sideOffset;
+                targetX = personPos.x + Math.sin(sideAngle) * distance;
+                targetZ = personPos.z + Math.cos(sideAngle) * distance;
+            }
             const targetY = personPos.y + height;
             
             // 計算相機應該看向的方向（小人的頭部位置）
@@ -1496,17 +1604,17 @@
             const targetRotY = Math.atan2(dx, dz);
             const targetRotX = Math.atan2(dy, distance2D);
             
-            // 檢查是否有預設的回答角度
+            // 檢查是否有預設的回答角度，或針對不同人物使用不同策略
+            const personIndex = people.indexOf(person);
             if (window.answerCameraAngles) {
-                // 使用預設的角度
+                // 使用手動設置的角度（優先級最高）
                 cameraTarget.radius = window.answerCameraAngles.radius;
                 cameraTarget.rotationX = window.answerCameraAngles.rotationX;
                 cameraTarget.rotationY = window.answerCameraAngles.rotationY;
                 cameraTarget.lookAtY = window.answerCameraAngles.lookAtY;
-                console.log('使用預設的回答角度:', window.answerCameraAngles);
-            } else {
-                // 使用你提供的默認角度（針對第一個小人）
-                // 這些角度是從你手動調整後獲取的
+                console.log('使用預設的回答角度:', window.answerCameraAngles, 'personIndex:', personIndex);
+            } else if (personIndex === 0 || personIndex === -1) {
+                // 第一個人物（或找不到 index 的情況）使用原本你調好的默認角度
                 const defaultAnswerAngles = {
                     radius: 6.885531693638559,
                     rotationX: -1.0262568468508941,
@@ -1518,22 +1626,18 @@
                 cameraTarget.rotationX = defaultAnswerAngles.rotationX;
                 cameraTarget.rotationY = defaultAnswerAngles.rotationY;
                 cameraTarget.lookAtY = defaultAnswerAngles.lookAtY;
-                console.log('使用默認的回答角度:', defaultAnswerAngles);
-            }
-            
-            // 如果上面的條件都不滿足，使用計算的角度（保留原有邏輯作為備用）
-            if (false) {
-                // 計算相機到原點的距離（radius）
+                console.log('使用默認的回答角度 (personIndex:', personIndex, '):', defaultAnswerAngles);
+            } else {
+                // 其他人物（包含 women2.glb）使用針對該人物動態計算的角度
                 const targetRadius = Math.sqrt(dx * dx + dy * dy + dz * dz);
                 
-                // 設置相機目標
                 cameraTarget.radius = targetRadius;
                 cameraTarget.rotationX = targetRotX;
                 cameraTarget.rotationY = targetRotY;
                 cameraTarget.lookAtY = lookAtY;
                 
-                // 添加調試信息（可選）
-                console.log('Camera moving to person (計算的角度):', {
+                console.log('Camera moving to person (動態角度):', {
+                    personIndex,
                     personPos: { x: personPos.x, y: personPos.y, z: personPos.z },
                     targetRadius: targetRadius,
                     targetRotX: targetRotX,

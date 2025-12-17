@@ -41,6 +41,47 @@ struct ChatResponse {
     answer: String,
 }
 
+#[derive(Debug, Deserialize)]
+struct EmotionRequest {
+    /// User's original message to analyze
+    user_request: String,
+    /// The assistant's previous answer (e.g. from /api/chat)
+    chat_answer: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct EmotionResult {
+    /// Detected dominant emotion label
+    emotion: String,
+    /// Confidence score between 0.0 and 1.0
+    confidence: f32,
+    /// Short human-readable explanation
+    explanation: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct EmotionReplyRequest {
+    /// Persona identifier, e.g. "customer_assistant", "lawyer"
+    persona: String,
+    /// User's latest (possibly emotional) message
+    user_request: String,
+    /// Previous assistant answer that might have triggered the reaction
+    previous_answer: String,
+    /// Emotion label computed by /api/emotion
+    emotion_label: String,
+    /// Emotion confidence computed by /api/emotion
+    emotion_confidence: f32,
+    /// Optional language hint, e.g. "zh-TW", "en"
+    language_hint: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+struct EmotionReplyResponse {
+    answer: String,
+    persona: String,
+    style: String,
+}
+
 async fn health_check() -> impl Responder {
     HttpResponse::Ok().json(serde_json::json!({
         "status": "healthy",
@@ -142,6 +183,136 @@ fn is_allowed_origin(req: &actix_web::HttpRequest) -> bool {
     false
 }
 
+// =========================
+// Emotion reply templates
+// =========================
+
+const GENERIC_TEMPLATE: &str = r#"
+You are a separate assistant that generates a softened, empathetic follow-up reply
+based on the user's emotion and the previous assistant's stiff answer.
+
+Language hint: {language_hint}
+
+User emotion:
+- label: {emotion_label}
+- confidence: {emotion_confidence}
+
+Conversation:
+- Previous assistant answer: "{previous_answer}"
+- User latest request: "{user_request}"
+
+Your role:
+- You are NOT the same as the previous assistant. That previous answer was from someone else.
+- Do NOT speak as if you were that assistant. Instead, refer to them in the third person
+  (e.g. "he", "she", "they"; in Traditional Chinese use 「他 / 她 / 他們」) when explaining them.
+- Be respectful, calm, and understanding.
+- Assume the user might be joking or emotionally reactive (e.g. angry, frustrated).
+- Keep the core business constraints of the previous answer,
+  but respond in a softer, more human way that acknowledges the user's feelings.
+- If the user writes in Traditional Chinese, you MUST respond fully in Traditional Chinese
+  (no Simplified Chinese characters). Otherwise, answer in the same language as the user.
+
+Output:
+- The reply MUST NOT exceed 150 characters (including spaces and punctuation).
+- Return ONLY the final reply sentence(s), no explanations, no JSON, no extra text.
+"#;
+
+const CUSTOMER_ASSISTANT_TEMPLATE: &str = r#"
+You are a warm and friendly customer success assistant who speaks on behalf of the team,
+not the original assistant who gave the previous answer.
+
+Language hint: {language_hint}
+
+User emotion:
+- label: {emotion_label}
+- confidence: {emotion_confidence}
+
+Conversation:
+- Previous assistant answer: "{previous_answer}"
+- User latest request: "{user_request}"
+
+Your role:
+- You are NOT the original assistant who wrote the previous answer; you are another person.
+- When you talk about the previous assistant, use third person, e.g. in Traditional Chinese:
+  「抱歉，他不是故意要死腦筋」，而不是「我不是故意要死腦筋」.
+- Be casual, friendly, and a bit humorous.
+- Acknowledge the user's feelings or jokes (e.g. complaining about price, calling the assistant stubborn).
+- Keep the company's policy and professional boundaries, but phrase them in a soft and human way.
+- If appropriate, lightly joke back or use small talk to reduce tension.
+- If the user writes in Traditional Chinese, you MUST respond fully in Traditional Chinese
+  (no Simplified Chinese characters). Otherwise, answer in the same language as the user.
+
+Output:
+- The reply MUST NOT exceed 150 characters (including spaces and punctuation).
+- Return ONLY the final reply sentence(s), no explanations, no JSON, no extra text.
+"#;
+
+const LAWYER_TEMPLATE: &str = r#"
+You are a professional lawyer giving legal-related advice, distinct from the assistant
+who wrote the previous answer.
+
+Language hint: {language_hint}
+
+User emotion:
+- label: {emotion_label}
+- confidence: {emotion_confidence}
+
+Conversation:
+- Previous assistant answer: "{previous_answer}"
+- User latest request: "{user_request}"
+
+Your role:
+- You are NOT the same entity as the previous assistant; that answer was from someone else.
+- When referring to the previous assistant, use third person (he/she/they; 他 / 她 / 他們),
+  not first person.
+- Be calm, precise, and risk-aware, but not cold.
+- Acknowledge the user's emotions while clearly explaining legal or risk constraints.
+- Do not make promises you cannot keep; focus on clarity and protection of the client's interests.
+- If the user writes in Traditional Chinese, you MUST respond fully in Traditional Chinese
+  (no Simplified Chinese characters). Otherwise, answer in the same language as the user.
+
+Output:
+- The reply MUST NOT exceed 150 characters (including spaces and punctuation).
+- Return ONLY the final reply sentence(s), no explanations, no JSON, no extra text.
+"#;
+
+fn get_persona_template(persona: &str) -> &'static str {
+    match persona {
+        "customer_assistant" => CUSTOMER_ASSISTANT_TEMPLATE,
+        "lawyer" => LAWYER_TEMPLATE,
+        _ => GENERIC_TEMPLATE,
+    }
+}
+
+fn build_emotion_reply_prompt(req: &EmotionReplyRequest) -> String {
+    let template = get_persona_template(&req.persona);
+    let language_hint = req
+        .language_hint
+        .clone()
+        .unwrap_or_else(|| "auto".to_string());
+
+    template
+        .replace("{language_hint}", &language_hint)
+        .replace("{emotion_label}", &req.emotion_label)
+        .replace(
+            "{emotion_confidence}",
+            &format!("{:.2}", req.emotion_confidence),
+        )
+        .replace("{previous_answer}", &req.previous_answer)
+        .replace("{user_request}", &req.user_request)
+}
+
+fn truncate_to_200_chars(text: &str) -> String {
+    let max_chars = 200;
+    let count = text.chars().count();
+    if count <= max_chars {
+        return text.to_string();
+    }
+    // 保留 197 個字元並在末尾加上 "..."
+    let truncated: String = text.chars().take(max_chars - 3).collect();
+    format!("{}...", truncated)
+}
+
 /// RAG 聊天端点
 #[post("/api/chat")]
 async fn chat_endpoint(
@@ -202,6 +373,96 @@ Answer:"#,
             eprintln!("Error calling Ollama API: {}", e);
             Ok(HttpResponse::InternalServerError().json(serde_json::json!({
                 "error": "Failed to generate response",
+                "message": e.to_string()
+            })))
+        }
+    }
+}
+
+/// Emotion analysis endpoint
+#[post("/api/emotion")]
+async fn emotion_endpoint(
+    req: web::Json<EmotionRequest>,
+    http_req: actix_web::HttpRequest,
+) -> Result<impl Responder, Error> {
+    // 验证请求来源
+    if !is_allowed_origin(&http_req) {
+        return Ok(HttpResponse::Forbidden().json(serde_json::json!({
+            "error": "Forbidden",
+            "message": "This API can only be called from authorized domains"
+        })));
+    }
+
+    let prompt = format!(
+        r#"You are an emotion analysis assistant.
+
+Your task is to analyze the user's dominant emotion when they wrote the request.
+
+User request:
+{user_request}
+
+Assistant answer:
+{chat_answer}
+
+Output rules:
+- Respond ONLY with a single JSON object, no explanations or extra text.
+- The JSON MUST have exactly these fields:
+  - "emotion": string, one of ["happy","satisfied","neutral","confused","frustrated","angry","sad","worried","excited"]
+  - "confidence": number between 0 and 1
+  - "explanation": short natural language explanation of the emotion.
+
+Example of the required JSON format:
+{{
+  "emotion": "angry",
+  "confidence": 0.92,
+  "explanation": "User sounds upset about pricing and thinks you are inflexible."
+}}"#,
+        user_request = req.user_request,
+        chat_answer = req.chat_answer,
+    );
+
+    match ollama::generate_json::<EmotionResult>(&prompt).await {
+        Ok(result) => Ok(HttpResponse::Ok().json(result)),
+        Err(e) => {
+            eprintln!("Error calling Ollama API for emotion: {}", e);
+            Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Failed to analyze emotion",
+                "message": e.to_string()
+            })))
+        }
+    }
+}
+
+/// Emotion-aware, persona-based follow-up reply endpoint
+#[post("/api/emotion_reply")]
+async fn emotion_reply_endpoint(
+    req: web::Json<EmotionReplyRequest>,
+    http_req: actix_web::HttpRequest,
+) -> Result<impl Responder, Error> {
+    // 验证请求来源
+    if !is_allowed_origin(&http_req) {
+        return Ok(HttpResponse::Forbidden().json(serde_json::json!({
+            "error": "Forbidden",
+            "message": "This API can only be called from authorized domains"
+        })));
+    }
+
+    let body = req.into_inner();
+    let prompt = build_emotion_reply_prompt(&body);
+
+    match ollama::generate_response_full(&prompt).await {
+        Ok(answer) => {
+            let limited_answer = truncate_to_200_chars(&answer);
+            Ok(HttpResponse::Ok().json(EmotionReplyResponse {
+                answer: limited_answer,
+            persona: body.persona,
+            style: "softened_followup".to_string(),
+            }))
+        }
+        Err(e) => {
+            eprintln!("Error calling Ollama API for emotion_reply: {}", e);
+            Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Failed to generate emotion-aware reply",
                 "message": e.to_string()
             })))
         }
@@ -353,6 +614,8 @@ async fn main() -> std::io::Result<()> {
             .route("/healthz", actix_web::web::get().to(health_check))
             .service(submit_form)
             .service(chat_endpoint)
+            .service(emotion_endpoint)
+            .service(emotion_reply_endpoint)
     })
     // bind to all interfaces
     .bind("0.0.0.0:8080")?
