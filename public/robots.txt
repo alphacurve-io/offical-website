@@ -3,11 +3,9 @@ Allow: /
 Disallow: /room2.html
 Disallow: /api/
 
-# Content signals for search indexing and AI training
-# Note: These directives are experimental and may not be supported by all crawlers
-# Format: Content-signal: <signal-name>=<value>
-# For Google: Use meta tags in HTML instead of robots.txt for better compatibility
-
 # Sitemap
 Sitemap: https://alphacurve.io/sitemap.xml
+
+# Note: Content signals for AI training control are handled via HTML meta tags
+# See SEOHead.js for <meta name="robots" content="index, follow, noai, noimageai" />
 

@@ -34,6 +34,27 @@ jobs:
         NODE_ENV: production
         GENERATE_SOURCEMAP: false # 禁用 source map 以减小文件大小
 
+    - name: Verify SEO files are included
+      run: |
+        echo "🔍 Verifying SEO files in build directory..."
+        if [ -f "build/robots.txt" ]; then
+          echo "✅ robots.txt found in build/"
+          cat build/robots.txt
+        else
+          echo "❌ ERROR: robots.txt NOT found in build/"
+          exit 1
+        fi
+        if [ -f "build/sitemap.xml" ]; then
+          echo "✅ sitemap.xml found in build/"
+        else
+          echo "❌ ERROR: sitemap.xml NOT found in build/"
+          exit 1
+        fi
+        echo "✅ All SEO files verified"
+        echo ""
+        echo "ℹ️  Note: Source maps are disabled (GENERATE_SOURCEMAP=false) to reduce bundle size."
+        echo "   This is intentional for production builds. Enable for debugging if needed."
+
     - name: Analyze build size
       run: |
         echo "📦 Build size analysis:"
