@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './HeroSection.css';
 import { useLanguage } from '../contexts/LanguageContext';
-import videoSrc from '../assets/hero-section-background-video-540p.mp4';
+import videoSrc from '../assets/hero-section-background-video-1080.mp4';
 
 const HeroSection = () => {
   const { content, language } = useLanguage();
