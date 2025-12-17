@@ -34,9 +34,9 @@ jobs:
         NODE_ENV: production
         GENERATE_SOURCEMAP: false # 禁用 source map 以减小文件大小
 
-    - name: Verify SEO files are included
+    - name: Verify SEO files and .htaccess are included
       run: |
-        echo "🔍 Verifying SEO files in build directory..."
+        echo "🔍 Verifying SEO files and configuration files in build directory..."
         if [ -f "build/robots.txt" ]; then
           echo "✅ robots.txt found in build/"
           cat build/robots.txt
@@ -49,6 +49,13 @@ jobs:
         else
           echo "❌ ERROR: sitemap.xml NOT found in build/"
           exit 1
+        fi
+        if [ -f "build/.htaccess" ]; then
+          echo "✅ .htaccess found in build/"
+          echo "   (Apache configuration for caching and compression)"
+        else
+          echo "⚠️  WARNING: .htaccess NOT found in build/"
+          echo "   If using Apache, ensure .htaccess is in public/ directory"
         fi
         echo "✅ All SEO files verified"
         echo ""

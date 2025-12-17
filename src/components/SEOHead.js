@@ -87,6 +87,19 @@ const SEOHead = ({ language = 'zh' }) => {
       {/* Canonical URL */}
       <link rel="canonical" href={baseUrl} />
       
+      {/* Resource hints for performance optimization */}
+      {/* Preconnect to own domain for faster resource loading */}
+      <link rel="preconnect" href={baseUrl} crossOrigin="anonymous" />
+      <link rel="dns-prefetch" href={baseUrl} />
+      
+      {/* Preconnect to external domains (limit to 4 as recommended) */}
+      <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+      <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+      <link rel="dns-prefetch" href="https://static.cloudflareinsights.com" />
+      
+      {/* Note: CSS preload will be handled by webpack's HTML plugin */}
+      {/* The main CSS file will be automatically injected with proper attributes */}
+      
       {/* Preload LCP images for optimal performance */}
       {/* These preload links ensure LCP images are discoverable immediately in the HTML */}
       {/* The actual image paths will be injected by React Helmet at render time */}
