@@ -49,29 +49,32 @@ module.exports = {
           ],
         };
 
-        // 代码分割优化
+        // 代码分割优化 - 改进配置以更好地分离大型库
         webpackConfig.optimization.splitChunks = {
           chunks: 'all',
-          maxInitialRequests: 25,
+          maxInitialRequests: 30,
           minSize: 20000,
+          maxSize: 244000, // 限制单个 chunk 的最大大小，强制分割
           cacheGroups: {
             default: false,
             vendors: false,
-            // 将 Three.js 单独分离（大型库）
+            // 将 Three.js 单独分离（大型库，优先级最高）
             three: {
               name: 'three',
               test: /[\\/]node_modules[\\/](three|three\/examples)[\\/]/,
               chunks: 'all',
-              priority: 30,
+              priority: 40,
               enforce: true,
+              reuseExistingChunk: true,
             },
             // 将 React 相关库分离
             react: {
               name: 'react',
               test: /[\\/]node_modules[\\/](react|react-dom|react-router|react-helmet)[\\/]/,
               chunks: 'all',
-              priority: 25,
+              priority: 30,
               enforce: true,
+              reuseExistingChunk: true,
             },
             // 将其他 vendor 代码分离
             vendor: {

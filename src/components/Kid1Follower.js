@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+// 使用动态导入 Three.js 以启用代码分割
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -215,7 +216,7 @@ const Kid1Follower = () => {
     return closestSection;
   }, [sectionConfigs]);
   
-  // 将鼠标位置转换为 3D 空间位置
+    // 将鼠标位置转换为 3D 空间位置
   const mouseToWorldPosition = useCallback((mouseX, mouseY, camera, distance = 5) => {
     // 将屏幕坐标转换为 NDC 坐标 (-1 到 1)
     const x = (mouseX / window.innerWidth) * 2 - 1;
