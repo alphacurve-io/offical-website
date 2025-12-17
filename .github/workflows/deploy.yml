@@ -16,11 +16,17 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18' # Adjust version as needed, defaulting to 18
+        node-version: '18' # Keep Node 18 for compatibility
         cache: 'npm' # 启用 npm 缓存以加快构建速度
 
     - name: Install dependencies
-      run: npm ci --prefer-offline --no-audit
+      run: |
+        # Update package-lock.json to sync with package.json changes
+        npm install --package-lock-only --no-audit
+        npm ci --prefer-offline --no-audit
+    
+    - name: Update browserslist database
+      run: npx update-browserslist-db@latest
 
     - name: Build with optimization
       run: npm run build

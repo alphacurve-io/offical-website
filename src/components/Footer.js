@@ -34,6 +34,9 @@ const Footer = () => {
                   <a 
                     href={contactInfo[link.key]} 
                     onClick={() => trackExternalLinkClick(contactInfo[link.key], link.label, 'footer')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${link.label} - Opens in new tab`}
                   >
                     {link.label}
                   </a>
@@ -48,6 +51,7 @@ const Footer = () => {
                 <a 
                   href={`mailto:${contactInfo.email}`}
                   onClick={() => trackExternalLinkClick(`mailto:${contactInfo.email}`, contactInfo.email, 'footer')}
+                  aria-label={`Send email to ${contactInfo.email}`}
                 >
                   {contactInfo.email}
                 </a>
@@ -58,6 +62,9 @@ const Footer = () => {
                 地址/Address: <a 
                   href={contactInfo.address_link}
                   onClick={() => trackExternalLinkClick(contactInfo.address_link, contactInfo.address_en, 'footer')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`View address on map: ${contactInfo.address_en} - Opens in new tab`}
                 >
                   {contactInfo.address_en}
                 </a>

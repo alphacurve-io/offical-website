@@ -112,11 +112,20 @@ const Header = () => {
           </ul>
         </nav>
         <div className="header-actions">
-            <button className="lang-toggle" onClick={handleLanguageToggle}>
+            <button 
+              className="lang-toggle" 
+              onClick={handleLanguageToggle}
+              aria-label={language === 'zh' ? 'Switch to English' : '切換到中文'}
+            >
                 {language === 'zh' ? 'EN' : 'ZH'}
             </button>
-            <button className="menu-toggle" onClick={toggleMenu}>
-            {isMenuOpen ? <MenuCloseIcon /> : <MenuOpenIcon />}
+            <button 
+              className="menu-toggle" 
+              onClick={toggleMenu}
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={isMenuOpen}
+            >
+            {isMenuOpen ? <MenuCloseIcon aria-hidden="true" /> : <MenuOpenIcon aria-hidden="true" />}
             </button>
         </div>
       </div>

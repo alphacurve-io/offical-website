@@ -68,10 +68,10 @@ const HeroSection = () => {
         </div>
         <div className="hero-slogan-container">
           <div className="hero-subtitle-container">
-            <h3 className="hero-subtitle">
+            <h2 className="hero-subtitle">
               {heroContent.subtitle.line1}<br />
               {heroContent.subtitle.line2} <span className="highlight">{heroContent.subtitle.line2Highlight}</span>
-            </h3>
+            </h2>
           </div>
           <div className="hero-description-container">
             <p className="hero-description">
@@ -131,8 +131,10 @@ const HeroSection = () => {
             playsInline
             preload="auto"
             onLoadedData={handleVideoLoaded}
+            aria-label="Hero section background video"
           >
             <source src={videoSrc} type="video/mp4" />
+            {/* Note: Add captions track if video contains important audio content */}
           </video>
         ) : (
           <div 

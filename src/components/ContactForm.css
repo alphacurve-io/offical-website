@@ -152,11 +152,12 @@
     background: #34BFD1;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 24px; /* 增加 padding 以確保觸摸目標至少 44px 高 */
     cursor: pointer;
     font-size: 16px;
     border-radius: 13px;
     width: 100%;
+    min-height: 44px; /* WCAG 建議的最小觸摸目標大小 */
   }
   
   .contact-map-container {

@@ -7,7 +7,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-helmet-async": "^2.0.5",
-    "react-router-dom": "^7.1.1",
+    "react-router-dom": "^6.26.0",
     "react-scripts": "5.0.1",
     "three": "^0.182.0",
     "web-vitals": "^4.2.4"
@@ -38,11 +38,13 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/plugin-transform-private-property-in-object": "^7.27.1",
+    "@craco/craco": "^7.1.0",
     "@svgr/webpack": "^8.1.0",
     "babel-preset-react-app": "^10.0.1",
     "cross-env": "^7.0.3",
-    "@craco/craco": "^7.1.0",
-    "terser-webpack-plugin": "^5.3.10",
-    "css-minimizer-webpack-plugin": "^5.0.1"
+    "css-minimizer-webpack-plugin": "^5.0.1",
+    "terser-webpack-plugin": "^5.3.10"
   }
 }

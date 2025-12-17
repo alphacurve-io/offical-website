@@ -65,6 +65,7 @@ const AppContent = () => {
       <SEOHead language={language} />
       <LazyScrollTracking />
       <div className="App">
+        <main>
         {/* CustomCursor and Kid1Follower: Load after initial render to reduce main thread work */}
         <LazyComponent fallback={null} rootMargin="300px">
           <Suspense fallback={null}>
@@ -114,6 +115,7 @@ const AppContent = () => {
             <Footer />
           </Suspense>
         </LazyComponent>
+        </main>
       </div>
     </>
   );

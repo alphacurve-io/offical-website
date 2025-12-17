@@ -563,6 +563,7 @@ const ContactForm = () => {
           loop
           muted
           playsInline
+          aria-label="Map section background video"
         >
         <source src={videoSrc} type="video/mp4" />
         </video>

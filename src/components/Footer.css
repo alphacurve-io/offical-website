@@ -65,6 +65,10 @@
   }
   
   .footer-column ul li a {
+  display: inline-block;
+  min-height: 44px; /* WCAG 建議的最小觸摸目標大小 */
+  padding: 8px 0; /* 增加垂直 padding 以確保觸摸目標足夠大 */
+  line-height: 1.5;
     /* color: white; */
     color: #878787;
     text-decoration: none;

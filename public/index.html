@@ -75,8 +75,8 @@
         document.addEventListener(event, loadGA4, { once: true, passive: true });
       });
       
-      // 3 秒后自动加载（即使用户没有交互）
-      setTimeout(loadGA4, 3000);
+      // 5 秒后自动加载（延长延迟以减少初始主线程工作）
+      setTimeout(loadGA4, 5000);
     </script>
   </head>
   <body>

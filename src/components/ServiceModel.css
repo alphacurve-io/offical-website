@@ -624,6 +624,8 @@
   display: inline-flex !important;
   align-items: center;
   gap: 5px;
+  min-height: 44px; /* WCAG 建議的最小觸摸目標大小 */
+  min-width: 44px; /* 確保寬度也符合要求 */
 }
 
 .cta-button-text {
