@@ -49,12 +49,14 @@ module.exports = {
           ],
         };
 
-        // 代码分割优化 - 改进配置以更好地分离大型库
+        // 代码分割优化 - 改进配置以更好地分离大型库，减少初始包大小
         webpackConfig.optimization.splitChunks = {
           chunks: 'all',
-          maxInitialRequests: 30,
+          // 减少初始请求数量，降低主线程工作负担
+          maxInitialRequests: 20,
           minSize: 20000,
-          maxSize: 244000, // 限制单个 chunk 的最大大小，强制分割
+          // 进一步减小单个 chunk 的最大大小，强制更细粒度的分割
+          maxSize: 200000, // 从 244000 降低到 200000
           cacheGroups: {
             default: false,
             vendors: false,
@@ -62,7 +64,7 @@ module.exports = {
             three: {
               name: 'three',
               test: /[\\/]node_modules[\\/](three|three\/examples)[\\/]/,
-              chunks: 'all',
+              chunks: 'async', // 只异步加载，不包含在初始包中
               priority: 40,
               enforce: true,
               reuseExistingChunk: true,
@@ -80,7 +82,7 @@ module.exports = {
             vendor: {
               name: 'vendor',
               test: /[\\/]node_modules[\\/]/,
-              chunks: 'all',
+              chunks: 'async', // 优先异步加载，减少初始包大小
               priority: 20,
               minChunks: 1,
               reuseExistingChunk: true,

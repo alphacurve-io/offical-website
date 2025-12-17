@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import './SwipeTransition.css';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -117,13 +118,28 @@ const SwipeTransition = () => {
   // 分离中间 items 和最后一个 item
   const middleItems = items.slice(0, -1);
   const lastItem = items[items.length - 1];
+  
+  // Get the first image source for LCP preload
+  const firstImageSrc = middleItems.length > 0 ? getImageSrc(middleItems[0].image) : null;
 
   return (
-    <section 
-      ref={sectionRef} 
-      className="swipe-transition-section"
-      style={{ '--n': middleItemCount }}
-    >
+    <>
+      {/* Preload LCP image (first SwipeTransition image) for optimal performance */}
+      {firstImageSrc && firstImageSrc !== placeholderImage && (
+        <Helmet>
+          <link 
+            rel="preload" 
+            as="image" 
+            href={firstImageSrc}
+            fetchPriority="high"
+          />
+        </Helmet>
+      )}
+      <section 
+        ref={sectionRef} 
+        className="swipe-transition-section"
+        style={{ '--n': middleItemCount }}
+      >
       {/* 占位空间，只计算中间 items 的高度 */}
       <div className="swipe-transition-spacer" style={{ height: `${middleItemCount * 100}vh` }} />
       
@@ -158,6 +174,9 @@ const SwipeTransition = () => {
                 <img 
                   src={getImageSrc(item.image)} 
                   alt={item.title}
+                  // Optimize LCP: First image should have high priority and eager loading
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                  loading={index === 0 ? "eager" : "lazy"}
                   onError={(e) => {
                     e.target.src = placeholderImage;
                   }}
@@ -182,6 +201,7 @@ const SwipeTransition = () => {
             <img 
               src={getImageSrc(lastItem.image)} 
               alt={lastItem.title}
+              loading="lazy"
               onError={(e) => {
                 e.target.src = placeholderImage;
               }}
@@ -193,6 +213,7 @@ const SwipeTransition = () => {
         </section>
       </article>
     </section>
+    </>
   );
 };
 

@@ -87,6 +87,11 @@ const SEOHead = ({ language = 'zh' }) => {
       {/* Canonical URL */}
       <link rel="canonical" href={baseUrl} />
       
+      {/* Preload LCP images for optimal performance */}
+      {/* These preload links ensure LCP images are discoverable immediately in the HTML */}
+      {/* The actual image paths will be injected by React Helmet at render time */}
+      {/* For the first SwipeTransition image (likely LCP element), we'll add preload via component */}
+      
       {/* hreflang 標籤 */}
       <link rel="alternate" hreflang="zh" href={`${baseUrl}/?lang=zh`} />
       <link rel="alternate" hreflang="en" href={`${baseUrl}/?lang=en`} />

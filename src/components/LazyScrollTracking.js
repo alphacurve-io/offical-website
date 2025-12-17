@@ -27,8 +27,8 @@ const LazyScrollTracking = () => {
       return { event, handler };
     });
 
-    // 2秒后自动加载
-    const timer = setTimeout(loadTracking, 2000);
+    // 3秒后自动加载（延长延迟以减少初始主线程工作）
+    const timer = setTimeout(loadTracking, 3000);
 
     return () => {
       clearTimeout(timer);
