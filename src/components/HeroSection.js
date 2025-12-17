@@ -134,7 +134,13 @@ const HeroSection = () => {
             aria-label="Hero section background video"
           >
             <source src={videoSrc} type="video/mp4" />
-            {/* Note: Add captions track if video contains important audio content */}
+            <track
+              kind="captions"
+              src="/hero-background-video-captions.vtt"
+              srcLang="zh-TW"
+              label="背景影片說明 / Background video description"
+              default
+            />
           </video>
         ) : (
           <div 

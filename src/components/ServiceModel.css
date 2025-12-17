@@ -45,7 +45,7 @@
 .section-title-en {
   font-size: 0.9rem;
   text-align: center;
-  color: #6c757d;
+  color: #343a40; /* 深色以提升對比度 */
   margin-bottom: 3rem;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -442,8 +442,8 @@
 }
 
 .step-title-en {
-  font-size: 0.75rem;
-  color: #6c757d;
+  font-size: 0.8rem; /* 略放大以兼顧易讀性 */
+  color: #343a40; /* 深色提升與 #f8f9fa 背景的對比 */
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 0.75rem;

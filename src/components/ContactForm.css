@@ -149,7 +149,7 @@
   }
   
   .submit-button {
-    background: #34BFD1;
+    background: #006680; /* 深色提高與白色文字的對比 */
     color: white;
     border: none;
     padding: 12px 24px; /* 增加 padding 以確保觸摸目標至少 44px 高 */
@@ -230,7 +230,7 @@
   }
 
   .submit-button {
-    background-color: #00a8cc;
+    background-color: #006680; /* 與上方保持一致，確保對比度 */
     color: white;
     border: none;
     padding: 10px 20px;

@@ -565,7 +565,14 @@ const ContactForm = () => {
           playsInline
           aria-label="Map section background video"
         >
-        <source src={videoSrc} type="video/mp4" />
+          <source src={videoSrc} type="video/mp4" />
+          <track
+            kind="captions"
+            src="/map-background-video-captions.vtt"
+            srcLang="zh-TW"
+            label="地圖背景影片說明 / Map background video description"
+            default
+          />
         </video>
       </div>
       <script src="./MapSectionVideo.js"></script>
