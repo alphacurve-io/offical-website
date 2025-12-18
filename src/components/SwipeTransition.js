@@ -131,7 +131,8 @@ const SwipeTransition = () => {
             rel="preload" 
             as="image" 
             href={firstImageSrc}
-            fetchPriority="high"
+            // React 目前不認得 fetchPriority 屬性，改用原生屬性名稱 fetchpriority 避免 warning
+            fetchpriority="high"
           />
         </Helmet>
       )}
@@ -175,7 +176,8 @@ const SwipeTransition = () => {
                   src={getImageSrc(item.image)} 
                   alt={item.title}
                   // Optimize LCP: First image should have high priority and eager loading
-                  fetchPriority={index === 0 ? "high" : "auto"}
+                  // 在 React 版本尚未原生支援 fetchPriority 時，改用小寫屬性名稱，避免「不認得 prop」警告
+                  fetchpriority={index === 0 ? "high" : "auto"}
                   loading={index === 0 ? "eager" : "lazy"}
                   onError={(e) => {
                     e.target.src = placeholderImage;

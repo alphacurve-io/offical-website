@@ -5,7 +5,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { useLanguage } from '../contexts/LanguageContext';
 import './Kid1Follower.css';
 
-const Kid1Follower = () => {
+const Kid1Follower = ({ startDelayMs = 1000, onKid1Reload }) => {
   const { content } = useLanguage();
   const kid1FollowerConfig = content.kid1Follower;
   
@@ -26,6 +26,7 @@ const Kid1Follower = () => {
   const [isDelayed, setIsDelayed] = useState(false); // 控制是否已延迟 5 秒
   const [isRoom2Open, setIsRoom2Open] = useState(false); // 控制 room2 是否打开
   const [isMapPinLoading, setIsMapPinLoading] = useState(false); // 控制 map-pin 是否在 loading
+  const [isKid1ConfirmedVisible, setIsKid1ConfirmedVisible] = useState(false); // 確認 kid1 實際載入並顯示後才允許顯示氣泡
   
   const targetPositionRef = useRef(new THREE.Vector3(0, 0, 0));
   const bubbleTimerRef = useRef(null);
@@ -41,6 +42,7 @@ const Kid1Follower = () => {
   const isMapPinLoadingRef = useRef(isMapPinLoading); // 使用 ref 存储 isMapPinLoading 状态
   const kid1StartTimeRef = useRef(null); // 存储 kid1 开始显示的时间
   const initialPositionSetRef = useRef(false); // 标记是否已设置初始位置（固定在右边）
+  const reloadCheckTimerRef = useRef(null); // 检查 kid1 是否正常顯示的計時器
   
   // 更新 ref 中的配置值
   useEffect(() => {
@@ -119,20 +121,17 @@ const Kid1Follower = () => {
   useEffect(() => {
     const checkReady = () => {
       if (checkPageReady()) {
-        // 延迟一小段时间确保所有内容都已渲染
+        // 页面内容就绪后立刻标记 ready，然后只延迟 startDelayMs
+        setIsReady(true);
         setTimeout(() => {
-          setIsReady(true);
-          // 再延迟 5 秒才真正显示 kid1，避免加载时快速移动鼠标产生残影
-          setTimeout(() => {
-            setIsDelayed(true);
-            console.log('✅ 延迟 5 秒后，kid1 现在可以显示了');
-          }, 5000);
-        }, 500);
+          setIsDelayed(true);
+          console.log('✅ 延遲啟動後，kid1 現在可以顯示了');
+        }, startDelayMs);
       }
     };
     
     // 如果页面已经加载完成，立即检查
-    if (document.readyState === 'complete') {
+      if (document.readyState === 'complete') {
       checkReady();
     } else {
       // 等待页面加载完成
@@ -144,14 +143,11 @@ const Kid1Follower = () => {
     // 使用 MutationObserver 监听 DOM 变化，确保 section 元素已渲染
     const observer = new MutationObserver(() => {
       if (!isReady && checkPageReady()) {
+        setIsReady(true);
         setTimeout(() => {
-          setIsReady(true);
-          // 再延迟 5 秒才真正显示 kid1
-          setTimeout(() => {
-            setIsDelayed(true);
-            console.log('✅ 延迟 5 秒后，kid1 现在可以显示了');
-          }, 5000);
-        }, 500);
+          setIsDelayed(true);
+          console.log('✅ 延遲啟動後，kid1 現在可以顯示了');
+        }, startDelayMs);
       }
     });
     
@@ -164,11 +160,10 @@ const Kid1Follower = () => {
     const intervalId = setInterval(() => {
       if (!isReady && checkPageReady()) {
         setIsReady(true);
-        // 再延迟 5 秒才真正显示 kid1
         setTimeout(() => {
           setIsDelayed(true);
-          console.log('✅ 延迟 5 秒后，kid1 现在可以显示了');
-        }, 5000);
+          console.log('✅ 延遲啟動後，kid1 現在可以顯示了');
+        }, startDelayMs);
         clearInterval(intervalId);
       }
     }, 1000);
@@ -179,7 +174,7 @@ const Kid1Follower = () => {
       observer.disconnect();
       clearInterval(intervalId);
     };
-  }, [checkPageReady, isReady]);
+  }, [checkPageReady, isReady, startDelayMs]);
   
   // 检测当前 section（基于滚动位置）
   const detectCurrentSection = useCallback(() => {
@@ -348,23 +343,16 @@ const Kid1Follower = () => {
     }, 100);
   }, [updateDestinationPosition]);
   
-  // 初始化 Three.js 场景（在高效能設備上啟用，低效能/偏好降低動效則直接跳過）
+  // 初始化 Three.js 场景（若使用者要求減少動效則跳過）
   useEffect(() => {
     if (!containerRef.current) return;
+    if (typeof window === 'undefined') return;
 
-    // 根據裝置能力與使用者偏好決定是否啟用 3D 動畫
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
-                     (window.innerWidth <= 768);
     const prefersReducedMotion =
       window.matchMedia &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const lowCoreCount =
-      typeof navigator.hardwareConcurrency === 'number' &&
-      navigator.hardwareConcurrency <= 4;
 
-    // Lighthouse 行動裝置環境與低階硬體通常會落在這個條件，
-    // 直接跳過 Three.js 初始化可大幅降低 JS CPU 時間
-    if (prefersReducedMotion || (isMobile && lowCoreCount)) {
+    if (prefersReducedMotion) {
       return;
     }
     
@@ -387,7 +375,7 @@ const Kid1Follower = () => {
     // 创建渲染器（移动端优化）
     const renderer = new THREE.WebGLRenderer({ 
       alpha: true,
-      antialias: !isMobile, // 移动端关闭抗锯齿以提高性能
+      antialias: true,
       powerPreference: 'high-performance',
       preserveDrawingBuffer: false, // 不保留绘制缓冲区，避免残影
       depth: true,
@@ -395,7 +383,7 @@ const Kid1Follower = () => {
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
     // 移动端限制像素比以提高性能
-    const pixelRatio = isMobile ? Math.min(window.devicePixelRatio, 1.5) : Math.min(window.devicePixelRatio, 2);
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     renderer.setPixelRatio(pixelRatio);
     // 设置清除颜色为透明，并启用自动清除
     renderer.setClearColor(0x000000, 0);
@@ -686,9 +674,9 @@ const Kid1Follower = () => {
         // 使用 clearColor 和 clear 来确保完全清除
         renderer.clear(true, true, true); // 清除颜色、深度和模板缓冲区
         // 额外确保画布被清除
-        const gl = renderer.getContext();
-        if (gl) {
-          gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+        const glClear = renderer.getContext();
+        if (glClear) {
+          glClear.clear(glClear.COLOR_BUFFER_BIT | glClear.DEPTH_BUFFER_BIT | glClear.STENCIL_BUFFER_BIT);
         }
       }
     };
@@ -1114,6 +1102,113 @@ const Kid1Follower = () => {
     }
   }, [isDelayed]);
   
+  // 偵測 kid1 應該顯示時卻看不到的異常狀況，印出成功/失敗訊息，必要時自動透過外部 callback 重新載入一次
+  useEffect(() => {
+    // 只有在應該顯示 kid1，且目前有有效的 section 時才檢查
+    if (!shouldShowKid1 || !currentSection) {
+      if (reloadCheckTimerRef.current) {
+        clearTimeout(reloadCheckTimerRef.current);
+        reloadCheckTimerRef.current = null;
+      }
+      // 當 kid1 不應該顯示或沒有有效 section 時，視為尚未確認成功載入
+      setIsKid1ConfirmedVisible(false);
+      return;
+    }
+
+    // 如果 Three.js 還沒初始化（例如使用者開啟「減少動態效果」），就不要做這個檢查，避免誤判
+    if (!rendererRef.current || !sceneRef.current || !cameraRef.current) {
+      console.warn('⚠️ kid1 狀態檢查略過：Three.js 尚未初始化（可能是系統的減少動態設定）');
+      return;
+    }
+
+    // 先清掉舊的 timer，並重置「已確認可見」狀態
+    if (reloadCheckTimerRef.current) {
+      clearTimeout(reloadCheckTimerRef.current);
+      reloadCheckTimerRef.current = null;
+    }
+    setIsKid1ConfirmedVisible(false);
+
+    console.log('⏱ 已排程 kid1 狀態檢查（4 秒後執行）', {
+      sectionId: currentSection?.id,
+      hasBubble: bubbleVisibleRef.current,
+    });
+
+    // 等待幾秒，給模型載入與渲染一些時間
+    reloadCheckTimerRef.current = setTimeout(() => {
+      const hasKid1InScene =
+        kid1Ref.current &&
+        sceneRef.current &&
+        sceneRef.current.children.includes(kid1Ref.current);
+
+      let isKid1VisibleOnScreen = false;
+      let projectedInfo = null;
+
+      if (hasKid1InScene && cameraRef.current && kid1Ref.current) {
+        const worldPos = new THREE.Vector3();
+        kid1Ref.current.getWorldPosition(worldPos);
+        const projected = worldPos.clone().project(cameraRef.current);
+
+        // 判斷是否在視窗範圍內（留一點容錯）
+        const inFrontOfCamera = projected.z > 0 && projected.z < 1.5;
+        const withinHorizontal = projected.x > -1.2 && projected.x < 1.2;
+        const withinVertical = projected.y > -1.2 && projected.y < 1.2;
+
+        isKid1VisibleOnScreen = inFrontOfCamera && withinHorizontal && withinVertical;
+        projectedInfo = {
+          world: { x: worldPos.x, y: worldPos.y, z: worldPos.z },
+          ndc: { x: projected.x, y: projected.y, z: projected.z },
+        };
+      }
+
+      if (hasKid1InScene && isKid1VisibleOnScreen) {
+        // 一旦確認 kid1 已成功載入且實際出現在畫面內，就允許顯示對話氣泡
+        setIsKid1ConfirmedVisible(true);
+        console.log('✅ 檢測結果：kid1 已成功載入並顯示在畫面內', {
+          sectionId: currentSectionRef.current?.id,
+          hasBubble: bubbleVisibleRef.current,
+          projectedInfo,
+        });
+        return;
+      }
+
+      // 這裡代表：按邏輯應該要看到 kid1（shouldShowKid1=true），
+      // 但場景裡找不到 kid1，或是模型在場景裡卻不在可見畫面範圍內
+      console.error(
+        '❌ 檢測結果：kid1 應該顯示，但實際沒有正常出現在畫面上（可能只有氣泡、像透明人）',
+        {
+          sectionId: currentSectionRef.current?.id,
+          hasBubble: bubbleVisibleRef.current,
+          hasKid1InScene,
+          isKid1VisibleOnScreen,
+          projectedInfo,
+        }
+      );
+
+      // 通知父層嘗試重新載入一次 Kid1（具體策略交由父層決定，例如模擬點擊 kid1-toggle）
+      if (typeof onKid1Reload === 'function') {
+        console.warn('🔁 已偵測 kid1 畫面異常，將請父層透過 kid1-toggle 重新載入一次');
+        try {
+          onKid1Reload();
+        } catch (error) {
+          console.error('❌ 觸發 onKid1Reload 時發生錯誤：', error);
+        }
+      } else if (typeof window !== 'undefined') {
+        // 若外部沒有提供 reload callback，就退而求其次做整頁 reload
+        console.warn('🔁 未提供 onKid1Reload callback，將在 3 秒後重新載入整個頁面');
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      }
+    }, 4000); // 4 秒後檢查
+
+    return () => {
+      if (reloadCheckTimerRef.current) {
+        clearTimeout(reloadCheckTimerRef.current);
+        reloadCheckTimerRef.current = null;
+      }
+    };
+  }, [shouldShowKid1, currentSection, onKid1Reload]);
+  
   return (
     <>
       <div 
@@ -1125,7 +1220,8 @@ const Kid1Follower = () => {
           transition: 'opacity 0.1s ease-in-out' // 缩短过渡时间，更快隐藏
         }} 
       />
-      {bubbleVisible && shouldShowKid1 && (
+      {/* 只有在 kid1 確認已成功載入並顯示後，才渲染對話氣泡 */}
+      {bubbleVisible && shouldShowKid1 && isKid1ConfirmedVisible && (
         <div ref={bubbleRef} className="kid1-bubble">
           {bubbleMessage}
         </div>
@@ -1135,4 +1231,3 @@ const Kid1Follower = () => {
 };
 
 export default Kid1Follower;
-

@@ -57,6 +57,10 @@ export const kid1FollowerContent = {
       },
     ],
     movingMessage: '讓我帶你去看看...',
+    toggle: {
+      enable: '啟動小幫手',
+      disable: '關閉小幫手',
+    },
   },
   en: {
     // Model size configuration (unit: Three.js units, 1.5 means height of 1.5 units)
@@ -115,8 +119,11 @@ export const kid1FollowerContent = {
       },
     ],
     movingMessage: 'Let me take you there...',
+    toggle: {
+      enable: 'Enable assistant',
+      disable: 'Disable assistant',
+    },
   },
 };
 
 export default kid1FollowerContent;
-

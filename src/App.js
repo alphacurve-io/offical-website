@@ -58,7 +58,91 @@ const LazyComponent = ({ children, fallback = null, rootMargin = '200px' }) => {
 };
 
 const AppContent = () => {
-  const { language } = useLanguage();
+  const { language, content } = useLanguage();
+  const [enableKid1, setEnableKid1] = React.useState(false);
+  const [canToggleKid1, setCanToggleKid1] = React.useState(false);
+  const [kid1StartDelayMs, setKid1StartDelayMs] = React.useState(1000);
+  const [kid1AutoReloadCount, setKid1AutoReloadCount] = React.useState(0);
+  const enableKid1Ref = React.useRef(enableKid1);
+
+  const kid1ToggleText = content.kid1Follower?.toggle || {};
+
+  // 桌面版預設啟動 Kid1；行動裝置預設關閉，但右側都有浮動選單可開關
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') return;
+
+    const ua = navigator.userAgent || '';
+    const isMobile =
+      /iPhone|iPad|iPod|Android/i.test(ua) ||
+      window.innerWidth <= 768;
+
+    const prefersReducedMotion = window.matchMedia
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : false;
+
+    // 所有裝置啟動延遲統一為 1 秒
+    setKid1StartDelayMs(1000);
+
+    // 桌面版：預設啟動 Kid1（若未要求減少動效）
+    if (!isMobile && !prefersReducedMotion) {
+      setEnableKid1(true);
+    }
+
+    // 只要未要求減少動效，就顯示右側浮動選單（桌機 + 手機都可以手動開關）
+    if (!prefersReducedMotion) {
+      setCanToggleKid1(true);
+    }
+  }, []);
+
+  // 讓 callback 和延遲定時器可以讀到最新的 enableKid1 狀態
+  React.useEffect(() => {
+    enableKid1Ref.current = enableKid1;
+  }, [enableKid1]);
+
+  // 給 Kid1Follower 用的「重新載入」函式：效果等同使用者手動按 kid1-toggle
+  // 規則：
+  // - 第一次偵測到異常：立刻用 toggle 重新載入一次
+  // - 之後每次偵測到異常：5 秒後再自動用 toggle 嘗試一次（不再限制次數）
+  const handleKid1Reload = React.useCallback(() => {
+    console.warn('🔁 Kid1Follower 要求重新載入，將透過 kid1-toggle 進行自動重載');
+
+    // 如果使用者已經手動關掉 Kid1，就不要再自動重載，尊重使用者選擇
+    if (!enableKid1Ref.current) {
+      console.warn('⚠️ 收到自動重載請求，但 Kid1 目前已關閉，將略過自動重載');
+      return;
+    }
+    
+    const toggleOnce = () => {
+      // 先關閉 Kid1（會卸載 Kid1Follower 組件）
+      setEnableKid1(false);
+      // 稍微延遲之後再重新開啟，效果等同按一次切換按鈕（關->開）
+      setTimeout(() => {
+        setEnableKid1(true);
+      }, 200);
+    };
+
+    setKid1AutoReloadCount((prev) => {
+      const next = prev + 1;
+
+      if (next === 1) {
+        // 第一次偵測到異常：立刻重載一次
+        console.warn('🔁 自動重載 Kid1（第 1 次，立刻執行 toggle）');
+        toggleOnce();
+      } else {
+        // 之後每一次偵測到異常：5 秒後再嘗試一次
+        console.warn(`🔁 自動重載 Kid1（第 ${next} 次，將在 5 秒後自動執行 toggle）`);
+        setTimeout(() => {
+          if (!enableKid1Ref.current) {
+            console.warn('⚠️ 5 秒後準備自動重載，但 Kid1 已關閉，將略過這次自動重載');
+            return;
+          }
+          toggleOnce();
+        }, 5000);
+      }
+
+      return next;
+    });
+  }, []);
   
   return (
     <>
@@ -72,11 +156,14 @@ const AppContent = () => {
             <CustomCursor />
           </Suspense>
         </LazyComponent>
-        <LazyComponent fallback={null} rootMargin="300px">
+        {enableKid1 && (
           <Suspense fallback={null}>
-            <Kid1Follower />
+            <Kid1Follower
+              startDelayMs={kid1StartDelayMs}
+              onKid1Reload={handleKid1Reload}
+            />
           </Suspense>
-        </LazyComponent>
+        )}
         <Header />
         <HeroSection />
         {/* Below-the-fold components: Load when approaching viewport */}
@@ -116,6 +203,31 @@ const AppContent = () => {
           </Suspense>
         </LazyComponent>
         </main>
+
+        {/* 右側浮動選單：讓使用者決定是否啟動 Kid1
+            桌機預設啟動，手機預設關閉，但兩者都可以在這裡切換 */}
+        {canToggleKid1 && (
+          <div className="kid1-toggle-container">
+            <button
+              type="button"
+              className={
+                `kid1-toggle-button ` +
+                (enableKid1 ? 'kid1-toggle-button--active ' : '') +
+                'kid1-toggle-button--en'
+              }
+              onClick={() => setEnableKid1((prev) => !prev)}
+            >
+              <span
+                className={
+                  `kid1-toggle-title ` +
+                  (language === 'zh' ? 'kid1-toggle-title--zh' : 'kid1-toggle-title--en')
+                }
+              >
+                {enableKid1 ? kid1ToggleText.disable : kid1ToggleText.enable}
+              </span>
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

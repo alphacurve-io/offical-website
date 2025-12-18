@@ -30,6 +30,64 @@
   color: #61dafb;
 }
 
+/* 手機 / 桌機共用 Kid1 浮動選單（文案從 content 取得） */
+.kid1-toggle-container {
+  position: fixed;
+  right: 10px;
+  bottom: 122px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.kid1-toggle-button {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.4); /* 半透明 */
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 讓按鈕可以依文字自動撐開，同時保持最低尺寸避免太小不好點擊 */
+  min-width: 28px;
+  min-height: 48px;
+}
+
+/* 所有語系共用：整個按鈕旋轉 90 度，讓「視覺上的高度」等於文字長度 */
+.kid1-toggle-button--en {
+  transform: rotate(-90deg);
+  transform-origin: 100% 50%; /* 以右緣為旋轉基準，貼齊螢幕右邊 */
+}
+
+.kid1-toggle-button--active {
+  background: rgba(0, 184, 212, 0.6);
+  color: #011018;
+}
+
+/* 如需點擊下壓效果，之後可改成 box-shadow 或 scale，而不是覆蓋 transform，
+   以免破壞英文版旋轉後的寬高比例 */
+
+.kid1-toggle-title {
+  font-weight: 600;
+}
+
+.kid1-toggle-title--zh {
+  /* writing-mode: vertical-rl; */
+  text-orientation: upright;
+  letter-spacing: 0.1em;
+}
+
+.kid1-toggle-title--en {
+  display: inline-block;
+  white-space: nowrap;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
