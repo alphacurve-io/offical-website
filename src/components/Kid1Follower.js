@@ -1102,7 +1102,10 @@ const Kid1Follower = ({ startDelayMs = 1000, onKid1Reload }) => {
     }
   }, [isDelayed]);
   
-  // 偵測 kid1 應該顯示時卻看不到的異常狀況，印出成功/失敗訊息，必要時自動透過外部 callback 重新載入一次
+  // 偵測 kid1 應該顯示時卻看不到的異常狀況，
+  // 並且「每 5 秒檢查一次，直到成功」：
+  // - 若偵測到 kid1 實際有出現在畫面上：標記為已成功顯示，停止輪詢
+  // - 若偵測到 kid1 應該顯示但看不到：透過 onKid1Reload 要求父層重載，5 秒後再檢查一次
   useEffect(() => {
     // 只有在應該顯示 kid1，且目前有有效的 section 時才檢查
     if (!shouldShowKid1 || !currentSection) {
@@ -1115,12 +1118,6 @@ const Kid1Follower = ({ startDelayMs = 1000, onKid1Reload }) => {
       return;
     }
 
-    // 如果 Three.js 還沒初始化（例如使用者開啟「減少動態效果」），就不要做這個檢查，避免誤判
-    if (!rendererRef.current || !sceneRef.current || !cameraRef.current) {
-      console.warn('⚠️ kid1 狀態檢查略過：Three.js 尚未初始化（可能是系統的減少動態設定）');
-      return;
-    }
-
     // 先清掉舊的 timer，並重置「已確認可見」狀態
     if (reloadCheckTimerRef.current) {
       clearTimeout(reloadCheckTimerRef.current);
@@ -1128,13 +1125,27 @@ const Kid1Follower = ({ startDelayMs = 1000, onKid1Reload }) => {
     }
     setIsKid1ConfirmedVisible(false);
 
-    console.log('⏱ 已排程 kid1 狀態檢查（4 秒後執行）', {
+    console.log('⏱ 啟動 kid1 狀態輪詢檢查（每 5 秒一次，直到成功）', {
       sectionId: currentSection?.id,
       hasBubble: bubbleVisibleRef.current,
     });
 
-    // 等待幾秒，給模型載入與渲染一些時間
-    reloadCheckTimerRef.current = setTimeout(() => {
+    const checkVisibleAndMaybeReload = () => {
+      // 如果此時已經不該顯示 kid1（例如使用者切換 section 或關閉 toggle），就停止輪詢
+      if (!shouldShowKid1 || !currentSectionRef.current) {
+        if (reloadCheckTimerRef.current) {
+          clearTimeout(reloadCheckTimerRef.current);
+          reloadCheckTimerRef.current = null;
+        }
+        return;
+      }
+
+      // 如果 Three.js 還沒初始化（例如使用者開啟「減少動態效果」），就不要做這個檢查，避免誤判
+      if (!rendererRef.current || !sceneRef.current || !cameraRef.current) {
+        console.warn('⚠️ kid1 狀態檢查略過：Three.js 尚未初始化（可能是系統的減少動態設定）');
+        return;
+      }
+
       const hasKid1InScene =
         kid1Ref.current &&
         sceneRef.current &&
@@ -1161,13 +1172,17 @@ const Kid1Follower = ({ startDelayMs = 1000, onKid1Reload }) => {
       }
 
       if (hasKid1InScene && isKid1VisibleOnScreen) {
-        // 一旦確認 kid1 已成功載入且實際出現在畫面內，就允許顯示對話氣泡
+        // 一旦確認 kid1 已成功載入且實際出現在畫面內，就允許顯示對話氣泡並停止後續輪詢
         setIsKid1ConfirmedVisible(true);
-        console.log('✅ 檢測結果：kid1 已成功載入並顯示在畫面內', {
+        console.log('✅ 檢測結果：kid1 已成功載入並顯示在畫面內，停止輪詢檢查', {
           sectionId: currentSectionRef.current?.id,
           hasBubble: bubbleVisibleRef.current,
           projectedInfo,
         });
+        if (reloadCheckTimerRef.current) {
+          clearTimeout(reloadCheckTimerRef.current);
+          reloadCheckTimerRef.current = null;
+        }
         return;
       }
 
@@ -1199,7 +1214,13 @@ const Kid1Follower = ({ startDelayMs = 1000, onKid1Reload }) => {
           window.location.reload();
         }, 3000);
       }
-    }, 4000); // 4 秒後檢查
+
+      // 5 秒後再次檢查，直到成功或條件不再成立
+      reloadCheckTimerRef.current = setTimeout(checkVisibleAndMaybeReload, 5000);
+    };
+
+    // 第一次檢查也延遲 5 秒，讓模型載入與渲染有時間完成
+    reloadCheckTimerRef.current = setTimeout(checkVisibleAndMaybeReload, 5000);
 
     return () => {
       if (reloadCheckTimerRef.current) {

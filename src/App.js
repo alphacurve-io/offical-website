@@ -62,7 +62,6 @@ const AppContent = () => {
   const [enableKid1, setEnableKid1] = React.useState(false);
   const [canToggleKid1, setCanToggleKid1] = React.useState(false);
   const [kid1StartDelayMs, setKid1StartDelayMs] = React.useState(1000);
-  const [kid1AutoReloadCount, setKid1AutoReloadCount] = React.useState(0);
   const enableKid1Ref = React.useRef(enableKid1);
 
   const kid1ToggleText = content.kid1Follower?.toggle || {};
@@ -99,10 +98,10 @@ const AppContent = () => {
     enableKid1Ref.current = enableKid1;
   }, [enableKid1]);
 
-  // 給 Kid1Follower 用的「重新載入」函式：效果等同使用者手動按 kid1-toggle
+  // 給 Kid1Follower 用的「重新載入」函式：效果等同使用者手動按一次 kid1-toggle（關->開）
   // 規則：
-  // - 第一次偵測到異常：立刻用 toggle 重新載入一次
-  // - 之後每次偵測到異常：5 秒後再自動用 toggle 嘗試一次（不再限制次數）
+  // - 每次偵測到異常時立刻用 toggle 重新載入一次
+  // - Kid1Follower 自己會每 5 秒做一次檢查並在需要時再次呼叫這個函式
   const handleKid1Reload = React.useCallback(() => {
     console.warn('🔁 Kid1Follower 要求重新載入，將透過 kid1-toggle 進行自動重載');
 
@@ -112,36 +111,12 @@ const AppContent = () => {
       return;
     }
     
-    const toggleOnce = () => {
-      // 先關閉 Kid1（會卸載 Kid1Follower 組件）
-      setEnableKid1(false);
-      // 稍微延遲之後再重新開啟，效果等同按一次切換按鈕（關->開）
-      setTimeout(() => {
-        setEnableKid1(true);
-      }, 200);
-    };
-
-    setKid1AutoReloadCount((prev) => {
-      const next = prev + 1;
-
-      if (next === 1) {
-        // 第一次偵測到異常：立刻重載一次
-        console.warn('🔁 自動重載 Kid1（第 1 次，立刻執行 toggle）');
-        toggleOnce();
-      } else {
-        // 之後每一次偵測到異常：5 秒後再嘗試一次
-        console.warn(`🔁 自動重載 Kid1（第 ${next} 次，將在 5 秒後自動執行 toggle）`);
-        setTimeout(() => {
-          if (!enableKid1Ref.current) {
-            console.warn('⚠️ 5 秒後準備自動重載，但 Kid1 已關閉，將略過這次自動重載');
-            return;
-          }
-          toggleOnce();
-        }, 5000);
-      }
-
-      return next;
-    });
+    // 先關閉 Kid1（會卸載 Kid1Follower 組件）
+    setEnableKid1(false);
+    // 稍微延遲之後再重新開啟，效果等同按一次切換按鈕（關->開）
+    setTimeout(() => {
+      setEnableKid1(true);
+    }, 200);
   }, []);
   
   return (
