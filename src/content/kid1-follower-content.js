@@ -50,7 +50,7 @@ export const kid1FollowerContent = {
         id: 'contact',
         name: 'Contact Section',
         selector: '#contact',
-        messages: ['長按地圖上的logo圖釘，可以參加我們的虛擬會議唷', '快跟我一起進來!'],
+        messages: ['長按地圖上的logo圖釘，可以參加我們的虛擬會議唷~快跟我一起進來!'],
         destination: '#map-pin',
         bubbleShowDuration: 3000,
         bubbleHideDuration: 2000,
