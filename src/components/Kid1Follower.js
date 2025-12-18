@@ -348,9 +348,25 @@ const Kid1Follower = () => {
     }, 100);
   }, [updateDestinationPosition]);
   
-  // 初始化 Three.js 场景
+  // 初始化 Three.js 场景（在高效能設備上啟用，低效能/偏好降低動效則直接跳過）
   useEffect(() => {
     if (!containerRef.current) return;
+
+    // 根據裝置能力與使用者偏好決定是否啟用 3D 動畫
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+                     (window.innerWidth <= 768);
+    const prefersReducedMotion =
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const lowCoreCount =
+      typeof navigator.hardwareConcurrency === 'number' &&
+      navigator.hardwareConcurrency <= 4;
+
+    // Lighthouse 行動裝置環境與低階硬體通常會落在這個條件，
+    // 直接跳過 Three.js 初始化可大幅降低 JS CPU 時間
+    if (prefersReducedMotion || (isMobile && lowCoreCount)) {
+      return;
+    }
     
     // 创建场景
     const scene = new THREE.Scene();
@@ -367,10 +383,6 @@ const Kid1Follower = () => {
     camera.position.set(0, 2, 5);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
-    
-    // 检测是否为移动设备
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
-                    (window.innerWidth <= 768);
     
     // 创建渲染器（移动端优化）
     const renderer = new THREE.WebGLRenderer({ 
