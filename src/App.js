@@ -1,4 +1,5 @@
 import React, { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
@@ -17,6 +18,7 @@ const ServiceModel = lazy(() => import(/* webpackChunkName: "service-model" */ '
 const SwipeTransition = lazy(() => import(/* webpackChunkName: "swipe" */ './components/SwipeTransition'));
 const ContactForm = lazy(() => import(/* webpackChunkName: "contact" */ './components/ContactForm'));
 const Footer = lazy(() => import(/* webpackChunkName: "footer" */ './components/Footer'));
+const Room2Page = lazy(() => import(/* webpackChunkName: "room2" */ './components/Room2Page'));
 
 // 加载占位符组件
 const LoadingPlaceholder = () => null;
@@ -211,7 +213,16 @@ const AppContent = () => {
 const App = () => {
   return (
     <LanguageProvider>
-      <AppContent />
+      <Router>
+        <Routes>
+          <Route path="/" element={<AppContent />} />
+          <Route path="/office" element={
+            <Suspense fallback={<LoadingPlaceholder />}>
+              <Room2Page />
+            </Suspense>
+          } />
+        </Routes>
+      </Router>
     </LanguageProvider>
   );
 };

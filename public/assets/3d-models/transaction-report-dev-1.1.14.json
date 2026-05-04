@@ -1,0 +1,1318 @@
+{
+  "name": "transaction-report-dev",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        224
+      ],
+      "id": "01e12ed8-fcfd-4a35-91b4-d8d863c04bfc",
+      "name": "Code Tool"
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        16,
+        224
+      ],
+      "id": "df53a099-2ee3-46c8-a89b-38f58328e4ef",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "3Sod2VJS2GF77Aa7",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.output }}",
+        "destinationKey": "statistical_results",
+        "options": {
+          "simplifiedAutoLink": true,
+          "tables": true
+        }
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        352,
+        112
+      ],
+      "id": "dbe2dc43-186b-4e01-b23b-cfe8bd3dd71c",
+      "name": "Markdown"
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        80,
+        624
+      ],
+      "id": "58991f44-8f9d-4fff-9aba-863ed3b61967",
+      "name": "Ollama Chat Model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "3Sod2VJS2GF77Aa7",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.output }}",
+        "destinationKey": "transaction_flow_report",
+        "options": {
+          "simplifiedAutoLink": true,
+          "tables": true
+        }
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        352,
+        512
+      ],
+      "id": "d3138f2e-bd29-4ce0-b490-a8c2d7f7ae05",
+      "name": "Markdown1"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        576,
+        496
+      ],
+      "id": "fa24f024-e75d-4f9d-8e34-abdb46cc2807",
+      "name": "Merge",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        80,
+        1136
+      ],
+      "id": "8e2c4238-0afa-4b52-9be8-aae2fb459de6",
+      "name": "Ollama Chat Model2",
+      "credentials": {
+        "ollamaApi": {
+          "id": "3Sod2VJS2GF77Aa7",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.output }}",
+        "destinationKey": "withdrawal_list",
+        "options": {
+          "simplifiedAutoLink": true,
+          "tables": true
+        }
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        352,
+        912
+      ],
+      "id": "defb126b-7edf-4f69-92f1-ba524b0c2ae6",
+      "name": "Markdown2"
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "formTitle": "Report Analytics",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "transaction report",
+              "fieldType": "file",
+              "acceptFileTypes": "pdf,csv",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -2048,
+        832
+      ],
+      "id": "d908f74b-b306-4b30-8bab-5ee1fc8b18e9",
+      "name": "Upload pdf Financial Report",
+      "webhookId": "d56e3106-a58d-4fb6-96d6-6a34cb36b279",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "sgVd8beZF54DbCIT",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 為每個 binary 文件創建獨立的 item\nconst outputItems = [];\n\nfor (let index = 0; index < items.length; index++) {\n  const item = items[index];\n  \n  if (item.binary) {\n    // 遍歷所有 binary 文件\n    for (const [key, binaryData] of Object.entries(item.binary)) {\n      outputItems.push({\n        json: {\n          setCookie: true,\n          file_index: index,\n          original_key: key,\n          file_name: binaryData.fileName || `file_${index}`,\n          file_size: binaryData.fileSize || 0\n        },\n        binary: {\n          data: binaryData  // 統一使用 \"data\" 作為 binary key\n        }\n      });\n    }\n  }\n}\n\nreturn outputItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1392,
+        832
+      ],
+      "id": "2be0ee72-420a-446a-9472-e0249503c79d",
+      "name": "Merge Files"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'my_new_field' to the JSON of each one\nconst result = {};\nconst report = {};\nconst transaction_collection = {};\n\nresult.chatInput = {};\nreport.statistics = {};\nreport.statistics.files = [];\nreport.transactions = {};\nreport.transactions.files = [];\nreport.withdrawal = {};\nreport.withdrawal.files = [];\n\nlet total_profit = 0;\nlet total_taxes = 0;\nlet total_commission = 0;\nlet total_swap = 0;\n\n/**\n * 分析並合併所有帳戶的 withdrawal_list\n */\nfunction analyze_withdrawal_list(items) {\n  // 使用普通 object 來累積同一年的提款數據\n  const yearly_withdrawals = {};\n  \n  // 遍歷每個帳戶\n  for (const item of items) {\n    // 從 item.json 中取得數據\n    const json_data = item.json || {};\n    \n    if (!json_data.success) {\n      continue;\n    }\n    \n    // 取得帳戶編號\n    const account = json_data.account || '';\n    const withdrawal_list = json_data.withdrawal_list || [];\n    \n    // 遍歷每個提款記錄\n    for (const withdrawal of withdrawal_list) {\n      const open_year = withdrawal.open_year;\n      if (!open_year) {\n        continue;\n      }\n      \n      // 如果這一年還沒有記錄,初始化\n      if (!yearly_withdrawals[open_year]) {\n        yearly_withdrawals[open_year] = {\n          total: 0,\n          notes: []\n        };\n      }\n      \n      // 累加 total\n      yearly_withdrawals[open_year].total += withdrawal.total || 0;\n      \n      // 收集 notes,加入 account 前綴\n      const note = withdrawal.note || '';\n      if (note) {\n        // 格式: account:note\n        const account_note = `${account}:${note}`;\n        if (!yearly_withdrawals[open_year].notes.includes(account_note)) {\n          yearly_withdrawals[open_year].notes.push(account_note);\n        }\n      }\n    }\n  }\n  \n  // 轉換為最終格式\n  const merged_list = [];\n  for (const [open_year, data] of Object.entries(yearly_withdrawals)) {\n    // 合併 notes\n    const combined_note = data.notes.length > 0 ? data.notes.join(', ') : '';\n    \n    merged_list.push({\n      open_year: open_year,\n      total: data.total,\n      note: combined_note\n    });\n  }\n  \n  // 按年份排序\n  merged_list.sort((a, b) => a.open_year - b.open_year);\n  \n  return merged_list;\n}\n\n/**\n * 分析並合併所有帳戶的 transaction_flow\n */\nfunction analyze_transaction_flows(items) {\n  // 使用普通 object 來累積同一天的交易數據\n  const daily_transactions = {};\n  \n  // 遍歷每個帳戶\n  for (const item of items) {\n    // 從 item.json 中取得數據\n    const json_data = item.json || {};\n    \n    if (!json_data.success) {\n      continue;\n    }\n    \n    // 取得帳戶編號\n    const account = json_data.account || '';\n    const transaction_flow = json_data.transaction_flow || [];\n    \n    // 遍歷每個交易流程記錄\n    for (const transaction of transaction_flow) {\n      const open_day = transaction.open_day;\n      if (!open_day) {\n        continue;\n      }\n      \n      // 如果這一天還沒有記錄,初始化\n      if (!daily_transactions[open_day]) {\n        daily_transactions[open_day] = {\n          total_tranin: 0,\n          total_tranout: 0,\n          notes: []\n        };\n      }\n      \n      // 累加 tranin 和 tranout\n      daily_transactions[open_day].total_tranin += transaction.total_tranin || 0;\n      daily_transactions[open_day].total_tranout += transaction.total_tranout || 0;\n      \n      // 收集 notes,加入 account 前綴\n      const note = transaction.note || '';\n      if (note) {\n        // 格式: account:note\n        const account_note = `${account}:${note}`;\n        if (!daily_transactions[open_day].notes.includes(account_note)) {\n          daily_transactions[open_day].notes.push(account_note);\n        }\n      }\n    }\n  }\n  \n  // 轉換為最終格式\n  const merged_flow = [];\n  for (const [open_day, data] of Object.entries(daily_transactions)) {\n    // 合併 notes\n    const combined_note = data.notes.length > 0 ? data.notes.join(', ') : '';\n    \n    // 判斷 match: tranin 和 tranout 的絕對值是否相等\n    const tranin = data.total_tranin;\n    const tranout = data.total_tranout;\n    const match = Math.abs(tranin + tranout) < 0.01; // 使用小誤差來處理浮點數比較\n    \n    merged_flow.push({\n      open_day: open_day,\n      total_tranin: tranin,\n      total_tranout: tranout,\n      match: match,\n      note: combined_note\n    });\n  }\n  \n  // 按日期排序\n  merged_flow.sort((a, b) => a.open_day.localeCompare(b.open_day));\n  \n  return merged_flow;\n}\n\n// 處理主要邏輯\n// 確保 items[0].json.files 存在且是陣列\nconst files = items[0]?.json?.files;\nif (!files || !Array.isArray(files)) {\n  throw new Error('items[0].json.files is not an array or does not exist');\n}\n\nfor (const item of files) {\n  item.json.my_new_field = 1;\n\n  total_profit += item.json.summary.total_profit;\n  total_commission += item.json.summary.total_commission;\n  total_taxes += item.json.summary.total_taxes;\n  total_swap += item.json.summary.total_swap;\n  \n  report.statistics.files.push({\n    success: item.json.success,\n    filename: item.json.filename,\n    account: item.json.account,\n    name: item.json.name,\n    summary: {\n      total_trades: item.json.summary.total_trades,\n      total_profit: item.json.summary.total_profit,\n      total_commission: item.json.summary.total_commission,\n      total_taxes: item.json.summary.total_taxes,\n      total_swap: item.json.summary.total_swap\n    },\n    buy_trades: item.json.buy_trades,\n    sell_trades: item.json.sell_trades,\n    pdf_summary: item.json.pdf_summary\n  });\n  \n  report.transactions.files.push({\n    success: item.json.success,\n    filename: item.json.filename,\n    account: item.json.account,\n    name: item.json.name,\n    list: item.json.transaction_flow\n  });\n  \n  report.withdrawal.files.push({\n    success: item.json.success,\n    filename: item.json.filename,\n    account: item.json.account,\n    name: item.json.name,\n    list: item.json.withdrawal_list\n  });\n}\n\nreport.statistics.all_files_summary = {\n  total_commission: total_commission,\n  total_profit: total_profit,\n  total_swap: total_swap,\n  total_taxes: total_taxes\n};\n\nreport.transactions.record = analyze_transaction_flows(files);\nreport.withdrawal.record = analyze_withdrawal_list(files);\nresult.chatInput = report;\n\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        512
+      ],
+      "id": "5ec323bb-380a-41f6-807c-0e8780254c8a",
+      "name": "Format Data"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=你是個文書助理，使用繁體中文，做以下4件事：\n1. 將 {{ $json.chatInput.statistics.files }} 中的filename, account, summary資料已表格呈現，並與pdf_summary中的統計結果作比較，驗證是否一樣\n2. 參考資料請將pdf_summary的數據列出\n3. 將{{ $json.chatInput.statistics.all_files_summary }}這個所有檔案的統計結果列出\n4. 最後給我一段你的分析摘要\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4121681a-f880-4df7-bedb-5b0c59b0404f",
+      "name": "AI Agent-Statistics",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=你是個資料分析師\n根據 {{ $json.chatInput.transactions.record }}\n整理出一份表格，讓我可以看清楚每天的transaction in/out有沒有一致\n使用繁體中文，並給我你的總結摘要"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        0,
+        400
+      ],
+      "id": "e2fdbd2b-dba6-4a74-930a-3dfcf1fc8388",
+      "name": "AI Agent-Transation Report",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=你是個會計，只負責將資料彙整\n把{{ $json.chatInput.withdrawal.record }}\n整理成一份表格\n\n（切記，只需要Withdrawal的部分，我想看的就是年度出金的資料，不需要做額外的整理）"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        0,
+        912
+      ],
+      "id": "7576195f-8b3f-492c-8523-b0c91f3e7f92",
+      "name": "AI Agent-Withdrawal Report",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Initialize variables to store results\nlet statistical_results = null;\nlet transaction_flow_report = null;\nlet withdrawal_list = null;\n\n// Loop through items to find the required fields\nfor (const item of items) {\n    const json_data = item.json || {};\n    \n    if (json_data.statistical_results) {\n        statistical_results = json_data.statistical_results;\n    }\n    \n    if (json_data.transaction_flow_report) {\n        transaction_flow_report = json_data.transaction_flow_report;\n    }\n    \n    if (json_data.withdrawal_list) {\n        withdrawal_list = json_data.withdrawal_list;\n    }\n}\n\n// Build the final result\nconst result_parts = [];\n\nif (statistical_results) {\n    result_parts.push(statistical_results);\n}\n\nif (transaction_flow_report) {\n    result_parts.push(\"<hr><hr><p>Transaction Flow</p>\");\n    result_parts.push(transaction_flow_report);\n}\n\nif (withdrawal_list) {\n    result_parts.push(\"<hr><hr><p>Withdrawal List</p>\");\n    result_parts.push(withdrawal_list);\n}\n\n// Return as array of dictionaries\nconst combined_html = result_parts.length > 0 ? result_parts.join(\"\") : \"\";\nreturn [{ json: { combined_report: combined_html } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        512
+      ],
+      "id": "44592e87-d32d-460f-9839-1069e1e5e10d",
+      "name": "Format"
+    },
+    {
+      "parameters": {
+        "content": "# 使用方式 \n點擊 **Execute Workflow** 橘色按鈕，選擇pdf檔上傳。等待流程跑完，會收到分析報告\n\n## 注意事項\n\n* 有時AI Agent會失敗，這是三方服務不穩定造成的，僅需重新執行一次流程即可。\n* 新用戶想收到分析報告請先告知，我們需要將用戶的Email加入列表。\n* 若持續執行失敗，可能是觸及LLM模型上限，需要等待一段時間。",
+        "height": 272,
+        "width": 608
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1504,
+        128
+      ],
+      "typeVersion": 1,
+      "id": "b81b6bda-6270-4336-9fd1-d647e118775c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Version: v1.1.4",
+        "height": 80,
+        "width": 608,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1504,
+        48
+      ],
+      "id": "64948630-aa0a-4c82-b666-932decc630c2",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 把所有檔案包成一個物件\nconst all_files = { files: items };\n\n// 建立 3 個副本\nreturn [\n    { json: all_files },\n    { json: all_files },\n    { json: all_files }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        832
+      ],
+      "id": "ece84d74-5c63-48e2-8a91-c61f902a5ac3",
+      "name": "Create Jobs"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -448,
+        832
+      ],
+      "id": "19a4a580-e4a9-4f71-b57a-cd9ab1ce9d15",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true,
+          "responseMode": "responseNodes"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1552,
+        1552
+      ],
+      "id": "b7c9e1aa-069e-4559-a053-5bc87442f343",
+      "name": "When chat message received",
+      "webhookId": "ebfeaab1-f84a-42b6-a960-d84b51219dc6"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "你是個狀態機，把用戶的問題做分類，如果是\n檢索pdf：回傳1\n其他問題：回傳2"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -1312,
+        1552
+      ],
+      "id": "ecba4a52-5744-4309-a4c1-0352c6d59c0b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -1360,
+        1760
+      ],
+      "id": "7c35bb47-ca95-494d-bc3d-4757a81ad2cb",
+      "name": "Ollama Chat Model3",
+      "credentials": {
+        "ollamaApi": {
+          "id": "3Sod2VJS2GF77Aa7",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        -1136,
+        1744
+      ],
+      "id": "d031df0e-e65b-4bc2-b5c2-8f7762ea3a56",
+      "name": "Code Tool1"
+    },
+    {
+      "parameters": {
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        1536
+      ],
+      "id": "7e7de68b-5e64-465d-af58-83f80610cb96",
+      "name": "Respond to Chat"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0404bd8c-7434-4edd-8220-b2f8a40b4819",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "2",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1024,
+        1552
+      ],
+      "id": "8e5f5938-873e-4410-886d-9136ab96ac57",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        1728
+      ],
+      "id": "45b07831-e4b2-472c-9645-2da90b029327",
+      "name": "Ollama Chat Model4",
+      "credentials": {
+        "ollamaApi": {
+          "id": "3Sod2VJS2GF77Aa7",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "bucketName": "otsodevsfxdev",
+        "options": {
+          "folderKey": "=private/transaction-reports/{{ $today.format('yyyy-MM-dd') }}/"
+        }
+      },
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 2,
+      "position": [
+        -528,
+        1856
+      ],
+      "id": "d30fde44-1b7d-499a-8fd0-b686cf406bc3",
+      "name": "Get many files",
+      "credentials": {
+        "aws": {
+          "id": "F0jPwR2buB42OM3v",
+          "name": "AWS account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "otsodevsfxdev",
+        "fileName": "=private/transaction-reports/{{ $today.format('yyyy-MM-dd') }}/{{ $json.account }}.json",
+        "binaryData": false,
+        "fileContent": "=[{{ $json.toJsonString() }}]",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        1056
+      ],
+      "id": "460d331e-9396-4398-a940-d2cccda0ef48",
+      "name": "Store Response",
+      "retryOnFail": true,
+      "credentials": {
+        "aws": {
+          "id": "F0jPwR2buB42OM3v",
+          "name": "AWS account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "otsodevsfxdev",
+        "fileName": "=private/transaction-reports/{{ $today.format('yyyy-MM-dd') }}/{{ $json.file_name }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 2,
+      "position": [
+        -976,
+        1056
+      ],
+      "id": "a6c34a7a-4f12-4118-87c5-89cb6aaf598e",
+      "name": "Upload Files",
+      "credentials": {
+        "aws": {
+          "id": "F0jPwR2buB42OM3v",
+          "name": "AWS account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "bucketName": "otsodevsfxdev",
+        "fileKey": "private/transaction-reports/2025-11-03/response.json"
+      },
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 2,
+      "position": [
+        -816,
+        1536
+      ],
+      "id": "27309092-40cc-4f22-abb6-fa08717ef3db",
+      "name": "Download a file",
+      "credentials": {
+        "aws": {
+          "id": "F0jPwR2buB42OM3v",
+          "name": "AWS account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=根據用戶的要求：\n {{ $('When chat message received').item.json.chatInput }}\n嘗試從以下資料找出用戶的答案：\n{{ $json.chatInput }}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -432,
+        1536
+      ],
+      "id": "bcb8f910-ed58-4859-a5d7-717ec47fec89",
+      "name": "AI Agent- Finder"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "destinationKey": "chatInput",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        1536
+      ],
+      "id": "7c02bdc9-40f1-4d67-8f50-75a9a28027bb",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "\noutput_items = []\nfor index, item in enumerate(_items):\n  if \"binary\" in item:\n    for key, binary_data in item[\"binary\"].items():\n      file_content = \"\"\n      file_name = binary_data.get(\"fileName\", f\"file_{index}\")\n      \n      try:\n        # n8n 的 binary_data 本身就包含文件內容\n        # 直接從 'data' 欄位讀取\n        if isinstance(binary_data.get(\"data\"), bytes):\n          file_bytes = binary_data[\"data\"]\n        else:\n          # 如果是 buffer 或其他格式\n          file_bytes = bytes(binary_data[\"data\"])\n        \n        # 嘗試解碼為文字\n        file_content = file_bytes.decode('utf-8', errors='ignore')\n        \n      except Exception as e:\n        file_content = f\"Error: {str(e)}\"\n      \n      output_items.append({\n        \"json\": {\n          \"file_index\": index,\n          \"file_name\": file_name,\n          \"file_size\": binary_data.get(\"fileSize\", 0),\n          \"file_content\": file_content[:5000],  # 只取前 5000 字元\n          \"mime_type\": binary_data.get(\"mimeType\", \"\")\n        },\n        \"binary\": {\n          \"data\": binary_data\n        }\n      })\n\nreturn {'json': {'chatInput': output_items}}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -784,
+        1856
+      ],
+      "id": "9ab47f7e-d864-44b2-9bd0-03782f9d32b0",
+      "name": "Merge Files From S3",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "operation": "delete",
+        "bucketName": "otsodevsfxdev",
+        "folderKey": "=private/transaction-reports/{{ $today.format('yyyy-MM-dd') }}"
+      },
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 2,
+      "position": [
+        -1360,
+        1072
+      ],
+      "id": "25c987ea-9049-4241-a765-018a773a2620",
+      "name": "Delete a folder",
+      "retryOnFail": false,
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "credentials": {
+        "aws": {
+          "id": "F0jPwR2buB42OM3v",
+          "name": "AWS account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "jamesshieh0510@gmail.com, edison@otsofintech.com, neil861022@gmail.com",
+        "toEmail": "jamesshieh0510@gmail.com",
+        "subject": "transaction reports",
+        "html": "=v1.1.0-test\n{{ $json.combined_report }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1136,
+        704
+      ],
+      "id": "136a7fcf-daec-412d-835f-7a33a1884668",
+      "name": "Send email",
+      "webhookId": "c8c4b705-a80f-4f10-a554-9f2de5aa7ccd",
+      "credentials": {
+        "smtp": {
+          "id": "BY1dIiO9AyUCCzj4",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mailagent": "6fbc035674ba073e",
+        "fromaddress": {
+          "address": "no_reply@otsofintech.com"
+        },
+        "toaddress": "jamesshieh0510@gmail.com, edison@otsofintech.com, neil861022@gmail.com, sfrdsem@gmail.com",
+        "subject": "transaction-report",
+        "htmlbody": "=v1.1.4\n{{ $json.combined_report }}",
+        "attachment": {}
+      },
+      "type": "n8n-nodes-zohozeptomail.zohoZeptomail",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        1040
+      ],
+      "id": "e2c26c09-a78b-4b19-a26d-38f50247551d",
+      "name": "Send Mail",
+      "credentials": {
+        "zohoZeptomailOAuth2Api": {
+          "id": "GCgfUBnNoB78N3Fi",
+          "name": "Zoho ZeptoMail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://transaction-report-analytics-1u2djcxqv-james-projects-849da35a.vercel.app/api/process-pdf",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -976,
+        832
+      ],
+      "id": "584ec9e0-bdd6-469d-9526-623e8924b88b",
+      "name": "Analysis (vercell)",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n-pdf-processor.sofinx.com/api/process-pdf",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -976,
+        672
+      ],
+      "id": "5fa5d353-4057-4088-a9f5-3ca95dab074d",
+      "name": "Analysis (eks)",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://trading.logging-prod.otso-dev.com/api/process-pdf",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "cookie",
+              "value": "={{ $json.cookie }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "=data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -976,
+        480
+      ],
+      "id": "962b73b6-05cf-439e-bb54-72b6e1ab5fed",
+      "name": "Analysis (golang)",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://trading.logging-prod.otso-dev.com/api/login",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"username\":\"sofinx\", \"password\":\"$ofinx\"}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1856,
+        608
+      ],
+      "id": "3c2256ab-2a75-46c4-95db-a879d33418ab",
+      "name": "login",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1696,
+        1168
+      ],
+      "id": "a189871d-5ac7-438b-baf5-3f9d0ecc1d89",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "setCookie",
+        "joinMode": "keepEverything",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1248,
+        624
+      ],
+      "id": "985512a1-f8fb-44c8-a68b-1d776ca84796",
+      "name": "Auth Merge",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "WuBfDEN27bslspWp",
+          "mode": "list",
+          "cachedResultName": "cookie",
+          "cachedResultUrl": "/projects/T3HgkLo2PWpIn8eA/datatables/WuBfDEN27bslspWp"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "1"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "cookie",
+              "displayName": "cookie",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "setCookie",
+              "displayName": "setCookie",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -1456,
+        416
+      ],
+      "id": "c3ffec2f-dbb8-4173-b257-fd16dba74a27",
+      "name": "Update Cookie"
+    },
+    {
+      "parameters": {
+        "jsCode": "\n\nreturn [{\"cookie\": $input.first().json.headers['set-cookie'][0], \"setCookie\": true}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1664,
+        432
+      ],
+      "id": "3131848e-4380-472c-b877-a5930aa64d44",
+      "name": "Fetch Cookie"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "WuBfDEN27bslspWp",
+          "mode": "list",
+          "cachedResultName": "cookie",
+          "cachedResultUrl": "/projects/T3HgkLo2PWpIn8eA/datatables/WuBfDEN27bslspWp"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "1"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -1456,
+        576
+      ],
+      "id": "685c3021-bf29-494b-ba32-f36b3cb802de",
+      "name": "Get Cookie"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent-Statistics",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent-Statistics",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent-Transation Report",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent-Withdrawal Report",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Upload pdf Financial Report": {
+      "main": [
+        [
+          {
+            "node": "Merge Files",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "login",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Cookie",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Files": {
+      "main": [
+        [
+          {
+            "node": "Auth Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Format Data": {
+      "main": [
+        [
+          {
+            "node": "AI Agent-Statistics",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent-Transation Report",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent-Withdrawal Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent-Statistics": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent-Transation Report": {
+      "main": [
+        [
+          {
+            "node": "Markdown1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent-Withdrawal Report": {
+      "main": [
+        [
+          {
+            "node": "Markdown2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format": {
+      "main": [
+        [
+          {
+            "node": "Send Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Jobs": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Format Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Tool1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Download a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent- Finder",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download a file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent- Finder": {
+      "main": [
+        [
+          {
+            "node": "Respond to Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "AI Agent- Finder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email": {
+      "main": [
+        []
+      ]
+    },
+    "Send Mail": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analysis (vercell)": {
+      "main": [
+        []
+      ]
+    },
+    "Analysis (eks)": {
+      "main": [
+        []
+      ]
+    },
+    "Analysis (golang)": {
+      "main": [
+        [
+          {
+            "node": "Create Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "login": {
+      "main": [
+        [
+          {
+            "node": "Fetch Cookie",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auth Merge": {
+      "main": [
+        [
+          {
+            "node": "Analysis (golang)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Cookie": {
+      "main": [
+        []
+      ]
+    },
+    "Fetch Cookie": {
+      "main": [
+        [
+          {
+            "node": "Update Cookie",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Cookie": {
+      "main": [
+        [
+          {
+            "node": "Auth Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7485a446-d16f-443e-a7a0-3970b64bf6a8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "30cd2593a6d625feb18c41e5f586aded50f1e6ec5168e73969d2da40a1e74ed1"
+  },
+  "id": "A9qP872f32Y3GXU0",
+  "tags": []
+}
