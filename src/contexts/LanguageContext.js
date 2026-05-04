@@ -58,14 +58,10 @@ const getLanguageFromBrowser = () => {
 
 // Initial language resolution:
 // 1) URL ?lang=zh/en（最高優先）
-// 2) Browser language（navigator.language / languages）
-// 3) Default to zh（你要求的預設：中文）
+// 2) 預設為 zh（忽略瀏覽器設定，確保預設一定是中文版）
 const getInitialLanguage = () => {
   const urlLang = getLanguageFromURL();
   if (urlLang) return urlLang;
-
-  const browserLang = getLanguageFromBrowser();
-  if (browserLang) return browserLang;
 
   return 'zh';
 };

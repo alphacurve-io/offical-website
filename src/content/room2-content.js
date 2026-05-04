@@ -85,7 +85,7 @@ export const room2Content = {
     // Audio config: mp3 file path (relative to public directory), leave empty to disable
     // loop: true for repeat, false for play once
     audioConfig: {
-      mp3: 'assets/audio/chrismas.mp3', // e.g., '/assets/audio/background.mp3'
+      mp3: 'assets/audio/chrismas.MP3', // e.g., '/assets/audio/background.mp3'
       loop: false, // whether to loop
     },
     people: [
@@ -102,7 +102,7 @@ export const room2Content = {
         hairColor: '#ffd700',
         expression: 'surprised',
         messages: ['These numbers are interesting.', 'If we automate this, it saves a lot of time.'],
-        leftArm: 'spread',
+        leftArm: 'none',
         rightArm: 'spread',
       },
       { 
@@ -110,7 +110,7 @@ export const room2Content = {
         hairColor: '#8b4513',
         expression: 'neutral',
         messages: ["Let's list out the main risks.", 'Maybe start with a small PoC.'],
-        leftArm: 'none',
+        leftArm: 'point',
         rightArm: 'point',
       },
       { 
