@@ -24,37 +24,7 @@ const getLanguageFromURL = () => {
   return (lang === 'en' || lang === 'zh') ? lang : null;
 };
 
-// Helper function: detect language from browser settings
-const getLanguageFromBrowser = () => {
-  if (typeof navigator === 'undefined') return null;
-
-  const candidates = [];
-
-  if (Array.isArray(navigator.languages) && navigator.languages.length > 0) {
-    candidates.push(...navigator.languages);
-  }
-
-  if (navigator.language) {
-    candidates.push(navigator.language);
-  }
-
-  // 部分瀏覽器可能提供 userLanguage 等額外屬性
-  if (navigator.userLanguage) {
-    candidates.push(navigator.userLanguage);
-  }
-
-  const lowered = candidates
-    .filter(Boolean)
-    .map((l) => l.toLowerCase());
-
-  // 優先檢查中文
-  if (lowered.some((l) => l.startsWith('zh'))) return 'zh';
-
-  // 其餘則優先英文
-  if (lowered.some((l) => l.startsWith('en'))) return 'en';
-
-  return null;
-};
+// (getLanguageFromBrowser has been removed because it is no longer used and causes ESLint errors in CI)
 
 // Initial language resolution:
 // 1) URL ?lang=zh/en（最高優先）
