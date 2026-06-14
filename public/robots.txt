@@ -9,3 +9,15 @@ Sitemap: https://alphacurve.io/sitemap.xml
 # Note: Content signals for AI training control are handled via HTML meta tags
 # See SEOHead.js for <meta name="robots" content="index, follow, noai, noimageai" />
 
+User-Agent: GPTBot
+User-Agent: OAI-SearchBot
+User-Agent: ChatGPT-User
+User-Agent: ClaudeBot
+User-Agent: anthropic-ai
+User-Agent: PerplexityBot
+User-Agent: Perplexity-User
+User-Agent: Google-Extended
+User-Agent: Applebot-Extended
+User-Agent: Amazonbot
+User-Agent: Meta-ExternalAgent
+User-Agent: CCBot
