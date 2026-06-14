@@ -3,7 +3,7 @@ export const contactContent = {
     contactInfo: {
       phone: '+886 921833117',
       email: 'service@alphacurve.io',
-      address: '302059 新竹市竹北市莊敬三路207號10樓',
+      address: '302059 新竹縣竹北市莊敬三路207號10樓',
       address_en: '10F., No.207, Zhuangjing 3rd Rd., Zhubei City, Hsinchu County 302059, Taiwan (R.O.C.)',
       company_name: '艾菲肯有限公司',
       company_name_en: 'AlphaCurve Co., Ltd.',
