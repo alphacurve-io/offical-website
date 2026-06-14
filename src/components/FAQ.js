@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
 import './ServiceModel.css';
 import { trackFAQExpand } from '../utils/analytics';
 
@@ -14,30 +13,11 @@ const FAQ = ({ faq }) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
 
-  // FAQPage Schema 結構化數據
-  // 以 @id 串接回 public/index.html 靜態 @graph 中的 WebPage 節點
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    '@id': 'https://alphacurve.io/#faq',
-    isPartOf: { '@id': 'https://alphacurve.io/#webpage' },
-    mainEntity: faq.questions.map((q) => ({
-      '@type': 'Question',
-      name: q.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: q.answer,
-      },
-    })),
-  };
+  // 註：FAQPage 結構化資料已統一移至 public/index.html 的靜態 JSON-LD @graph
+  // (#faq 節點)，以確保不執行 JS 的 AI 爬蟲也能讀取，避免重複定義。
 
   return (
     <div className="faq-section">
-      <Helmet>
-        <script type="application/ld+json">
-          {JSON.stringify(faqSchema)}
-        </script>
-      </Helmet>
       <h3 className="section-title">{faq.title}</h3>
       <p className="section-title-en">{faq.subtitle}</p>
       <div className="faq-list">
