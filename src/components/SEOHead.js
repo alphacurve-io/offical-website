@@ -59,9 +59,9 @@ const SEOHead = ({ language = 'zh' }) => {
       {/* 允許用於搜索索引，但不允許用於 AI 訓練 */}
       <meta name="robots" content="index, follow, noai, noimageai" />
       
-      {/* Canonical URL */}
-      <link rel="canonical" href={baseUrl} />
-      
+      {/* 註：canonical 與 hreflang 已統一改為靜態標籤，寫在 public/index.html 的 <head>，
+          以確保不執行 JS 的爬蟲也能讀取，避免與 Helmet 注入版本重複/衝突。 */}
+
       {/* Resource hints for performance optimization */}
       {/* Preconnect to own domain for faster resource loading */}
       <link rel="preconnect" href={baseUrl} crossOrigin="anonymous" />
@@ -80,11 +80,8 @@ const SEOHead = ({ language = 'zh' }) => {
       {/* The actual image paths will be injected by React Helmet at render time */}
       {/* For the first SwipeTransition image (likely LCP element), we'll add preload via component */}
       
-      {/* hreflang 標籤 */}
-      <link rel="alternate" hreflang="zh" href={`${baseUrl}/?lang=zh`} />
-      <link rel="alternate" hreflang="en" href={`${baseUrl}/?lang=en`} />
-      <link rel="alternate" hreflang="x-default" href={baseUrl} />
-      
+      {/* hreflang 標籤已移至 public/index.html 靜態 <head> */}
+
       {/* Open Graph */}
       <meta property="og:type" content="website" />
       <meta property="og:url" content={baseUrl} />
