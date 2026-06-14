@@ -100,8 +100,19 @@
           "@type": "Organization",
           "@id": "https://alphacurve.io/#organization",
           "name": "Alphacurve",
-          "alternateName": "Alphacurve.io",
+          "alternateName": ["Alphacurve.io", "艾菲肯有限公司", "AlphaCurve Co., Ltd."],
+          "legalName": "艾菲肯有限公司",
           "url": "https://alphacurve.io",
+          "email": "service@alphacurve.io",
+          "telephone": "+886-921-833117",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "莊敬三路207號10樓",
+            "addressLocality": "竹北市",
+            "addressRegion": "新竹縣",
+            "postalCode": "302059",
+            "addressCountry": "TW"
+          },
           "logo": {
             "@type": "ImageObject",
             "@id": "https://alphacurve.io/#logo",
@@ -128,6 +139,8 @@
           "contactPoint": {
             "@type": "ContactPoint",
             "contactType": "Customer Service",
+            "email": "service@alphacurve.io",
+            "telephone": "+886-921-833117",
             "availableLanguage": ["zh-TW", "en"]
           },
           "sameAs": [
@@ -260,7 +273,22 @@
     </script>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>
+      You need to enable JavaScript to run this app.
+      <!-- 無 JS / AI 爬蟲可讀取的後備內容：含具備敘述性 alt 的圖片與可偵測的聯絡資訊 -->
+      <img src="/logo.png" width="600" height="60"
+           alt="Alphacurve 艾菲肯有限公司 — AI 技術顧問、軟體開發與企業數位轉型服務" />
+      <section id="contact-us">
+        <h1>Alphacurve｜AI 技術顧問與軟體開發服務</h1>
+        <h2>聯絡我們 Contact Us</h2>
+        <p>公司名稱：艾菲肯有限公司（AlphaCurve Co., Ltd.）</p>
+        <p>電子郵件：<a href="mailto:service@alphacurve.io">service@alphacurve.io</a></p>
+        <p>聯絡電話：<a href="tel:+886921833117">+886 921 833 117</a></p>
+        <p>辦公地址：302059 新竹縣竹北市莊敬三路207號10樓
+          （10F., No.207, Zhuangjing 3rd Rd., Zhubei City, Hsinchu County 302059, Taiwan）</p>
+        <p>LINE：<a href="https://page.line.me/alphacurve" rel="noopener">@alphacurve</a></p>
+      </section>
+    </noscript>
     <div id="root"></div>
     <!--
       This HTML file is a template.
