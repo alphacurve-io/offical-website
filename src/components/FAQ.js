@@ -15,9 +15,12 @@ const FAQ = ({ faq }) => {
   };
 
   // FAQPage Schema 結構化數據
+  // 以 @id 串接回 public/index.html 靜態 @graph 中的 WebPage 節點
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
+    '@id': 'https://alphacurve.io/#faq',
+    isPartOf: { '@id': 'https://alphacurve.io/#webpage' },
     mainEntity: faq.questions.map((q) => ({
       '@type': 'Question',
       name: q.question,

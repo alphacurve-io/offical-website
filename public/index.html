@@ -89,6 +89,112 @@
       // 5 秒后自动加载（延长延迟以减少初始主线程工作）
       setTimeout(loadGA4, 5000);
     </script>
+
+    <!-- JSON-LD 結構化資料 (AEO / SEO) -->
+    <!-- 直接放在靜態 HTML，確保不執行 JS 的 AI 爬蟲 (GPTBot / ClaudeBot / PerplexityBot 等) 也能讀取 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://alphacurve.io/#organization",
+          "name": "Alphacurve",
+          "alternateName": "Alphacurve.io",
+          "url": "https://alphacurve.io",
+          "logo": {
+            "@type": "ImageObject",
+            "@id": "https://alphacurve.io/#logo",
+            "url": "https://alphacurve.io/logo.png",
+            "contentUrl": "https://alphacurve.io/logo.png",
+            "caption": "Alphacurve"
+          },
+          "image": { "@id": "https://alphacurve.io/#logo" },
+          "description": "Alphacurve 提供 AI 整合、軟體開發與技術顧問服務，協助企業突破技術瓶頸，實現數位轉型與業務成長。",
+          "slogan": "AI 技術顧問與軟體開發服務",
+          "knowsAbout": [
+            "AI 整合",
+            "人工智慧應用",
+            "軟體開發",
+            "技術顧問",
+            "數位轉型",
+            "系統開發",
+            "流程自動化",
+            "雲端解決方案",
+            "企業系統"
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "Customer Service",
+            "availableLanguage": ["zh-TW", "en"]
+          },
+          "sameAs": [
+            "https://page.line.me/alphacurve"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://alphacurve.io/#website",
+          "url": "https://alphacurve.io",
+          "name": "Alphacurve.io",
+          "description": "AI 整合、軟體開發與技術顧問服務",
+          "publisher": { "@id": "https://alphacurve.io/#organization" },
+          "inLanguage": ["zh-TW", "en-US"]
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://alphacurve.io/#webpage",
+          "url": "https://alphacurve.io",
+          "name": "Alphacurve.io | AI 技術顧問與軟體開發服務",
+          "isPartOf": { "@id": "https://alphacurve.io/#website" },
+          "about": { "@id": "https://alphacurve.io/#organization" },
+          "description": "Alphacurve 提供 AI 整合、軟體開發與技術顧問服務。協助企業突破技術瓶頸，實現數位轉型與業務成長。專業團隊，客製化解決方案。",
+          "inLanguage": "zh-TW"
+        },
+        {
+          "@type": "ProfessionalService",
+          "@id": "https://alphacurve.io/#service",
+          "name": "Alphacurve AI 技術顧問與軟體開發",
+          "url": "https://alphacurve.io",
+          "image": "https://alphacurve.io/logo.png",
+          "provider": { "@id": "https://alphacurve.io/#organization" },
+          "areaServed": "TW",
+          "availableLanguage": ["zh-TW", "en"],
+          "description": "提供 AI 整合、軟體開發與技術顧問服務，協助企業導入人工智慧、開發客製化系統並完成數位轉型。",
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "服務項目",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "AI 整合",
+                  "description": "協助企業導入並整合人工智慧技術至既有流程與產品。"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "軟體開發",
+                  "description": "客製化軟體與企業系統開發，涵蓋網頁、後端與雲端應用。"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "技術顧問",
+                  "description": "提供技術架構、數位轉型與自動化策略顧問服務。"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

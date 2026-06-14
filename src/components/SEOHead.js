@@ -40,34 +40,9 @@ const SEOHead = ({ language = 'zh' }) => {
   const ogImage = `${baseUrl}/facebook-image.jpg`;
   const twitterImage = `${baseUrl}/twitter-image.png`;
 
-  // 結構化數據 - Organization
-  const organizationSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'Alphacurve',
-    url: baseUrl,
-    logo: `${baseUrl}/header-icon.svg`,
-    description: isZh 
-      ? 'AI 技術顧問與軟體開發服務'
-      : 'AI Tech Consulting & Software Development Services',
-    contactPoint: {
-      '@type': 'ContactPoint',
-      contactType: 'Customer Service',
-      availableLanguage: ['zh', 'en'],
-    },
-    sameAs: [
-      'https://page.line.me/alphacurve',
-    ],
-  };
-
-  // 結構化數據 - WebSite
-  const websiteSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'Alphacurve.io',
-    url: baseUrl,
-    inLanguage: [isZh ? 'zh-TW' : 'en-US'],
-  };
+  // 註：Organization / WebSite / WebPage 等結構化資料已統一改為靜態
+  // JSON-LD @graph，直接寫在 public/index.html 的 <head>，以確保不執行 JS 的
+  // AI 爬蟲 (GPTBot / ClaudeBot / PerplexityBot 等) 也能讀取，避免重複定義。
 
   return (
     <Helmet>
@@ -129,14 +104,10 @@ const SEOHead = ({ language = 'zh' }) => {
       <meta name="twitter:description" content={content.twitterDescription} />
       <meta name="twitter:image" content={twitterImage} />
       <meta name="twitter:image:alt" content={content.twitterTitle} />
-      
-      {/* 結構化數據 */}
-      <script type="application/ld+json">
-        {JSON.stringify(organizationSchema)}
-      </script>
-      <script type="application/ld+json">
-        {JSON.stringify(websiteSchema)}
-      </script>
+
+      {/* 結構化資料 (Organization / WebSite / WebPage / ProfessionalService)
+          已移至 public/index.html 的靜態 JSON-LD @graph，此處不再重複注入。
+          FAQPage 結構化資料仍由 FAQ 組件提供，並以 @id 串接回 @graph。 */}
     </Helmet>
   );
 };
