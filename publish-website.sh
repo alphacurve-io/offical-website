@@ -1,18 +1,26 @@
-   npm run build
-   rm build.zip
-   # zip build folder
-   zip -r build.zip build
-   # remove build.zip remotely
-   ssh -i ~/.ssh/id_rsa jamesshieh0510@35.189.163.219 "rm build.zip"
-   ssh -i ~/.ssh/id_rsa jamesshieh0510@35.189.163.219 "rm -rf build"
-   scp build.zip jamesshieh0510@35.189.163.219:~/
-#    ssh -i ~/.ssh/id_rsa jamesshieh0510@35.189.163.219
-   # unzip build.zip
-   #sudo apt install unzip
-   ssh -i ~/.ssh/id_rsa jamesshieh0510@35.189.163.219 "unzip build.zip"
-   # remove build.zip
-   ssh -i ~/.ssh/id_rsa jamesshieh0510@35.189.163.219 "rm build.zip"
-   # remove  /var/www/alphacurve.io/html
-   ssh -i ~/.ssh/id_rsa jamesshieh0510@35.189.163.219 "rm -rf /var/www/alphacurve.io/html/*"
-   # move build to /var/www/alphacurve.io/html
-   ssh -i ~/.ssh/id_rsa jamesshieh0510@35.189.163.219 "mv ~/build/* /var/www/alphacurve.io/html"
+#!/bin/bash
+set -euo pipefail
+
+# 部署目標:nginx VM (專案 ai-saas-419818, asia-east1-c, 34.81.6.91)
+# 網站根目錄:/var/www/alphacurve.io/html
+PROJECT="ai-saas-419818"
+ZONE="asia-east1-c"
+VM="nginx"
+WEB_ROOT="/var/www/alphacurve.io/html"
+
+GSSH=(gcloud compute ssh "$VM" --project="$PROJECT" --zone="$ZONE" --command)
+
+npm run build
+
+rm -f build.zip
+zip -rq build.zip build
+
+# 上傳並解壓
+"${GSSH[@]}" "rm -rf ~/build ~/build.zip"
+gcloud compute scp build.zip "$VM":~/ --project="$PROJECT" --zone="$ZONE"
+"${GSSH[@]}" "unzip -q build.zip && rm build.zip"
+
+# 換上新版網站內容（build 內可能夾帶 .DS_Store 等隱藏雜物，mv * 不會搬走，最後整個目錄刪掉）
+"${GSSH[@]}" "sudo rm -rf $WEB_ROOT/* && sudo mv ~/build/* $WEB_ROOT/ && rm -rf ~/build"
+
+echo "Deployed to https://alphacurve.io"

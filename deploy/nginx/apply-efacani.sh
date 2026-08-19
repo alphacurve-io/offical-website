@@ -1,0 +1,90 @@
+sudo tee /etc/nginx/sites-available/efacani.com > /dev/null <<'NGINX_EOF'
+# /etc/nginx/sites-available/efacani.com
+# efacani.com — 官網第二網域（補助申請需求），內容與 alphacurve.io 相同
+# root 直接共用 alphacurve.io 的靜態檔，publish-website.sh 部署一次、兩個網域同步更新
+# 憑證：Let's Encrypt (certbot)，僅涵蓋 efacani.com（不含 www，需要的話要先擴充憑證）
+# 注意：upstream backend_alphacurve_api 定義在 sites-available/alphacurve.io，
+#       此檔直接引用，不可重複定義（nginx 會報 duplicate upstream）
+
+server {
+    server_name efacani.com;
+
+    root /var/www/alphacurve.io/html;
+    # 若之後要放不同內容，改回獨立目錄：
+    # root /var/www/efacani.com/html;
+    index index.html index.htm index.nginx-debian.html;
+
+    access_log /var/log/nginx/efacani_access.log;
+    error_log /var/log/nginx/efacani_error.log warn;
+
+    # ---- 官網後端 API（Rust web_api，共用 alphacurve.io 定義的 upstream）----
+    location /website/api/submit {
+        proxy_pass http://backend_alphacurve_api;
+    }
+    location /api/chat {
+        proxy_pass http://backend_alphacurve_api;
+    }
+    location /api/emotion {
+        proxy_pass http://backend_alphacurve_api;
+    }
+    location /api/emotion_reply {
+        proxy_pass http://backend_alphacurve_api;
+    }
+    location /health {
+        proxy_pass http://backend_alphacurve_api;
+    }
+
+    # ---- SPA fallback 與靜態資源快取（與 alphacurve.io 相同）----
+    location / {
+        try_files $uri $uri/ /index.html;
+        gzip_static on;
+
+        # 靜態資源長快取
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|mp4|webm|webp)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable, max-age=31536000";
+            access_log off;
+            gzip_static on;
+        }
+        # HTML 檔案較短的快取時間
+        location ~* \.(html)$ {
+            expires 1h;
+            add_header Cache-Control "public, max-age=3600";
+        }
+        # JSON 和 manifest 檔案
+        location ~* \.(json|webmanifest)$ {
+            expires 1d;
+            add_header Cache-Control "public, max-age=86400";
+        }
+    }
+
+    location ~* /static/js/main-.*\.js$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable, max-age=31536000";
+        gzip_static on;
+    }
+
+    # ipv6only=on 已由 alphacurve.io 的 listen 宣告，這裡不可重複
+    listen [::]:443 ssl http2;
+    listen 443 ssl http2;
+    ssl_certificate /etc/letsencrypt/live/efacani.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/efacani.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+
+# HTTP → HTTPS 轉址
+server {
+    if ($host = efacani.com) {
+        return 301 https://$host$request_uri;
+    }
+
+    listen 80;
+    listen [::]:80;
+    server_name efacani.com;
+    return 404;
+}
+NGINX_EOF
+sudo ln -sf ../sites-available/efacani.com /etc/nginx/sites-enabled/efacani.com
+sudo nginx -t && sudo systemctl reload nginx
+curl -sI https://efacani.com | head -5
