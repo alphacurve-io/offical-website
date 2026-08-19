@@ -16,7 +16,7 @@ export const teamContent = {
         education: '國立成功大學 製造資訊與系統所 碩士',
         degree: "Master's of Science, National Cheng Kung University",
         picture: JamesIcon,
-        link: 'https://app.wavecnct.com/app/profile/james.shieh.8uqu',
+        link: 'https://www.linkedin.com/in/james-shieh/',
       },
       {
         id: 'peter',
@@ -58,7 +58,7 @@ export const teamContent = {
         education: 'M.S. in Manufacturing Information & Systems, NCKU',
         degree: "Master's of Science, National Cheng Kung University",
         picture: JamesIcon,
-        link: 'https://app.wavecnct.com/app/profile/james.shieh.8uqu',
+        link: 'https://www.linkedin.com/in/james-shieh/',
       },
       {
         id: 'peter',
