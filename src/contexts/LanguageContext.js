@@ -11,6 +11,7 @@ import { room2Content } from '../content/room2-content';
 import { footerContent } from '../content/footer-content';
 import { swipeTransitionContent } from '../content/swipe-transition-content';
 import { kid1FollowerContent } from '../content/kid1-follower-content';
+import { getSiteConfig } from '../utils/site-config';
 
 const LanguageContext = createContext();
 
@@ -80,6 +81,22 @@ export const LanguageProvider = ({ children }) => {
     footer: footerContent[language],
     room2: room2Content[language],
     kid1Follower: kid1FollowerContent[language],
+  };
+
+  // 多網域動態調整：從 efacani.com 進站時，聯繫信箱與版權宣告中的網域
+  // 都切換為 efacani.com（公司主體相同，僅網域與信箱不同）
+  const site = getSiteConfig();
+  content.contact = {
+    ...content.contact,
+    contactInfo: { ...content.contact.contactInfo, email: site.email },
+  };
+  content.footer = {
+    ...content.footer,
+    contactInfo: { ...content.footer.contactInfo, email: site.email },
+    copyright: {
+      ...content.footer.copyright,
+      text: content.footer.copyright.text.split('alphacurve.io').join(site.domain),
+    },
   };
 
   return (

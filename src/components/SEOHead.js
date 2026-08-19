@@ -9,34 +9,53 @@
 
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { getSiteConfig } from '../utils/site-config';
 
 const SEOHead = ({ language = 'zh' }) => {
   const isZh = language === 'zh';
-  
+  const site = getSiteConfig();
+
+  // 多網域支援：public/index.html 內的靜態 canonical / hreflang 是為 alphacurve.io
+  // 寫死的；當從 efacani.com 進站時，改寫這些靜態標籤指向 efacani.com，
+  // 避免瀏覽器與審核工具看到指向另一個網域的 canonical。
+  React.useEffect(() => {
+    if (site.domain === 'alphacurve.io') return;
+
+    const links = document.head.querySelectorAll(
+      'link[rel="canonical"], link[rel="alternate"][hreflang]'
+    );
+    links.forEach((link) => {
+      const href = link.getAttribute('href');
+      if (href && href.startsWith('https://alphacurve.io')) {
+        link.setAttribute('href', href.replace('https://alphacurve.io', site.baseUrl));
+      }
+    });
+  }, [site.domain, site.baseUrl]);
+
   // SEO 內容配置
   const seoContent = {
     zh: {
-      title: 'Alphacurve.io | AI 技術顧問與軟體開發服務',
-      description: 'Alphacurve 提供 AI 整合、軟體開發與技術顧問服務。協助企業突破技術瓶頸，實現數位轉型與業務成長。專業團隊，客製化解決方案。',
-      keywords: 'AI 整合, 軟體開發, 技術顧問, 數位轉型, 系統開發, 自動化, 雲端解決方案, 企業系統, AI 顧問',
-      ogTitle: 'Alphacurve.io | AI 技術顧問與軟體開發服務',
+      title: `${site.siteLabel} | AI 研發、技術顧問與軟體開發服務`,
+      description: 'Alphacurve 專注 AI 自主研發與技術顧問服務，旗下 AI 產品包含 Rank Pilot（AI SEO/GEO 分析）、DualView（AI 語言學習）、ScanPro（AI 文件掃描）與 Aura（AI 智慧助理）。協助企業導入 AI、突破技術瓶頸，實現數位轉型與業務成長。',
+      keywords: 'AI 研發, AI 產品, AI 整合, 軟體開發, 技術顧問, 數位轉型, 系統開發, 自動化, 雲端解決方案, 企業系統, AI 顧問, Rank Pilot, DualView, ScanPro, Aura',
+      ogTitle: `${site.siteLabel} | AI 研發、技術顧問與軟體開發服務`,
       ogDescription: '提供 AI 整合、軟體開發與技術顧問服務。協助企業突破技術瓶頸，實現數位轉型。',
-      twitterTitle: 'Alphacurve.io | AI 技術顧問與軟體開發',
+      twitterTitle: `${site.siteLabel} | AI 研發與技術顧問`,
       twitterDescription: '提供 AI 整合、軟體開發與技術顧問服務。協助企業突破技術瓶頸，實現數位轉型。',
     },
     en: {
-      title: 'Alphacurve.io | AI Tech Consulting & Software Development',
-      description: 'Alphacurve provides AI integration, software development, and tech consulting services. Help businesses break through tech bottlenecks and achieve digital transformation. Expert team, customized solutions.',
-      keywords: 'AI integration, software development, tech consulting, digital transformation, system development, automation, cloud solutions, enterprise systems, AI consulting',
-      ogTitle: 'Alphacurve.io | AI Tech Consulting & Software Development',
+      title: `${site.siteLabel} | AI R&D, Tech Consulting & Software Development`,
+      description: 'Alphacurve builds in-house AI products — Rank Pilot (AI SEO/GEO analyzer), DualView (AI language learning), ScanPro (AI document scanner), and Aura (AI assistant) — and provides AI integration, software development, and tech consulting services for digital transformation.',
+      keywords: 'AI R&D, AI products, AI integration, software development, tech consulting, digital transformation, system development, automation, cloud solutions, enterprise systems, AI consulting, Rank Pilot, DualView, ScanPro, Aura',
+      ogTitle: `${site.siteLabel} | AI R&D, Tech Consulting & Software Development`,
       ogDescription: 'Provides AI integration, software development, and tech consulting services. Help businesses break through tech bottlenecks and achieve digital transformation.',
-      twitterTitle: 'Alphacurve.io | AI Tech Consulting & Software Development',
+      twitterTitle: `${site.siteLabel} | AI R&D & Tech Consulting`,
       twitterDescription: 'Provides AI integration, software development, and tech consulting services. Help businesses break through tech bottlenecks.',
     },
   };
 
   const content = seoContent[language] || seoContent.zh;
-  const baseUrl = 'https://alphacurve.io';
+  const baseUrl = site.baseUrl;
   const ogImage = `${baseUrl}/facebook-image.jpg`;
   const twitterImage = `${baseUrl}/twitter-image.png`;
 
@@ -53,7 +72,7 @@ const SEOHead = ({ language = 'zh' }) => {
       <title>{content.title}</title>
       <meta name="description" content={content.description} />
       <meta name="keywords" content={content.keywords} />
-      <meta name="author" content="Alphacurve.io" />
+      <meta name="author" content={site.siteLabel} />
       
       {/* Google AI Training Control */}
       {/* 允許用於搜索索引，但不允許用於 AI 訓練 */}
@@ -91,7 +110,7 @@ const SEOHead = ({ language = 'zh' }) => {
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:alt" content={content.ogTitle} />
-      <meta property="og:site_name" content="Alphacurve.io" />
+      <meta property="og:site_name" content={site.siteLabel} />
       <meta property="og:locale" content={isZh ? 'zh_TW' : 'en_US'} />
       <meta property="og:locale:alternate" content={isZh ? 'en_US' : 'zh_TW'} />
       
