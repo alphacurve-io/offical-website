@@ -16,6 +16,11 @@ export const headerContent = {
         subtitle: "What we do"
       },
       {
+        id: "products",
+        title: "AI 產品",
+        subtitle: "AI Products"
+      },
+      {
         id: "team",
         title: "關於我們",
         subtitle: "Who we are"
@@ -42,6 +47,11 @@ export const headerContent = {
         id: "services",
         title: "Services",
         subtitle: "What we do"
+      },
+      {
+        id: "products",
+        title: "AI Products",
+        subtitle: "In-house R&D"
       },
       {
         id: "team",

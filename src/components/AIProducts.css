@@ -1,0 +1,200 @@
+.ai-products-section {
+    background-color: #114C55;
+    color: white;
+    padding: 100px 20px;
+    text-align: center;
+}
+
+.ai-products-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.ai-products-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.ai-products-description {
+    width: 60%;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    margin-bottom: 50px;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.ai-products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 24px;
+}
+
+@media (max-width: 960px) {
+    .ai-products-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .ai-products-title {
+        text-align: center;
+    }
+    .ai-products-description {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+.ai-product-card {
+    background: linear-gradient(135deg, rgba(26, 95, 122, 0.4) 0%, rgba(13, 148, 136, 0.4) 100%);
+    border: 3px solid #34BFD1;
+    border-radius: 19px;
+    padding: 28px;
+    text-align: left;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: transform 0.3s ease-in-out,
+                background 0.3s ease-in-out,
+                box-shadow 0.3s ease-in-out;
+}
+
+.ai-product-card:hover {
+    transform: translateY(-4px);
+    background: linear-gradient(135deg, rgba(26, 95, 122, 0.7) 0%, rgba(13, 148, 136, 0.7) 100%);
+    box-shadow: 0 8px 20px rgba(52, 191, 209, 0.3), 0 0 30px rgba(52, 191, 209, 0.2);
+}
+
+.ai-product-screenshot-link {
+    display: block;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(52, 191, 209, 0.5);
+    line-height: 0;
+}
+
+.ai-product-screenshot {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease-in-out;
+}
+
+.ai-product-screenshot-link:hover .ai-product-screenshot {
+    transform: scale(1.03);
+}
+
+.ai-product-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.ai-product-name {
+    font-family: 'Sora', sans-serif;
+    font-size: 26px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.ai-product-status {
+    flex-shrink: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0e3d44;
+    background-color: #34BFD1;
+    border-radius: 999px;
+    padding: 4px 12px;
+    white-space: nowrap;
+}
+
+.ai-product-tagline {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #9FE0E8;
+    margin: 8px 0 0;
+}
+
+.ai-product-category {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 4px 0 0;
+}
+
+.ai-product-pain,
+.ai-product-solution {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.ai-product-pain {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.ai-product-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px 16px;
+}
+
+.ai-product-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.ai-product-features .check-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+}
+
+.ai-product-link {
+    align-self: flex-start;
+    margin-top: auto;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0e3d44;
+    background-color: #34BFD1;
+    border-radius: 999px;
+    padding: 10px 22px;
+    text-decoration: none;
+    transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.ai-product-link:hover {
+    background-color: #9FE0E8;
+    transform: scale(1.05);
+}
+
+@media (max-width: 480px) {
+    .ai-products-grid {
+        grid-template-columns: 1fr;
+    }
+    .ai-product-card {
+        padding: 20px;
+    }
+    .ai-product-name-row {
+        flex-wrap: wrap;
+    }
+}

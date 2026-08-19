@@ -12,6 +12,7 @@ import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 const CustomCursor = lazy(() => import(/* webpackChunkName: "cursor" */ './components/CustomCursor'));
 const Kid1Follower = lazy(() => import(/* webpackChunkName: "kid1" */ './components/Kid1Follower'));
 const Services = lazy(() => import(/* webpackChunkName: "services" */ './components/Services'));
+const AIProducts = lazy(() => import(/* webpackChunkName: "ai-products" */ './components/AIProducts'));
 const Team = lazy(() => import(/* webpackChunkName: "team" */ './components/Team'));
 const ParallaxWords = lazy(() => import(/* webpackChunkName: "parallax" */ './components/ParallaxWords'));
 const ServiceModel = lazy(() => import(/* webpackChunkName: "service-model" */ './components/ServiceModel'));
@@ -147,6 +148,11 @@ const AppContent = () => {
         <LazyComponent fallback={<LoadingPlaceholder />} rootMargin="300px">
           <Suspense fallback={<LoadingPlaceholder />}>
             <Services />
+          </Suspense>
+        </LazyComponent>
+        <LazyComponent fallback={<LoadingPlaceholder />} rootMargin="300px">
+          <Suspense fallback={<LoadingPlaceholder />}>
+            <AIProducts />
           </Suspense>
         </LazyComponent>
         <LazyComponent fallback={<LoadingPlaceholder />} rootMargin="300px">

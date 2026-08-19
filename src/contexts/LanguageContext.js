@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { headerContent } from '../content/header-content';
 import { heroContent } from '../content/hero-content';
 import { servicesContent } from '../content/services-content';
+import { aiProductsContent } from '../content/ai-products-content';
 import { teamContent } from '../content/team-content';
 import { parallaxWordsContent } from '../content/parallax-words-content';
 import { serviceModelContent } from '../content/service-model-content';
@@ -70,6 +71,7 @@ export const LanguageProvider = ({ children }) => {
     header: headerContent[language],
     hero: heroContent[language],
     services: servicesContent[language],
+    aiProducts: aiProductsContent[language],
     team: teamContent[language],
     parallaxWords: parallaxWordsContent[language],
     serviceModel: serviceModelContent[language],
