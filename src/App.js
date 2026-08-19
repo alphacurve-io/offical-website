@@ -41,7 +41,10 @@ const LazyComponent = ({ children, fallback = null, rootMargin = '200px' }) => {
           }
         });
       },
-      { rootMargin, threshold: 0.01 }
+      // threshold 必須為 0：載入前的佔位 div 高度為 0（零面積），
+      // 任何 >0 的 threshold 都永遠無法達成，會導致區塊能否載入取決於
+      // 初始回呼的時序而變得不穩定
+      { rootMargin, threshold: 0 }
     );
 
     if (ref.current) {
@@ -54,7 +57,7 @@ const LazyComponent = ({ children, fallback = null, rootMargin = '200px' }) => {
   }, [shouldLoad, rootMargin]);
 
   return (
-    <div ref={ref}>
+    <div ref={ref} style={shouldLoad ? undefined : { minHeight: 1 }}>
       {shouldLoad ? children : fallback}
     </div>
   );
