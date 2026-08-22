@@ -27,15 +27,66 @@
     text-align: left;
 }
 
-.ai-products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-    gap: 24px;
+/* 一列跑馬燈輪播：軌道把產品卡複製一份，
+   位移 -50% 時剛好接回第一張，形成無縫循環 */
+.ai-products-marquee {
+    position: relative;
+    margin: 0 -20px;
+    padding: 12px 0 24px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 7%, #000 93%, transparent 100%);
 }
 
-@media (max-width: 960px) {
-    .ai-products-grid {
-        grid-template-columns: 1fr;
+.ai-products-track {
+    display: flex;
+    align-items: stretch;
+    width: max-content;
+    animation: ai-products-marquee var(--ai-marquee-duration, 60s) linear infinite;
+}
+
+/* 滑鼠移入或鍵盤 focus 到卡片時暫停，方便閱讀與點擊 */
+.ai-products-track:hover,
+.ai-products-track:focus-within {
+    animation-play-state: paused;
+}
+
+@keyframes ai-products-marquee {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+/* 觸控裝置沒有 hover 可暫停，減少動態偏好也不該自動捲動：
+   兩者都改成隱藏複製卡、由使用者自行左右滑動 */
+@media (hover: none), (prefers-reduced-motion: reduce) {
+    .ai-products-marquee {
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -webkit-mask-image: none;
+        mask-image: none;
+    }
+
+    .ai-products-marquee::-webkit-scrollbar {
+        display: none;
+    }
+
+    .ai-products-track {
+        animation: none;
+        padding: 0 20px;
+    }
+
+    .ai-product-card {
+        scroll-snap-align: center;
+    }
+
+    .ai-product-card--clone {
+        display: none;
     }
 }
 
@@ -50,6 +101,11 @@
 }
 
 .ai-product-card {
+    /* 用 margin-right 而非 track 的 gap，讓每張卡佔寬一致，
+       translateX(-50%) 才會精準對齊複製組的起點 */
+    flex: 0 0 420px;
+    margin-right: 24px;
+    box-sizing: border-box;
     background: linear-gradient(135deg, rgba(26, 95, 122, 0.4) 0%, rgba(13, 148, 136, 0.4) 100%);
     border: 3px solid #34BFD1;
     border-radius: 19px;
@@ -187,11 +243,9 @@
     transform: scale(1.05);
 }
 
-@media (max-width: 480px) {
-    .ai-products-grid {
-        grid-template-columns: 1fr;
-    }
+@media (max-width: 560px) {
     .ai-product-card {
+        flex-basis: 84vw;
         padding: 20px;
     }
     .ai-product-name-row {

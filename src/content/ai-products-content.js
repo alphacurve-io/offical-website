@@ -1,15 +1,19 @@
 // AI 產品區塊內容配置
-// 旗下自研 AI 產品：Rank Pilot / DualView / ScanPro / Aura
+// 旗下自研 AI 產品：Rank Pilot / DualView / ScanPro / Aura / Contract / Inference
 import rankPilotScreenshot from '../assets/products/rank-pilot.webp';
 import dualviewScreenshot from '../assets/products/dualview.webp';
 import scanproScreenshot from '../assets/products/scanpro.webp';
 import auraScreenshot from '../assets/products/aura.webp';
+import contractScreenshot from '../assets/products/contract.webp';
+import inferenceScreenshot from '../assets/products/inference.webp';
 
 const PRODUCT_SCREENSHOTS = {
   'rank-pilot': rankPilotScreenshot,
   dualview: dualviewScreenshot,
   scanpro: scanproScreenshot,
   aura: auraScreenshot,
+  contract: contractScreenshot,
+  inference: inferenceScreenshot,
 };
 
 export const aiProductsContent = {
@@ -98,6 +102,46 @@ export const aiProductsContent = {
           "行程、清單、購物建議",
           "個人化持續學習"
         ]
+      },
+      {
+        id: "contract",
+        screenshot: PRODUCT_SCREENSHOTS['contract'],
+        screenshotAlt: "AlphaCurve Contract 產品截圖：AI 合約協作平台首頁與定稿數位指紋、可信時戳展示",
+        name: "AlphaCurve Contract",
+        tagline: "擬約、議約、定稿，然後留下站得住腳的證據",
+        category: "法律科技・SaaS",
+        status: "已上線",
+        url: "https://contract.alphacurve.io",
+        painPoint:
+          "合約來回改版時，條號、金額變數與格式全靠人工維護；等到真的有爭議，卻拿不出「談定的是哪一版、誰核准、什麼時候定稿」的可信證據。",
+        solution:
+          "AlphaCurve Contract 以結構化條款與 AI 輔助擬約／改約加速談判，定稿後自動產生 SHA-256 數位指紋、對外簽署紀錄與 RFC 3161 第三方可信時戳，組成一條可驗證的完整證據鏈。",
+        features: [
+          "AI 擬約與改約建議，前後逐行對照",
+          "自動條號、六種變數與範本庫",
+          "定稿 SHA-256 數位指紋驗證",
+          "RFC 3161 可信時戳與稽核軌跡報告"
+        ]
+      },
+      {
+        id: "inference",
+        screenshot: PRODUCT_SCREENSHOTS['inference'],
+        screenshotAlt: "Inference 產品截圖：LLM API 中轉閘道首頁與 OpenAI 相容 curl 呼叫範例",
+        name: "Inference",
+        tagline: "一個端點，打所有模型",
+        category: "LLM 基礎設施・API 閘道",
+        status: "已上線",
+        url: "https://inference.alphacurve.io",
+        painPoint:
+          "團隊同時用 OpenAI、Anthropic、Google Gemini 等多家模型，SDK、金鑰與帳單各自為政；上游限流或故障只能手動切換，成本也難以拆分到專案與團隊。",
+        solution:
+          "Inference 是 OpenAI 相容的 LLM 中轉閘道：把 base_url 換成我們，就能用同一支 SDK、同一把金鑰呼叫 10+ 家上游，內建自動容錯路由、金鑰額度控管與即時成本觀測。",
+        features: [
+          "OpenAI 相容：串流、工具呼叫、視覺輸入",
+          "多家上游路由與自動容錯切換",
+          "金鑰層級模型白名單與月額度上限",
+          "Token、成本與 P95 延遲即時儀表板"
+        ]
       }
     ]
   },
@@ -185,6 +229,46 @@ export const aiProductsContent = {
           "LLM intent understanding & breakdown",
           "Itineraries, lists & shopping advice",
           "Personalized continuous learning"
+        ]
+      },
+      {
+        id: "contract",
+        screenshot: PRODUCT_SCREENSHOTS['contract'],
+        screenshotAlt: "AlphaCurve Contract screenshot: AI contract workspace homepage with document fingerprint and trusted timestamp",
+        name: "AlphaCurve Contract",
+        tagline: "Draft, negotiate, finalize — and leave evidence that holds up",
+        category: "Legal Tech · SaaS",
+        status: "Live",
+        url: "https://contract.alphacurve.io",
+        painPoint:
+          "Contracts go through endless rounds where clause numbers, amounts, and formatting are all maintained by hand — and when a dispute arrives, there is no credible proof of which version was agreed, who approved it, or when it was finalized.",
+        solution:
+          "AlphaCurve Contract speeds up negotiation with structured clauses and AI-assisted drafting and redlining. On finalization it generates a SHA-256 fingerprint, external signature records, and an RFC 3161 trusted timestamp — one verifiable evidence chain.",
+        features: [
+          "AI drafting & redlines with line-by-line diff",
+          "Auto clause numbering, six variable types & templates",
+          "SHA-256 fingerprint on every finalized document",
+          "RFC 3161 trusted timestamps & audit trail report"
+        ]
+      },
+      {
+        id: "inference",
+        screenshot: PRODUCT_SCREENSHOTS['inference'],
+        screenshotAlt: "Inference screenshot: LLM API gateway homepage with an OpenAI-compatible curl example",
+        name: "Inference",
+        tagline: "One endpoint, every model",
+        category: "LLM Infrastructure · API Gateway",
+        status: "Live",
+        url: "https://inference.alphacurve.io",
+        painPoint:
+          "Teams juggling OpenAI, Anthropic, and Google Gemini end up with a separate SDK, key, and bill for each — manual failover when an upstream rate-limits, and no clean way to split cost across teams and projects.",
+        solution:
+          "Inference is an OpenAI-compatible LLM gateway: point base_url at us and call 10+ upstream providers with one SDK and one key, with automatic failover routing, per-key spend caps, and real-time cost observability built in.",
+        features: [
+          "OpenAI-compatible: streaming, tool calling & vision",
+          "Multi-provider routing with automatic failover",
+          "Per-key model whitelists & monthly spend caps",
+          "Live dashboard for tokens, cost & P95 latency"
         ]
       }
     ]
