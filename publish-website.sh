@@ -10,7 +10,9 @@ WEB_ROOT="/var/www/alphacurve.io/html"
 
 GSSH=(gcloud compute ssh "$VM" --project="$PROJECT" --zone="$ZONE" --command)
 
-npm run build
+# 不產生 source map:否則整包原始碼會隨 build 上傳並公開可下載
+# (.github/workflows/deploy.yml 走 CI 部署時同樣設了這個變數)
+GENERATE_SOURCEMAP=false npm run build
 
 rm -f build.zip
 zip -rq build.zip build
